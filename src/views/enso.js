@@ -1,11 +1,12 @@
 import { PATHS } from "../config.js";
 import { load } from "../data.js";
 import { el, clear, spinner, errorBox } from "../ui/dom.js";
-import { loadPlotly, adaptLayout, titleLines, legendItems, CONFIG } from "../charts/plotly.js";
+import { loadPlotly, adaptLayout, titleLines, CONFIG } from "../charts/plotly.js";
+import { groupSeries, seriesFilter } from "../charts/series.js";
 
 const CHARTS = [
   { id: "percentiles", label: "Percentiles", hint: "Dispersión del ensamble multimodelo" },
-  { id: "boxplot", label: "Boxplot", hint: "Distribución por modelo", htmlLegend: true },
+  { id: "boxplot", label: "Boxplot", hint: "Distribución por modelo", selectable: true },
 ];
 
 export default function enso(outlet) {
@@ -14,7 +15,7 @@ export default function enso(outlet) {
 
   const caption = el("div", { class: "chart__caption" });
   const plot = el("div", { class: "chart__plot" });
-  const legend = el("div", { class: "chart__legend" });
+  const legend = el("div", { class: "series" });
   const stage = el("section", { class: "chart" }, [caption, plot, legend]);
   const tabs = el("div", { class: "tabs", role: "tablist" });
 
@@ -59,18 +60,15 @@ export default function enso(outlet) {
 
       const chart = CHARTS.find((item) => item.id === id);
       const layout = adaptLayout(figure.layout, plot.clientWidth);
-      if (chart.htmlLegend) layout.showlegend = false;
+      if (chart.selectable) layout.showlegend = false;
 
       clear(plot);
       await Plotly.newPlot(plot, figure.data, layout, CONFIG);
 
-      if (chart.htmlLegend) {
-        legend.append(...legendItems(figure.data).map((item) =>
-          el("span", { class: "chart__legend-item" }, [
-            el("span", { class: "chart__legend-swatch", style: `background:${item.color}` }),
-            el("span", { text: item.name }),
-          ]),
-        ));
+      if (chart.selectable) {
+        seriesFilter(legend, groupSeries(figure.data), (updates) => {
+          Plotly.restyle(plot, { visible: updates.map((u) => u.visible) }, updates.map((u) => u.index));
+        });
       }
     } catch (error) {
       clear(plot).append(errorBox("No se pudo cargar el gráfico.", () => show(id)));

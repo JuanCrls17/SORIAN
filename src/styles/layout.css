@@ -13,6 +13,27 @@
   padding: 1rem 1rem 2.5rem;
 }
 
+/* Vistas de tipo aplicacion: el contenido ocupa la ventana y no desplaza */
+body.is-app #app { height: 100dvh; overflow: hidden; }
+body.is-app .footer { display: none; }
+
+.outlet--app {
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+  min-height: 0;
+  padding: .5rem;
+}
+
+.app-note {
+  flex: 0 0 auto;
+  padding: .375rem .25rem 0;
+  font-size: .6875rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.app-note b { color: var(--ink); }
+
 .view__header { margin-bottom: 1.25rem; }
 .view__lead { color: var(--muted); max-width: 65ch; margin: 0; }
 
@@ -45,11 +66,19 @@
   min-width: 0;
   min-height: 44px;
 }
-.brand__logo { height: 30px; width: auto; }
+.brand__logos { display: flex; align-items: center; gap: .5rem; flex: 0 0 auto; }
+.brand__logo { height: 22px; width: auto; }
+.brand__logo--senamhi { height: 26px; }
 .brand__divider { width: 1px; height: 26px; background: var(--line); }
-.brand__name { display: flex; flex-direction: column; line-height: 1.1; min-width: 0; }
-.brand__name strong { font-size: 1.0625rem; letter-spacing: .04em; color: var(--navy); }
-.brand__name small { font-size: .6875rem; color: var(--muted); }
+.brand__name { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+.brand__name strong { font-size: 1rem; letter-spacing: .04em; color: var(--navy); }
+.brand__name small { font-size: .625rem; color: var(--muted); white-space: nowrap; }
+
+@media (max-width: 420px) {
+  .brand__divider, .brand__name small { display: none; }
+  .brand__logo { height: 20px; }
+  .brand__logo--senamhi { height: 24px; }
+}
 
 .nav__burger {
   display: grid;
@@ -93,7 +122,7 @@
 .nav__link.is-active { color: var(--blue-600); font-weight: 700; }
 
 @media (min-width: 860px) {
-  :root { --header-h: 64px; }
+  :root { --header-h: 64px; --chrome-h: 113px; }
   .nav__burger { display: none; }
   .nav {
     display: flex;
@@ -109,7 +138,8 @@
   }
   .nav__link:hover { border-bottom-color: var(--line); }
   .nav__link.is-active { border-bottom-color: var(--blue); }
-  .brand__logo { height: 36px; }
+  .brand__logo { height: 30px; }
+  .brand__logo--senamhi { height: 34px; }
 }
 
 /* ---------- Footer ---------- */

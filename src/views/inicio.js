@@ -11,7 +11,7 @@ export default function inicio(outlet) {
   outlet.append(
     el("section", { class: "hero" }, [
       el("div", { class: "hero__content" }, [
-        el("p", { class: "hero__eyebrow", text: "SENAMHI · Subdirección de Modelamiento Numérico de la Atmósfera" }),
+        el("p", { class: "hero__eyebrow", text: "SENAMHI · Subdirección de Cambio Climático y Modelamiento Atmosférico" }),
         el("h1", { class: "hero__title", text: "SORIAN" }),
         el("p", { class: "hero__subtitle", text: "Sistema Operacional de Resolución Integrada para la Predicción del Clima" }),
         el("p", { class: "hero__text", text: "Información climática subestacional, mensual y estacional para el Perú y Sudamérica, integrada desde los principales modelos globales de predicción." }),

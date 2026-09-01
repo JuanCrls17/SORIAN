@@ -2,8 +2,8 @@
 
 **Sistema Operacional de Resolución Integrada para la Predicción del Clima**
 
-Plataforma de visualización climática de la Subdirección de Modelamiento Numérico
-de la Atmósfera del Servicio Nacional de Meteorología e Hidrología del Perú
+Plataforma de visualización climática de la Subdirección de Cambio Climático y Modelamiento Atmosférico
+del Servicio Nacional de Meteorología e Hidrología del Perú
 (SENAMHI). Integra pronóstico estacional multimodelo y monitoreo ENSO para el
 Perú y Sudamérica.
 
@@ -78,24 +78,6 @@ python tools/extract_borders.py /ruta/a/visores/visor_ecmwf_tpara.html data/geo/
 
 `extract_grids.py` espera archivos con el patrón `visor_<modelo>_<variable>.html`.
 Los límites políticos solo se regeneran si cambia el dominio del mapa.
-
-## Desarrollo
-
-```bash
-python -m http.server 8000
-```
-
-Abrir `http://localhost:8000`. No hay dependencias que instalar ni paso de
-compilación: al editar un archivo basta con recargar.
-
-Para añadir una sección, crear `src/views/<nombre>.js` que exporte una función
-`(outlet) => ({ destroy })`, registrarla en `src/main.js` y añadirla a `SECTIONS`
-en `src/ui/nav.js`.
-
-## Despliegue
-
-GitHub Pages sirve la rama `main` desde la raíz. El archivo `.nojekyll` evita el
-procesamiento de Jekyll.
 
 ## Licencia y uso
 

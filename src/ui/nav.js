@@ -54,7 +54,10 @@ export function buildHeader() {
   return el("header", { class: "masthead" }, [
     el("div", { class: "masthead__bar" }, [
       el("a", { class: "brand", href: "#inicio", onClick: () => navigate("inicio") }, [
-        el("img", { class: "brand__logo", src: "assets/logo-senamhi.png", alt: "SENAMHI", width: "350", height: "160" }),
+        el("span", { class: "brand__logos" }, [
+          el("img", { class: "brand__logo", src: "assets/logo-minam.png", alt: "Ministerio del Ambiente", width: "728", height: "150" }),
+          el("img", { class: "brand__logo brand__logo--senamhi", src: "assets/logo-senamhi.png", alt: "SENAMHI", width: "350", height: "160" }),
+        ]),
         el("span", { class: "brand__divider", "aria-hidden": "true" }),
         el("span", { class: "brand__name" }, [
           el("strong", { text: "SORIAN" }),
@@ -74,7 +77,6 @@ export function buildFooter() {
       el("span", { text: "Los resultados se basan en modelos numéricos y contienen incertidumbre. La información es de carácter referencial y no reemplaza una evaluación oficial. El SENAMHI no se responsabiliza por interpretaciones o usos inadecuados." }),
     ]),
     el("div", { class: "footer__meta" }, [
-      el("img", { class: "footer__logo", src: "assets/logo-minam.png", alt: "MINAM", width: "728", height: "150", loading: "lazy" }),
       el("p", { text: "© SENAMHI · SORIAN — Lima, Perú" }),
     ]),
   ]);

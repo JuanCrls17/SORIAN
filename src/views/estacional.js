@@ -4,42 +4,36 @@ import { routeParams } from "../router.js";
 import { selectorGroup } from "../ui/selector.js";
 import { createViewer } from "../map/viewer.js";
 
+const valid = (list, value, fallback) =>
+  (list.some((item) => item.id === value) ? value : fallback);
+
 export default function estacional(outlet) {
   const params = routeParams();
   const state = {
-    model: MODELS.some((m) => m.id === params.get("modelo")) ? params.get("modelo") : "ecmwf",
-    variable: VARIABLES.some((v) => v.id === params.get("variable")) ? params.get("variable") : "tpara",
+    model: valid(MODELS, params.get("modelo"), "ecmwf"),
+    variable: valid(VARIABLES, params.get("variable"), "tpara"),
   };
 
-  const controls = el("div", { class: "controls", id: "controls-estacional" });
+  const controls = el("div", { class: "controls" });
   const stage = el("div", { class: "viewer" });
 
-  const toggle = el("button", {
-    class: "controls__toggle", type: "button",
-    "aria-expanded": "false", "aria-controls": "controls-estacional",
-    onClick: () => {
-      const open = panel.classList.toggle("is-open");
-      toggle.setAttribute("aria-expanded", String(open));
-      toggle.textContent = open ? "Ocultar opciones ▲" : "Modelo y variable ▼";
-    },
-  }, "Modelo y variable ▼");
-
-  const panel = el("section", { class: "panel" }, [toggle, controls]);
-
+  outlet.classList.add("outlet--app");
+  document.body.classList.add("is-app");
   outlet.append(
-    el("header", { class: "view__header" }, [
-      el("h1", { text: "Pronóstico estacional" }),
-      el("p", { class: "view__lead", text: "Anomalías mensuales multimodelo para Sudamérica. Seleccione modelo y variable; use la línea de tiempo para recorrer los meses." }),
-    ]),
-    panel,
+    el("h1", { class: "sr-only", text: "Pronóstico estacional" }),
     stage,
+    el("p", { class: "app-note" }, [
+    el("b", { text: "Nota. " }),
+      "Resultados de modelos numéricos, de carácter referencial. No reemplazan una evaluación oficial del SENAMHI.",
+    ]),
   );
 
-  const viewer = createViewer(stage);
+  const viewer = createViewer(stage, controls);
 
-  function renderControls() {
+  function render() {
     clear(controls).append(
       selectorGroup("Modelo", MODELS, state.model, (id) => update({ model: id })),
+      el("span", { class: "controls__divider", "aria-hidden": "true" }),
       selectorGroup("Variable", VARIABLES, state.variable, (id) => update({ variable: id })),
     );
   }
@@ -47,13 +41,19 @@ export default function estacional(outlet) {
   function update(patch) {
     Object.assign(state, patch);
     history.replaceState(null, "", `#estacional?modelo=${state.model}&variable=${state.variable}`);
-    renderControls();
+    render();
     viewer.open(state.model, state.variable);
   }
 
-  renderControls();
+  render();
   viewer.open(state.model, state.variable);
   requestAnimationFrame(() => viewer.invalidate());
 
-  return { destroy: () => viewer.destroy() };
+  return {
+    destroy: () => {
+      outlet.classList.remove("outlet--app");
+      document.body.classList.remove("is-app");
+      viewer.destroy();
+    },
+  };
 }
