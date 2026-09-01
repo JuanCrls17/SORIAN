@@ -43,42 +43,135 @@
   box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
 }
 
-.viewer__readout {
+/* Sonda: sigue al puntero y resume el punto consultado */
+.probe {
   position: absolute;
-  z-index: 500;
-  right: .5rem;
-  top: 3.75rem;
-  padding: .25rem .5rem;
-  border-radius: 6px;
-  background: rgb(10 28 72 / 82%);
+  z-index: 600;
+  top: 0;
+  left: 0;
+  display: grid;
+  gap: .0625rem;
+  margin: .75rem 0 0 .75rem;
+  padding: .4375rem .625rem;
+  min-width: 9rem;
+  border-radius: var(--radius-sm);
+  background: rgb(10 28 72 / 93%);
+  backdrop-filter: blur(6px);
   color: #fff;
-  font-size: .75rem;
-  font-variant-numeric: tabular-nums;
   pointer-events: none;
+  box-shadow: 0 4px 16px rgb(10 28 72 / 28%);
 }
-.viewer__readout:empty { display: none; }
+.probe--flip { margin-left: 0; translate: -100% 0; }
+.probe__head {
+  font-size: .625rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #9dc4e8;
+}
+.probe__value { font-size: .9375rem; font-variant-numeric: tabular-nums; }
+.probe__place { font-size: .6875rem; color: #c3d3e6; font-variant-numeric: tabular-nums; }
 
 /* ---------- Controles ---------- */
 .controls {
   display: flex;
-  align-items: center;
-  gap: .375rem;
+  align-items: stretch;
+  gap: .5rem;
   flex: 1;
   min-width: 0;
+}
+
+.controls__single,
+.controls__sides { display: flex; gap: .5rem; flex: 1; min-width: 0; }
+
+.controls__single {
+  align-items: center;
+  gap: .5rem;
   overflow-x: auto;
-  padding: .375rem .5rem;
   scrollbar-width: none;
-  background: rgb(255 255 255 / 92%);
+  padding: .375rem .625rem;
+  background: rgb(255 255 255 / 93%);
   backdrop-filter: blur(10px);
   border: 1px solid rgb(255 255 255 / 70%);
   border-radius: var(--radius-sm);
   box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
 }
-.controls::-webkit-scrollbar { display: none; }
-/* Degradado al borde: indica que la barra continua al desplazarse */
-.controls { mask-image: linear-gradient(90deg, #000 calc(100% - 1.5rem), transparent); }
-@media (min-width: 900px) { .controls { mask-image: none; } }
+.controls__single::-webkit-scrollbar { display: none; }
 .controls__divider { width: 1px; align-self: stretch; background: var(--line); flex: 0 0 auto; }
+
+/* Boton de comparacion */
+.compare {
+  display: flex;
+  align-items: center;
+  gap: .4375rem;
+  flex: 0 0 auto;
+  padding: .5rem .875rem;
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: var(--radius-sm);
+  background: rgb(255 255 255 / 93%);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
+  font: inherit;
+  font-weight: 700;
+  font-size: .8125rem;
+  color: var(--navy);
+  cursor: pointer;
+}
+.compare:hover { color: var(--blue-600); }
+.compare.is-active { background: var(--navy); border-color: var(--navy); color: #fff; }
+.compare--detail { position: relative; }
+.compare--detail.is-active { background: var(--blue); border-color: var(--blue); }
+.compare__warn {
+  position: absolute;
+  top: -5px; right: -5px;
+  display: grid; place-items: center;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: #d98324;
+  color: #fff;
+  font-size: .625rem;
+  font-weight: 800;
+}
+.compare__icon { width: 20px; height: 20px; flex: 0 0 auto; }
+.compare__icon svg { width: 100%; height: 100%; display: block; }
+
+/* Un panel por lado, sobre la mitad del mapa que gobierna */
+.side-panel {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: .375rem .625rem .5rem;
+  background: rgb(255 255 255 / 93%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
+  border-top: 3px solid var(--navy);
+}
+.side-panel--b { border-top-color: var(--blue); }
+
+.side-panel__head {
+  display: flex;
+  align-items: center;
+  gap: .375rem;
+  margin-bottom: .3125rem;
+  font-size: .625rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+.side-panel--b .side-panel__head { color: var(--blue-600); }
+.side-panel__icon { width: 15px; height: 15px; }
+.side-panel__icon svg { width: 100%; height: 100%; display: block; }
+
+.side-panel__body {
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.side-panel__body::-webkit-scrollbar { display: none; }
 
 .selector { display: flex; align-items: center; gap: .375rem; flex: 0 0 auto; }
 .selector__label {
@@ -91,8 +184,11 @@
 .selector__options { display: flex; gap: .25rem; }
 
 .chip {
-  min-height: 36px;
-  padding: .3125rem .75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .3125rem;
+  min-height: 34px;
+  padding: .25rem .6875rem;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: #fff;
@@ -106,7 +202,16 @@
 }
 .chip:hover { border-color: var(--blue); color: var(--blue-600); }
 .chip.is-active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.chip__glyph { width: 17px; height: 17px; flex: 0 0 auto; }
+.chip__glyph svg { width: 100%; height: 100%; display: block; }
 .chip__short { display: none; }
+
+/* Comparando hay dos juegos de controles: las variables quedan en su
+   pictograma, que ya las identifica, y asi caben sin recortarse. */
+.side-panel .chip__glyph { width: 19px; height: 19px; }
+.side-panel .chip:has(.chip__glyph) .chip__label,
+.side-panel .chip:has(.chip__glyph) .chip__short { display: none; }
+.side-panel .chip:has(.chip__glyph) { padding: .25rem .5rem; }
 
 /* ---------- Leyenda ---------- */
 .viewer__panel--legend { padding: .5rem .625rem; max-width: 20rem; }
@@ -203,11 +308,15 @@
 
 .leaflet-top.leaflet-right { margin-top: 3.25rem; }
 
-@media (max-width: 720px) {
+@media (max-width: 860px) {
+  .viewer__overlay--top { flex-direction: column; }
+  .controls { flex-direction: column; }
+  .controls__sides { flex-direction: column; }
+  .compare { align-self: flex-start; }
   .viewer__overlay--bottom { flex-direction: column; align-items: stretch; }
   .viewer__panel--legend { max-width: none; }
   .selector__label { display: none; }
-  .chip { font-size: .75rem; padding: .3125rem .625rem; }
+  .chip { font-size: .75rem; padding: .25rem .5rem; }
   .leaflet-top.leaflet-right { margin-top: 3.5rem; }
 }
 
@@ -271,27 +380,6 @@
 .swipe__grip::after { right: 9px; border-left: 7px solid var(--navy); }
 .swipe__handle.is-dragging .swipe__grip { transform: translate(-50%, -50%) scale(1.1); }
 
-.swipe__label {
-  position: absolute;
-  top: 4.5rem;
-  padding: .25rem .5rem;
-  border-radius: 6px;
-  background: rgb(10 28 72 / 88%);
-  color: #fff;
-  font-size: .6875rem;
-  font-weight: 600;
-  white-space: nowrap;
-  max-width: 42%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.swipe__label--left { left: .5rem; }
-.swipe__label--right { right: 3.25rem; }
-
-@media (max-width: 720px) {
-  .swipe__label { top: 5.25rem; font-size: .625rem; max-width: 40%; }
-}
-.swipe__label:empty { display: none; }
 
 /* ---------- Conmutador de lado ---------- */
 .chip--toggle { display: inline-flex; align-items: center; gap: .375rem; }
@@ -334,3 +422,6 @@
 
 /* Con dos escalas visibles, la leyenda se apila */
 .viewer__panel--legend { display: grid; gap: .5rem; }
+
+/* Las etiquetas del mapa base van sobre la grilla, sin capturar el puntero */
+.leaflet-shadow-pane { z-index: 500; pointer-events: none; }

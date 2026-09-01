@@ -2,14 +2,12 @@ import { register, start } from "./router.js";
 import { buildHeader, buildFooter } from "./ui/nav.js";
 import inicio from "./views/inicio.js";
 import descripcion from "./views/descripcion.js";
-import subestacional from "./views/subestacional.js";
 import estacional from "./views/estacional.js";
 import enso from "./views/enso.js";
 import consultas from "./views/consultas.js";
 
 register("inicio", inicio);
 register("descripcion", descripcion);
-register("subestacional", subestacional);
 register("estacional", estacional);
 register("enso", enso);
 register("consultas", consultas);

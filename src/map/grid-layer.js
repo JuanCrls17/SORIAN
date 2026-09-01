@@ -1,4 +1,6 @@
 import { decodeFrame } from "../data.js";
+import { smoothField } from "./interpolate.js";
+import { SMOOTH_FACTOR } from "../config.js";
 
 const NO_DATA = 255;
 
@@ -8,12 +10,15 @@ const NO_DATA = 255;
  */
 export function createGridLayer(L) {
   return L.Layer.extend({
-    initialize(grid, palette) {
+    initialize(grid, palette, scale) {
       this._grid = grid;
       this._palette = palette;
+      this._scale = scale;
       this._frame = null;
       this._opacity = 0.75;
       this._clip = null;
+      this._smooth = false;
+      this._field = null;
     },
 
     onAdd(map) {
@@ -34,6 +39,15 @@ export function createGridLayer(L) {
 
     setFrame(base64) {
       this._frame = decodeFrame(base64);
+      this._field = null;
+      this._render();
+    },
+
+    /** Alterna entre la celda tal cual y el campo reconstruido. */
+    setSmooth(enabled) {
+      if (this._smooth === enabled) return;
+      this._smooth = enabled;
+      this._field = null;
       this._render();
     },
 
@@ -42,7 +56,7 @@ export function createGridLayer(L) {
       this._render();
     },
 
-    /** Limita el dibujo a una banda horizontal, para comparar dos capas. */
+    /** Limita el dibujo a una banda horizontal (fracciones 0-1 del ancho). */
     setClip(from, to) {
       this._clip = from === null ? null : { from, to };
       this._render();
@@ -92,13 +106,21 @@ export function createGridLayer(L) {
 
       ctx.save();
       if (this._clip) {
+        const from = this._clip.from * size.x;
         ctx.beginPath();
-        ctx.rect(this._clip.from, 0, this._clip.to - this._clip.from, size.y);
+        ctx.rect(from, 0, this._clip.to * size.x - from, size.y);
         ctx.clip();
       }
       ctx.globalAlpha = this._opacity;
 
       const { lat0, lon0, dlat, dlon, ny, nx } = this._grid;
+
+      if (this._smooth) {
+        this._drawField(ctx, map);
+        ctx.restore();
+        return;
+      }
+
       const bounds = map.getBounds();
       const firstRow = Math.max(0, Math.floor((bounds.getSouth() - lat0) / dlat));
       const lastRow = Math.min(ny - 1, Math.ceil((bounds.getNorth() - lat0) / dlat));
@@ -122,6 +144,35 @@ export function createGridLayer(L) {
         }
       }
       ctx.restore();
+    },
+
+    /**
+     * El campo interpolado se cachea como bitmap y el escalado corre por
+     * cuenta del compositor, de modo que el desplazamiento no recalcula nada.
+     */
+    _drawField(ctx, map) {
+      const { lat0, lon0, dlat, dlon, ny, nx } = this._grid;
+
+      if (!this._field) {
+        const image = smoothField(this._frame, this._grid, this._scale, SMOOTH_FACTOR);
+        const buffer = document.createElement("canvas");
+        buffer.width = image.width;
+        buffer.height = image.height;
+        buffer.getContext("2d").putImageData(image, 0, 0);
+        this._field = buffer;
+      }
+
+      const topLeft = map.latLngToContainerPoint([lat0 + ny * dlat, lon0]);
+      const bottomRight = map.latLngToContainerPoint([lat0, lon0 + nx * dlon]);
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(
+        this._field,
+        topLeft.x, topLeft.y,
+        bottomRight.x - topLeft.x,
+        bottomRight.y - topLeft.y,
+      );
     },
   });
 }

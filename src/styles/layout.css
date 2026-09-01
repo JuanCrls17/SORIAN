@@ -45,6 +45,7 @@ body.is-app .footer { display: none; }
   background: var(--surface);
   border-bottom: 1px solid var(--line);
 }
+@media (max-width: 899px) { .masthead { position: sticky; } .masthead__bar { position: relative; } }
 
 .masthead__bar {
   display: flex;
@@ -56,6 +57,7 @@ body.is-app .footer { display: none; }
   margin-inline: auto;
   padding-inline: 1rem;
 }
+@media (min-width: 900px) { .masthead { display: block; } }
 
 .brand {
   display: flex;
@@ -71,7 +73,12 @@ body.is-app .footer { display: none; }
 .brand__logo--senamhi { height: 26px; }
 .brand__divider { width: 1px; height: 26px; background: var(--line); }
 .brand__name { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
-.brand__name strong { font-size: 1rem; letter-spacing: .04em; color: var(--navy); }
+.brand__name strong {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: .16em;
+  color: var(--navy);
+}
 .brand__name small { font-size: .625rem; color: var(--muted); white-space: nowrap; }
 .brand__full-long { display: none; }
 @media (min-width: 1100px) {
@@ -111,8 +118,16 @@ body.is-app .footer { display: none; }
 
 .nav {
   display: none;
+  position: absolute;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  z-index: 40;
   flex-direction: column;
+  background: var(--surface);
   border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow);
   padding: .5rem 1rem 1rem;
 }
 .nav.is-open { display: flex; }
@@ -126,25 +141,45 @@ body.is-app .footer { display: none; }
 }
 .nav__link.is-active { color: var(--blue-600); font-weight: 700; }
 
-@media (min-width: 860px) {
-  :root { --header-h: 64px; --chrome-h: 113px; }
+/* En pantallas amplias la cabecera cabe en una sola franja: la marca a la
+   izquierda y la navegacion a la derecha, para no gastar alto en el visor. */
+@media (min-width: 900px) {
+  :root { --header-h: 66px; --chrome-h: 67px; }
+
+  .masthead__bar {
+    max-width: none;
+    gap: 2rem;
+    padding-inline: 1.5rem;
+  }
   .nav__burger { display: none; }
+
   .nav {
     display: flex;
+    position: static;
     flex-direction: row;
-    justify-content: center;
-    gap: 1.75rem;
-    border-top: 1px solid var(--line);
-    padding: 0 1rem;
+    align-items: stretch;
+    gap: 1.5rem;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+    margin-left: auto;
   }
   .nav__link {
-    padding: .875rem 0;
+    display: flex;
+    align-items: center;
+    padding: 0;
     border-bottom: 3px solid transparent;
+    font-size: .9375rem;
   }
   .nav__link:hover { border-bottom-color: var(--line); }
   .nav__link.is-active { border-bottom-color: var(--blue); }
-  .brand__logo { height: 30px; }
-  .brand__logo--senamhi { height: 34px; }
+
+  .brand__logo { height: 32px; }
+  .brand__logo--senamhi { height: 36px; }
+  .brand__divider { height: 34px; }
+  .brand__name strong { font-size: 1.5rem; font-weight: 500; letter-spacing: .2em; }
+  .brand__name small { font-size: .6875rem; }
 }
 
 /* ---------- Footer ---------- */

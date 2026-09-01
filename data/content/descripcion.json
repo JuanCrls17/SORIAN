@@ -1,6 +1,6 @@
 {
  "intro": [
-  "SORIAN es una plataforma operativa desarrollada por la Subdirección de Cambio Climático y Modelamiento Atmosférico del Servicio Nacional de Meteorología e Hidrología del Perú (SENAMHI), orientada a integrar, analizar y visualizar información climática proveniente de modelos globales y regionales de predicción subestacional, mensual y estacional.",
+  "SORIAN es una plataforma operativa desarrollada por la Subdirección de Cambio Climático y Modelamiento Atmosférico del Servicio Nacional de Meteorología e Hidrología del Perú (SENAMHI), orientada a integrar, analizar y visualizar información climática proveniente de modelos globales y regionales de predicción mensual y estacional.",
   "Su objetivo principal es brindar información climática clara, actualizada y de fácil interpretación, que apoye las actividades de vigilancia, monitoreo climático y la toma de decisiones en el Perú y Sudamérica.",
   "Ante la creciente disponibilidad de modelos y productos de predicción, frecuentemente dispersos y de alta complejidad técnica, SORIAN organiza, estandariza y presenta esta información de manera integrada y accesible para distintos tipos de usuarios."
  ],
@@ -140,13 +140,6 @@
  "viewers": {
   "title": "Visores disponibles",
   "groups": [
-   {
-    "name": "Visor subestacional",
-    "items": [
-     "Predicciones semanales de anomalía de precipitación.",
-     "Predicciones semanales de anomalía de temperatura máxima y mínima."
-    ]
-   },
    {
     "name": "Visor estacional",
     "items": [

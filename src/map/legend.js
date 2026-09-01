@@ -31,3 +31,10 @@ export function describeBin(scale, index) {
   const bin = scale[index];
   return `${format(bin.min)} a ${format(bin.max)}`;
 }
+
+/** -8.6, -71.3 -> 8.6° S, 71.3° O */
+export function formatLatLng({ lat, lng }) {
+  const ns = `${Math.abs(lat).toFixed(1)}° ${lat >= 0 ? "N" : "S"}`;
+  const ew = `${Math.abs(lng).toFixed(1)}° ${lng >= 0 ? "E" : "O"}`;
+  return `${ns}, ${ew}`;
+}

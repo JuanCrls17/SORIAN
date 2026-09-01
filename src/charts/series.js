@@ -19,55 +19,57 @@ export function groupSeries(traces) {
 }
 
 /**
- * Leyenda seleccionable: cada serie se activa o desactiva con un clic
- * y el grafico se actualiza sin volver a dibujarse por completo.
+ * Selector de series. Con todo visible, el primer clic aisla la serie elegida;
+ * a partir de ahi cada clic suma o quita, de modo que la seleccion se arma
+ * eligiendo lo que interesa en vez de descartando lo que no.
  */
 export function seriesFilter(node, groups, onChange) {
-  const hidden = new Set();
+  const names = groups.map((group) => group.name);
+  let shown = new Set(names);
 
   function apply() {
     onChange(groups.flatMap((group) =>
-      group.indices.map((index) => ({ index, visible: !hidden.has(group.name) })),
+      group.indices.map((index) => ({ index, visible: shown.has(group.name) })),
     ));
     render();
   }
 
-  function setAll(names) {
-    hidden.clear();
-    for (const name of names) hidden.add(name);
+  function pick(name) {
+    if (shown.size === names.length) shown = new Set([name]);
+    else if (shown.has(name)) shown.delete(name);
+    else shown.add(name);
     apply();
   }
 
   function render() {
-    const shown = groups.length - hidden.size;
+    const count = shown.size;
 
     clear(node).append(
       el("div", { class: "series__head" }, [
-        el("span", { class: "series__count", text: `${shown} de ${groups.length} modelos` }),
+        el("span", { class: "series__count" }, [
+          el("strong", { text: String(count) }),
+          ` de ${names.length} modelos`,
+        ]),
         el("div", { class: "series__actions" }, [
           el("button", {
             class: "series__action", type: "button", text: "Todos",
-            onClick: () => setAll([]),
+            disabled: count === names.length,
+            onClick: () => { shown = new Set(names); apply(); },
           }),
           el("button", {
-            class: "series__action", type: "button", text: "Ninguno",
-            onClick: () => setAll(groups.map((group) => group.name)),
+            class: "series__action", type: "button", text: "Limpiar",
+            disabled: count === 0,
+            onClick: () => { shown = new Set(); apply(); },
           }),
         ]),
       ]),
       el("div", { class: "series__list" }, groups.map((group) => {
-        const active = !hidden.has(group.name);
+        const active = shown.has(group.name);
         return el("button", {
           class: `series__item${active ? " is-active" : ""}`,
           type: "button",
           "aria-pressed": String(active),
-          title: `Doble clic para ver solo ${group.name}`,
-          onClick: (event) => {
-            if (event.detail > 1) return;
-            hidden.has(group.name) ? hidden.delete(group.name) : hidden.add(group.name);
-            apply();
-          },
-          onDblclick: () => setAll(groups.map((g) => g.name).filter((n) => n !== group.name)),
+          onClick: () => pick(group.name),
         }, [
           el("span", { class: "series__swatch", style: `background:${group.color}` }),
           el("span", { class: "series__name", text: group.name }),

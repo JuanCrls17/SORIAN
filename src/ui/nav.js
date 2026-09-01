@@ -4,7 +4,6 @@ import { navigate } from "../router.js";
 export const SECTIONS = [
   { id: "inicio", label: "Inicio" },
   { id: "descripcion", label: "Descripción" },
-  { id: "subestacional", label: "Subestacional" },
   { id: "estacional", label: "Estacional" },
   { id: "enso", label: "ENSO" },
   { id: "consultas", label: "Consultas" },
@@ -67,9 +66,9 @@ export function buildHeader() {
           ]),
         ]),
       ]),
+      menu,
       button,
     ]),
-    menu,
   ]);
 }
 

@@ -16,7 +16,7 @@ export default function enso(outlet) {
   const caption = el("div", { class: "chart__caption" });
   const plot = el("div", { class: "chart__plot" });
   const legend = el("div", { class: "series" });
-  const stage = el("section", { class: "chart" }, [caption, plot, legend]);
+  const stage = el("section", { class: "chart" }, [caption, legend, plot]);
   const tabs = el("div", { class: "tabs", role: "tablist" });
 
   outlet.append(

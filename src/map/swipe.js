@@ -12,9 +12,6 @@ export function createSwipe(container, onMove) {
   let ratio = 0.5;
   let dragging = false;
 
-  const labelLeft = el("span", { class: "swipe__label swipe__label--left" });
-  const labelRight = el("span", { class: "swipe__label swipe__label--right" });
-
   const handle = el("div", {
     class: "swipe__handle",
     role: "separator",
@@ -31,7 +28,7 @@ export function createSwipe(container, onMove) {
     },
   }, [el("span", { class: "swipe__grip", "aria-hidden": "true" })]);
 
-  const root = el("div", { class: "swipe" }, [labelLeft, labelRight, handle]);
+  const root = el("div", { class: "swipe" }, [handle]);
   container.append(root);
 
   function set(next) {
@@ -70,10 +67,6 @@ export function createSwipe(container, onMove) {
   return {
     ratio: () => ratio,
     reset: () => set(0.5),
-    setLabels: (left, right) => {
-      labelLeft.textContent = left;
-      labelRight.textContent = right;
-    },
     remove: () => root.remove(),
   };
 }
