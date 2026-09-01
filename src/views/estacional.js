@@ -2,7 +2,7 @@ import { MODELS, VARIABLES, SIDES } from "../config.js";
 import { el, clear } from "../ui/dom.js";
 import { routeParams } from "../router.js";
 import { selectorGroup } from "../ui/selector.js";
-import { COMPARE_ICON, SIDE_ICONS, SMOOTH_ICON } from "../ui/icons.js";
+import { COMPARE_ICON, SIDE_ICONS, SMOOTH_ICON, SUMMARY_ICON } from "../ui/icons.js";
 import { createViewer } from "../map/viewer.js";
 import { createSheet } from "../ui/sheet.js";
 import { watchLayout } from "../ui/media.js";
@@ -25,6 +25,7 @@ export default function estacional(outlet) {
     },
     comparing: params.has("modelo2"),
     smooth: params.get("detalle") === "continuo",
+    summary: params.get("reparto") === "1",
   };
 
   const continuous = (id) => VARIABLES.find((v) => v.id === id).continuous;
@@ -58,6 +59,7 @@ export default function estacional(outlet) {
       query.set("variable2", state.b.variable);
     }
     if (state.smooth) query.set("detalle", "continuo");
+    if (state.summary) query.set("reparto", "1");
     history.replaceState(null, "", `#estacional?${query}`);
   }
 
@@ -71,6 +73,13 @@ export default function estacional(outlet) {
   function setSmooth(enabled) {
     state.smooth = enabled;
     viewer.setSmooth(enabled);
+    syncUrl();
+    render();
+  }
+
+  function setSummary(enabled) {
+    state.summary = enabled;
+    viewer.summarize(enabled);
     syncUrl();
     render();
   }
@@ -114,6 +123,16 @@ export default function estacional(outlet) {
         el("span", { class: "compare__label", text: state.smooth ? "Continuo" : "Celdas" }),
         advisable ? null : el("span", { class: "compare__warn", "aria-hidden": "true", text: "!" }),
       ]),
+      el("button", {
+        class: `compare${state.summary ? " is-active" : ""}`,
+        type: "button",
+        "aria-pressed": String(state.summary),
+        title: "Reparto del dominio entre las clases de la escala",
+        onClick: () => setSummary(!state.summary),
+      }, [
+        el("span", { class: "compare__icon", html: SUMMARY_ICON }),
+        el("span", { class: "compare__label", text: "Reparto" }),
+      ]),
     ];
   }
 
@@ -124,8 +143,8 @@ export default function estacional(outlet) {
         el("span", { text: side.label }),
       ]),
       el("div", { class: "side-panel__body" }, [
-        selectorGroup("Modelo", MODELS, state[side.id].model, (id) => update(side.id, { model: id })),
-        selectorGroup("Variable", VARIABLES, state[side.id].variable, (id) => update(side.id, { variable: id })),
+        selectorGroup("Modelo", MODELS, state[side.id].model, (id) => update(side.id, { model: id }), `modelo-${side.id}`),
+        selectorGroup("Variable", VARIABLES, state[side.id].variable, (id) => update(side.id, { variable: id }), `variable-${side.id}`),
       ]),
     ]);
   }
@@ -138,9 +157,8 @@ export default function estacional(outlet) {
       state.comparing
         ? el("div", { class: "controls__sides" }, SIDES.map(sidePanel))
         : el("div", { class: "controls__single" }, [
-            selectorGroup("Modelo", MODELS, state.a.model, (id) => update("a", { model: id })),
-            el("span", { class: "controls__divider", "aria-hidden": "true" }),
-            selectorGroup("Variable", VARIABLES, state.a.variable, (id) => update("a", { variable: id })),
+            selectorGroup("Modelo", MODELS, state.a.model, (id) => update("a", { model: id }), "modelo-a"),
+            selectorGroup("Variable", VARIABLES, state.a.variable, (id) => update("a", { variable: id }), "variable-a"),
           ]),
     );
   }
@@ -182,11 +200,11 @@ export default function estacional(outlet) {
         selectorGroup("Modelo", MODELS, state[side.id].model, (id) => {
           update(side.id, { model: id });
           openSheet(side);
-        }),
+        }, `hoja-modelo-${side.id}`),
         selectorGroup("Variable", VARIABLES, state[side.id].variable, (id) => {
           update(side.id, { variable: id });
           openSheet(side);
-        }),
+        }, `hoja-variable-${side.id}`),
       ],
     );
   }
@@ -199,6 +217,7 @@ export default function estacional(outlet) {
 
   render();
   viewer.setSmooth(state.smooth);
+  viewer.summarize(state.summary);
   viewer.open("a", state.a.model, state.a.variable);
   if (state.comparing) setComparing(true);
 

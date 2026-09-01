@@ -1,5 +1,6 @@
 import { el } from "./dom.js";
 import { navigate } from "../router.js";
+import { slidingMarker } from "./marker.js";
 
 export const SECTIONS = [
   { id: "inicio", label: "Inicio" },
@@ -17,9 +18,8 @@ export function buildNav() {
     }),
   );
 
-  const marker = el("span", { class: "nav__marker", "aria-hidden": "true" });
-  const menu = el("nav", { class: "nav", id: "nav-main", "aria-label": "Navegación principal" }, [marker, ...links]);
-  let settle = null;
+  const menu = el("nav", { class: "nav", id: "nav-main", "aria-label": "Navegación principal" }, links);
+  const moveTo = slidingMarker(menu, "nav");
 
   const button = el("button", {
     class: "nav__burger", type: "button",
@@ -39,39 +39,17 @@ export function buildNav() {
     button.setAttribute("aria-label", "Abrir menú");
   }
 
-  /**
-   * La pastilla activa viaja de un enlace al siguiente y se estira en el
-   * trayecto, como una gota que se despega y vuelve a juntarse al llegar.
-   */
-  function moveMarker() {
-    const active = links.find((link) => link.classList.contains("is-active"));
-    if (!active || !active.offsetWidth) return marker.classList.remove("is-visible");
-
-    const target = active.offsetLeft;
-    const travel = Math.abs(target - (marker.at ?? target));
-    const stretch = marker.at === undefined ? 1 : Math.min(1.3, 1 + travel / 420);
-    marker.at = target;
-
-    marker.classList.add("is-visible");
-    marker.style.width = `${active.offsetWidth}px`;
-    marker.style.transform = `translateX(${target}px) scaleX(${stretch})`;
-
-    clearTimeout(settle);
-    settle = setTimeout(() => { marker.style.transform = `translateX(${target}px)`; }, 150);
-  }
+  const activeLink = () => links.find((link) => link.classList.contains("is-active"));
 
   window.addEventListener("route:changed", (event) => {
     for (const link of links) {
       link.classList.toggle("is-active", link.dataset.route === event.detail);
       link.toggleAttribute("aria-current", link.dataset.route === event.detail);
     }
-    requestAnimationFrame(moveMarker);
+    requestAnimationFrame(() => moveTo(activeLink()));
   });
 
-  window.addEventListener("resize", () => {
-    marker.at = undefined;
-    moveMarker();
-  });
+  window.addEventListener("resize", () => moveTo(activeLink()));
 
   return { menu, button };
 }

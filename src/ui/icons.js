@@ -64,3 +64,26 @@ export const SMOOTH_ICON = `
     <path d="M8.2 5.5v13M12.4 5.5v13M16.6 5.5v13"
           stroke="currentColor" stroke-width=".75" opacity=".35"/>
   </svg>`;
+
+/** Reparto del dominio entre clases de la escala */
+export const SUMMARY_ICON = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <rect x="3.5" y="5.5" width="17" height="13" rx="2"
+          fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M6.5 9h9M6.5 12h6M6.5 15h11"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+
+export const EXPAND_ICON = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"
+          fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+
+export const COLLAPSE_ICON = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M4 9h5V4M20 9h-5V4M4 15h5v5M20 15h-5v5"
+          fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;

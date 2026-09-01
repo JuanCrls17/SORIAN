@@ -1,6 +1,7 @@
 import { MAP, MODELS, VARIABLES, PATHS, ANIMATION_INTERVAL } from "../config.js";
 import { load } from "../data.js";
 import { el, clear, spinner, errorBox } from "../ui/dom.js";
+import { EXPAND_ICON, COLLAPSE_ICON } from "../ui/icons.js";
 import { createGridLayer } from "./grid-layer.js";
 import { buildLegend, describeBin, formatLatLng } from "./legend.js";
 import { createSwipe } from "./swipe.js";
@@ -14,7 +15,9 @@ export function createViewer(container, controls) {
   const timeline = el("div", { class: "viewer__panel viewer__panel--time" });
   const readout = el("div", { class: "probe", role: "status", "aria-live": "polite", hidden: true });
 
-  const analysis = el("aside", { class: "analysis", "aria-label": "Resumen del dominio" });
+  const analysis = el("aside", {
+    class: "analysis", hidden: true, "aria-label": "Distribución del dominio",
+  });
 
   const stage = el("div", { class: "viewer__stage" }, [
     mapNode,
@@ -47,6 +50,7 @@ export function createViewer(container, controls) {
     maxZoom: MAP.maxZoom,
   }).addTo(map);
   L.control.zoom({ position: "topright" }).addTo(map);
+  addFullscreen();
 
   // Las etiquetas van por encima de la grilla para que sigan legibles.
   const labels = L.tileLayer(MAP.labels, {
@@ -77,6 +81,40 @@ export function createViewer(container, controls) {
       }).addTo(map);
     })
     .catch(() => { /* el mapa sigue siendo utilizable sin fronteras */ });
+
+  /**
+   * Pantalla completa sobre la vista entera, no solo el mapa: los mandos y
+   * la linea de tiempo tienen que seguir al alcance.
+   */
+  function addFullscreen() {
+    if (!document.fullscreenEnabled) return;
+
+    const button = el("button", {
+      class: "map-btn", type: "button",
+      title: "Pantalla completa", "aria-label": "Pantalla completa",
+      html: EXPAND_ICON,
+      onClick: () => {
+        const target = container.parentElement ?? container;
+        if (document.fullscreenElement) document.exitFullscreen();
+        else target.requestFullscreen?.();
+      },
+    });
+
+    const control = L.control({ position: "topright" });
+    control.onAdd = () => {
+      L.DomEvent.disableClickPropagation(button);
+      return button;
+    };
+    control.addTo(map);
+
+    document.addEventListener("fullscreenchange", () => {
+      const on = Boolean(document.fullscreenElement);
+      button.innerHTML = on ? COLLAPSE_ICON : EXPAND_ICON;
+      button.title = on ? "Salir de pantalla completa" : "Pantalla completa";
+      button.setAttribute("aria-label", button.title);
+      requestAnimationFrame(() => map.invalidateSize());
+    });
+  }
 
   function applyClip() {
     if (!swipe) {
@@ -117,9 +155,10 @@ export function createViewer(container, controls) {
     updateAnalysis();
   }
 
+  /** El reparto solo se recalcula si el panel esta a la vista. */
   function updateAnalysis() {
     const { grid, layer, label } = sides.a;
-    if (!grid || !layer?._frame) return;
+    if (analysis.hidden || !grid || !layer?._frame) return;
     renderAnalysis(analysis, grid, layer._frame, grid.months[index], label ?? "");
   }
 
@@ -282,6 +321,12 @@ export function createViewer(container, controls) {
     open,
     compare,
     setSmooth,
+    summarize: (visible) => {
+      analysis.hidden = !visible;
+      container.classList.toggle("viewer--summary", visible);
+      updateAnalysis();
+      requestAnimationFrame(() => map.invalidateSize());
+    },
     stop,
     invalidate: () => {
       map.invalidateSize();

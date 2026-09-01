@@ -5,6 +5,7 @@ import { loadPlotly, adaptLayout, titleLines, CONFIG } from "../charts/plotly.js
 import { splitRegions, alignScales, legendSeries, categoryKey } from "../charts/regions.js";
 import { groupSeries, seriesFilter, staticLegend, visibilityFor } from "../charts/series.js";
 import { isCompact } from "../ui/media.js";
+import { slidingMarker } from "../ui/marker.js";
 
 const VIEWS = [
   { id: "percentiles", label: "Percentiles", hint: "Dispersión del ensamble multimodelo" },
@@ -78,6 +79,9 @@ export default function enso(outlet) {
         onClick: () => { region = option.id; show(); },
       }),
     ));
+
+    const moveTo = slidingMarker(scope, "enso-region");
+    requestAnimationFrame(() => moveTo(scope.querySelector(".is-active")));
   }
 
   /** Ancho y alto de cada panel segun cuantos se muestran a la vez. */

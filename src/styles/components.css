@@ -1,3 +1,23 @@
+/* ---------- Pastilla deslizante ----------
+   Fondo comun de la opcion activa en cualquier grupo de capsulas: viaja
+   hasta ella en vez de aparecer de golpe en su sitio. */
+.marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: center;
+  transition:
+    transform .34s cubic-bezier(.22, .92, .3, 1.08),
+    width .34s cubic-bezier(.22, .92, .3, 1.08),
+    height .2s ease,
+    opacity .18s linear;
+}
+.marker.is-visible { opacity: 1; }
+
 /* ---------- Botones ---------- */
 .btn {
   display: inline-flex;
@@ -133,6 +153,7 @@
 
 /* Conmutador de opcion unica, para alternar entre vistas del mismo dato */
 .segmented {
+  position: relative;
   display: inline-flex;
   flex: 0 0 auto;
   padding: 3px;
@@ -141,7 +162,11 @@
   border-radius: 999px;
 }
 .segmented:empty { display: none; }
+.segmented .marker { background: var(--surface); box-shadow: 0 1px 4px rgb(10 28 72 / 16%); }
+
 .segmented__option {
+  position: relative;
+  z-index: 1;
   min-height: 38px;
   padding: .375rem 1.0625rem;
   border: 0;
@@ -156,11 +181,7 @@
   transition: background .2s, color .2s, box-shadow .2s;
 }
 .segmented__option:hover { color: var(--navy); }
-.segmented__option.is-active {
-  background: var(--surface);
-  color: var(--navy);
-  box-shadow: 0 1px 4px rgb(10 28 72 / 16%);
-}
+.segmented__option.is-active { color: var(--navy); }
 
 /* ---------- Clave de lectura ---------- */
 .key {

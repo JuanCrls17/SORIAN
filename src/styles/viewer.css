@@ -15,31 +15,44 @@
   isolation: isolate;
 }
 
-.viewer__stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+.viewer__stage { position: relative; grid-area: 1 / 1; min-width: 0; min-height: 0; overflow: hidden; }
+
+.viewer--summary { grid-template-columns: minmax(0, 1fr) 22rem; }
+/* Fila fija para el reparto: con `auto` el contenido se comeria el mapa */
+@media (max-width: 899px) {
+  .viewer--summary {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 46%;
+  }
+}
 .viewer__map { position: absolute; inset: 0; z-index: 0; }
 
 /* Con zoom fraccionario las teselas se escalan y dejan costuras de 1 px.
    El fondo toma el tono de la base para que no se vean como rayas claras. */
 .viewer__map .leaflet-container { background: #f2f1ee; }
 
-/* ---------- Resumen del dominio ---------- */
-.analysis { display: none; }
+/* ---------- Reparto del dominio ----------
+   Se abre a peticion y toma su propia columna: superpuesto taparia los
+   mandos justo cuando hay dos juegos de ellos. */
+.analysis {
+  grid-area: 1 / 2;
+  overflow-y: auto;
+  padding: 1rem 1.125rem;
+  background: var(--surface);
+  border-left: 1px solid var(--line);
+  font-size: .8125rem;
+  animation: analysis-in .22s ease-out;
+}
+@keyframes analysis-in { from { opacity: 0; transform: translateX(14px); } }
+@keyframes analysis-up { from { opacity: 0; transform: translateY(16px); } }
 
-/* Con mucho ancho el mapa no puede llenarlo sin recortar buena parte del
-   dominio: ese margen se dedica al respaldo cuantitativo de la lectura. */
-@media (min-width: 1400px) {
-  .viewer { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; }
-
+@media (max-width: 899px) {
   .analysis {
-    display: block;
-    grid-area: 1 / 2;
-    overflow-y: auto;
-    padding: 1rem 1.125rem;
-    background: var(--surface);
-    border-left: 1px solid var(--line);
-    font-size: .8125rem;
+    grid-area: 2 / 1;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    animation-name: analysis-up;
   }
-  .analysis:empty { display: none; }
 }
 
 .analysis__head { margin-bottom: .875rem; }
@@ -100,7 +113,8 @@
   pointer-events: none;
 }
 .viewer__overlay > * { pointer-events: auto; }
-.viewer__overlay--top { top: 0; }
+/* deja libre la columna del zoom y la pantalla completa */
+.viewer__overlay--top { top: 0; padding-right: 3.5rem; }
 .viewer__overlay--bottom {
   bottom: 0;
   align-items: flex-end;
@@ -163,11 +177,13 @@
 .controls {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: .625rem;
   min-width: 0;
 }
 
-.controls__sides { display: flex; gap: .5rem; flex: 1; min-width: 0; }
+/* Comparando, los dos panels bajan a su propia fila antes que recortarse */
+.controls__sides { display: flex; gap: .5rem; flex: 1 1 34rem; min-width: 0; }
 .controls__actions { display: flex; gap: .5rem; flex: 0 0 auto; }
 
 /* Con un solo pronostico los mandos flotan sueltos: una barra continua
@@ -182,23 +198,21 @@
   scrollbar-width: none;
 }
 .controls__single::-webkit-scrollbar { display: none; }
-.controls__divider { display: none; }
 
-.controls__single .selector__label {
-  padding: .25rem .5625rem;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 90%);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgb(10 28 72 / 14%);
-  color: var(--navy);
-}
-.controls__single .chip {
-  border-color: rgb(255 255 255 / 70%);
-  background: rgb(255 255 255 / 95%);
-  backdrop-filter: blur(8px);
+/* Cada grupo es una tarjeta: el rotulo manda sobre sus opciones en vez de
+   competir con ellas en la misma fila. */
+.controls__single .selector {
+  display: grid;
+  gap: .3125rem;
+  padding: .4375rem .625rem .5rem;
+  background: rgb(255 255 255 / 93%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: var(--radius-sm);
   box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
 }
-.controls__single .chip.is-active { background: var(--blue); border-color: var(--blue); }
+.controls__single .selector__label { padding-left: .125rem; }
+.controls__single .chip { box-shadow: none; }
 
 /* Boton de comparacion */
 .compare {
@@ -268,13 +282,11 @@
 .side-panel__body {
   display: flex;
   align-items: center;
-  gap: .625rem;
-  overflow-x: auto;
-  scrollbar-width: none;
+  flex-wrap: wrap;
+  gap: .5rem .625rem;
 }
-.side-panel__body::-webkit-scrollbar { display: none; }
 
-.selector { display: flex; align-items: center; gap: .375rem; flex: 0 0 auto; }
+.selector { display: flex; align-items: center; flex-wrap: wrap; gap: .375rem; flex: 0 1 auto; min-width: 0; }
 .selector__label {
   font-size: .625rem;
   font-weight: 700;
@@ -282,9 +294,12 @@
   text-transform: uppercase;
   color: var(--muted);
 }
-.selector__options { display: flex; gap: .25rem; }
+.selector__options { position: relative; display: flex; flex-wrap: wrap; gap: .25rem; }
+.selector__options .marker { background: var(--blue); }
 
 .chip {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: .3125rem;
@@ -299,10 +314,11 @@
   color: var(--ink);
   white-space: nowrap;
   cursor: pointer;
-  transition: background .12s, border-color .12s, color .12s;
+  transition: border-color .16s, color .2s;
 }
 .chip:hover { border-color: var(--blue); color: var(--blue-600); }
-.chip.is-active { background: var(--blue); border-color: var(--blue); color: #fff; }
+/* el fondo lo pone la pastilla que se desliza por detras */
+.chip.is-active { background: transparent; border-color: transparent; color: #fff; }
 .chip__glyph { width: 17px; height: 17px; flex: 0 0 auto; }
 .chip__glyph svg { width: 100%; height: 100%; display: block; }
 .chip__short { display: none; }
@@ -382,6 +398,27 @@
 .timeline__step.is-active { background: var(--navy); color: #fff; }
 
 /* Controles de mapa: un unico bloque con el mismo acabado que los paneles */
+/* Boton suelto del mapa, con el mismo acabado que el control de zoom */
+.map-btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: var(--radius-sm);
+  background: rgb(255 255 255 / 93%);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
+  color: var(--navy);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.map-btn:hover { background: var(--accent); color: var(--blue-600); }
+.map-btn svg { width: 18px; height: 18px; display: block; }
+
+.outlet--app:fullscreen { background: var(--canvas); padding: .5rem; }
+
 .leaflet-touch .leaflet-bar,
 .leaflet-bar {
   border: 1px solid rgb(255 255 255 / 70%);
