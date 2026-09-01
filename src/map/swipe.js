@@ -4,11 +4,17 @@ const MIN = 0.04;
 const MAX = 0.96;
 const STEP = 0.04;
 
+// Gestos que Leaflet escucha en el contenedor del mapa. La cortina vive
+// dentro de ese contenedor, asi que cada uno se detiene en la guia: de lo
+// contrario el mapa se desplaza bajo el dedo en vez de moverse la cortina.
+const SWALLOW = ["mousedown", "touchstart", "touchmove", "dblclick", "wheel", "contextmenu"];
+
 /**
  * Cortina de comparacion: una guia vertical arrastrable que reparte el mapa
- * entre dos capas. Responde a puntero, teclado y rueda de desplazamiento.
+ * entre dos capas. Responde a puntero, tacto y teclado.
  */
-export function createSwipe(container, onMove) {
+export function createSwipe(map, onMove) {
+  const container = map.getContainer();
   let ratio = 0.5;
   let dragging = false;
 
@@ -26,7 +32,10 @@ export function createSwipe(container, onMove) {
       event.preventDefault();
       set(Math.abs(delta) === 1 ? (delta < 0 ? MIN : MAX) : ratio + delta);
     },
-  }, [el("span", { class: "swipe__grip", "aria-hidden": "true" })]);
+  }, [
+    el("span", { class: "swipe__line", "aria-hidden": "true" }),
+    el("span", { class: "swipe__grip", "aria-hidden": "true" }),
+  ]);
 
   const root = el("div", { class: "swipe" }, [handle]);
   container.append(root);
@@ -39,20 +48,29 @@ export function createSwipe(container, onMove) {
     onMove(ratio);
   }
 
-  function pointerFrom(event) {
+  function moveTo(clientX) {
     const box = container.getBoundingClientRect();
-    set((event.clientX - box.left) / box.width);
+    set((clientX - box.left) / box.width);
+  }
+
+  for (const type of SWALLOW) {
+    handle.addEventListener(type, (event) => event.stopPropagation(), { passive: false });
   }
 
   handle.addEventListener("pointerdown", (event) => {
     dragging = true;
     handle.setPointerCapture(event.pointerId);
     handle.classList.add("is-dragging");
+    // el mapa deja de responder al gesto mientras dura el arrastre
+    map.dragging.disable();
     event.preventDefault();
+    event.stopPropagation();
   });
 
   handle.addEventListener("pointermove", (event) => {
-    if (dragging) pointerFrom(event);
+    if (!dragging) return;
+    event.preventDefault();
+    moveTo(event.clientX);
   });
 
   const release = (event) => {
@@ -60,6 +78,7 @@ export function createSwipe(container, onMove) {
     dragging = false;
     handle.releasePointerCapture?.(event.pointerId);
     handle.classList.remove("is-dragging");
+    map.dragging.enable();
   };
   handle.addEventListener("pointerup", release);
   handle.addEventListener("pointercancel", release);
@@ -67,6 +86,9 @@ export function createSwipe(container, onMove) {
   return {
     ratio: () => ratio,
     reset: () => set(0.5),
-    remove: () => root.remove(),
+    remove: () => {
+      if (dragging) map.dragging.enable();
+      root.remove();
+    },
   };
 }

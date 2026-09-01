@@ -80,10 +80,22 @@ export function createGridLayer(L) {
       L.DomUtil.setTransform(this._canvas, offset, scale);
     },
 
-    _reset() {
+    /**
+     * Tamano del buffer en pixeles enteros. canvas.width descarta los
+     * decimales, asi que con un devicePixelRatio fraccionario -zoom del
+     * navegador, pantallas escaladas- hay que redondear antes de comparar:
+     * de lo contrario la medida nunca coincide y el redibujo se reentra.
+     */
+    _buffer() {
       const size = this._map.getSize();
-      this._canvas.width = size.x * (window.devicePixelRatio || 1);
-      this._canvas.height = size.y * (window.devicePixelRatio || 1);
+      const ratio = window.devicePixelRatio || 1;
+      return { size, width: Math.round(size.x * ratio), height: Math.round(size.y * ratio) };
+    },
+
+    _reset() {
+      const { size, width, height } = this._buffer();
+      this._canvas.width = width;
+      this._canvas.height = height;
       this._canvas.style.width = `${size.x}px`;
       this._canvas.style.height = `${size.y}px`;
       this._render();
@@ -93,15 +105,14 @@ export function createGridLayer(L) {
       if (!this._map || !this._frame) return;
 
       const map = this._map;
-      const size = map.getSize();
-      const ratio = window.devicePixelRatio || 1;
-
-      if (this._canvas.width !== size.x * ratio) return this._reset();
+      const { size, width, height } = this._buffer();
+      if (!width || !height) return;
+      if (this._canvas.width !== width || this._canvas.height !== height) return this._reset();
 
       L.DomUtil.setPosition(this._canvas, map.containerPointToLayerPoint([0, 0]));
 
       const ctx = this._ctx;
-      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.setTransform(width / size.x, 0, 0, height / size.y, 0, 0);
       ctx.clearRect(0, 0, size.x, size.y);
 
       ctx.save();

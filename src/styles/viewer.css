@@ -18,6 +18,10 @@
 .viewer__stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
 .viewer__map { position: absolute; inset: 0; z-index: 0; }
 
+/* Con zoom fraccionario las teselas se escalan y dejan costuras de 1 px.
+   El fondo toma el tono de la base para que no se vean como rayas claras. */
+.viewer__map .leaflet-container { background: #f2f1ee; }
+
 /* ---------- Resumen del dominio ---------- */
 .analysis { display: none; }
 
@@ -146,33 +150,55 @@
 .probe__value { font-size: .9375rem; font-variant-numeric: tabular-nums; }
 .probe__place { font-size: .6875rem; color: #c3d3e6; font-variant-numeric: tabular-nums; }
 
+/* Anclada al borde superior: en tactil el dedo tapa el punto consultado */
+.probe--docked {
+  top: .5rem;
+  left: .5rem;
+  right: .5rem;
+  margin: 0;
+  transform: none !important;
+}
+
 /* ---------- Controles ---------- */
 .controls {
   display: flex;
-  align-items: stretch;
-  gap: .5rem;
-  flex: 1;
+  align-items: center;
+  gap: .625rem;
   min-width: 0;
 }
 
-.controls__single,
 .controls__sides { display: flex; gap: .5rem; flex: 1; min-width: 0; }
 .controls__actions { display: flex; gap: .5rem; flex: 0 0 auto; }
 
+/* Con un solo pronostico los mandos flotan sueltos: una barra continua
+   cruzaria el mapa de lado a lado y taparia datos sin necesidad. */
 .controls__single {
+  display: flex;
   align-items: center;
-  gap: .5rem;
+  gap: .75rem;
+  flex: 0 1 auto;
+  min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
-  padding: .375rem .625rem;
-  background: rgb(255 255 255 / 93%);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgb(255 255 255 / 70%);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
 }
 .controls__single::-webkit-scrollbar { display: none; }
-.controls__divider { width: 1px; align-self: stretch; background: var(--line); flex: 0 0 auto; }
+.controls__divider { display: none; }
+
+.controls__single .selector__label {
+  padding: .25rem .5625rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 90%);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgb(10 28 72 / 14%);
+  color: var(--navy);
+}
+.controls__single .chip {
+  border-color: rgb(255 255 255 / 70%);
+  background: rgb(255 255 255 / 95%);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
+}
+.controls__single .chip.is-active { background: var(--blue); border-color: var(--blue); }
 
 /* Boton de comparacion */
 .compare {
@@ -425,40 +451,78 @@
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 1rem .75rem .75rem;
+  display: grid;
+  gap: 1.125rem;
+  padding: 1.25rem 1rem 1rem;
 }
-.chart__caption { padding: 0 .25rem .75rem; }
-.chart__title { font-size: clamp(.9375rem, 2.2vw, 1.0625rem); margin: 0 0 .25rem; text-wrap: balance; }
+@media (min-width: 900px) { .chart { padding: 1.75rem 1.75rem 1.25rem; gap: 1.5rem; } }
+.chart__caption { padding: 0 .25rem; }
+.chart__title { font-size: clamp(.9375rem, 2.2vw, 1.125rem); margin: 0 0 .25rem; text-wrap: balance; }
 .chart__subtitle { font-size: .8125rem; color: var(--muted); margin: 0; }
-.chart__plot { min-height: clamp(360px, 58dvh, 620px); }
+@media (max-width: 640px) {
+  .chart { padding: 1rem .875rem .875rem; gap: .875rem; }
+  .chart__title { font-size: .8125rem; line-height: 1.35; }
+  .chart__panels { gap: 1.5rem; }
+}
+
+.chart__panels {
+  display: grid;
+  grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.panel { margin: 0; min-width: 0; }
+.panel__name {
+  display: block;
+  margin-bottom: .5rem;
+  padding-bottom: .5rem;
+  border-bottom: 1px solid var(--line);
+  font-size: .9375rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--navy);
+}
+.panel__plot { min-height: 340px; }
 
 /* ---------- Cortina de comparacion ---------- */
 .swipe { position: absolute; inset: 0; z-index: 450; pointer-events: none; }
 
+/* La guia visible mide 3 px, pero el area que responde al dedo mide 44:
+   con el ancho de la linea seria imposible agarrarla en un movil. */
 .swipe__handle {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 50%;
+  width: 44px;
+  margin-left: -22px;
+  display: grid;
+  place-items: center;
+  cursor: ew-resize;
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.swipe__handle:focus-visible { outline: 3px solid var(--blue); outline-offset: -3px; border-radius: 22px; }
+
+.swipe__line {
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
   width: 3px;
   margin-left: -1.5px;
   background: #fff;
   box-shadow: 0 0 0 1px rgb(10 28 72 / 30%), 0 0 12px rgb(10 28 72 / 30%);
-  cursor: ew-resize;
-  pointer-events: auto;
-  touch-action: none;
 }
-.swipe__handle:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 
 .swipe__grip {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px; height: 40px;
+  position: relative;
+  width: 44px; height: 44px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 2px 10px rgb(10 28 72 / 32%);
+  box-shadow: 0 2px 10px rgb(10 28 72 / 32%), 0 0 0 1px rgb(10 28 72 / 12%);
+  transition: transform .12s ease-out;
 }
 .swipe__grip::before,
 .swipe__grip::after {
@@ -469,9 +533,15 @@
   border-block: 5px solid transparent;
   transform: translateY(-50%);
 }
-.swipe__grip::before { left: 9px; border-right: 7px solid var(--navy); }
-.swipe__grip::after { right: 9px; border-left: 7px solid var(--navy); }
-.swipe__handle.is-dragging .swipe__grip { transform: translate(-50%, -50%) scale(1.1); }
+.swipe__grip::before { left: 11px; border-right: 7px solid var(--navy); }
+.swipe__grip::after { right: 11px; border-left: 7px solid var(--navy); }
+.swipe__handle.is-dragging .swipe__grip { transform: scale(1.12); }
+.swipe__handle.is-dragging .swipe__line { box-shadow: 0 0 0 1px var(--blue), 0 0 16px rgb(11 107 184 / 45%); }
+
+@media (pointer: coarse) {
+  .swipe__handle { width: 56px; margin-left: -28px; }
+  .swipe__grip { width: 52px; height: 52px; }
+}
 
 
 /* ---------- Conmutador de lado ---------- */

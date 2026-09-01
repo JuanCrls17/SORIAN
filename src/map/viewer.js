@@ -6,6 +6,8 @@ import { buildLegend, describeBin, formatLatLng } from "./legend.js";
 import { createSwipe } from "./swipe.js";
 import { renderAnalysis } from "./analysis.js";
 
+const COARSE = window.matchMedia("(pointer: coarse)");
+
 export function createViewer(container, controls) {
   const mapNode = el("div", { class: "viewer__map" });
   const legendNode = el("div", { class: "viewer__panel viewer__panel--legend" });
@@ -188,8 +190,17 @@ export function createViewer(container, controls) {
       el("span", { class: "probe__place", text: formatLatLng(event.latlng) }),
     );
 
-    const size = map.getSize();
     readout.hidden = false;
+
+    // con el dedo encima, una sonda que persigue al puntero queda tapada:
+    // en tactil se ancla al borde superior del mapa
+    if (COARSE.matches) {
+      readout.classList.add("probe--docked");
+      readout.style.transform = "";
+      return;
+    }
+
+    const size = map.getSize();
     readout.classList.toggle("probe--flip-x", point.x > size.x - 190);
     readout.classList.toggle("probe--flip-y", point.y > size.y - 150);
     readout.style.transform = `translate(${point.x}px, ${point.y}px)`;
@@ -258,7 +269,7 @@ export function createViewer(container, controls) {
   function compare(enabled) {
     if (!enabled) return closeSide();
     if (swipe) return;
-    swipe = createSwipe(mapNode, applyClip);
+    swipe = createSwipe(map, applyClip);
     applyClip();
   }
 

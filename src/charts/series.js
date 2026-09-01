@@ -18,6 +18,27 @@ export function groupSeries(traces) {
   return [...groups.values()].filter((group) => group.color);
 }
 
+/** Traduce el conjunto de series visibles a un restyle de Plotly. */
+export function visibilityFor(groups, shown) {
+  const updates = groups.flatMap((group) =>
+    group.indices.map((index) => ({ index, visible: shown.has(group.name) })),
+  );
+  return {
+    indices: updates.map((update) => update.index),
+    visible: updates.map((update) => update.visible),
+  };
+}
+
+/** Leyenda de solo lectura: una muestra de color por serie. */
+export function staticLegend(node, items) {
+  clear(node).append(...items.map((item) =>
+    el("span", { class: "key__item" }, [
+      el("span", { class: `key__swatch${item.area ? " key__swatch--area" : ""}`, style: `background:${item.color}` }),
+      el("span", { text: item.name }),
+    ]),
+  ));
+}
+
 /**
  * Selector de series. Con todo visible, el primer clic aisla la serie elegida;
  * a partir de ahi cada clic suma o quita, de modo que la seleccion se arma
@@ -28,9 +49,7 @@ export function seriesFilter(node, groups, onChange) {
   let shown = new Set(names);
 
   function apply() {
-    onChange(groups.flatMap((group) =>
-      group.indices.map((index) => ({ index, visible: shown.has(group.name) })),
-    ));
+    onChange(shown);
     render();
   }
 

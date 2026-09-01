@@ -74,6 +74,17 @@ img { max-width: 100%; height: auto; }
 }
 .skip-link:focus { left: .5rem; top: .5rem; }
 
+/* Entrada de vista: el contenido asciende al aparecer */
+.outlet.is-entering { animation: view-in .34s cubic-bezier(.22, .9, .3, 1) both; }
+@keyframes view-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* En el visor no se transforma el contenedor: el mapa se posiciona dentro */
+.outlet--app.is-entering { animation: view-fade .26s ease-out both; }
+@keyframes view-fade { from { opacity: 0; } to { opacity: 1; } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;

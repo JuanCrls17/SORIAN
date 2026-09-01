@@ -43,5 +43,13 @@ async function resolve(name) {
   const instance = await view(outlet);
   current = { name, ...instance };
   outlet.scrollTop = 0;
+  enter(outlet);
   window.dispatchEvent(new CustomEvent("route:changed", { detail: name }));
+}
+
+/** Reinicia la animacion de entrada aunque la clase ya estuviera puesta. */
+function enter(node) {
+  node.classList.remove("is-entering");
+  void node.offsetWidth;
+  node.classList.add("is-entering");
 }

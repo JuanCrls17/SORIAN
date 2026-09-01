@@ -17,7 +17,9 @@ export function buildNav() {
     }),
   );
 
-  const menu = el("nav", { class: "nav", id: "nav-main", "aria-label": "Navegación principal" }, links);
+  const marker = el("span", { class: "nav__marker", "aria-hidden": "true" });
+  const menu = el("nav", { class: "nav", id: "nav-main", "aria-label": "Navegación principal" }, [marker, ...links]);
+  let settle = null;
 
   const button = el("button", {
     class: "nav__burger", type: "button",
@@ -37,11 +39,38 @@ export function buildNav() {
     button.setAttribute("aria-label", "Abrir menú");
   }
 
+  /**
+   * La pastilla activa viaja de un enlace al siguiente y se estira en el
+   * trayecto, como una gota que se despega y vuelve a juntarse al llegar.
+   */
+  function moveMarker() {
+    const active = links.find((link) => link.classList.contains("is-active"));
+    if (!active || !active.offsetWidth) return marker.classList.remove("is-visible");
+
+    const target = active.offsetLeft;
+    const travel = Math.abs(target - (marker.at ?? target));
+    const stretch = marker.at === undefined ? 1 : Math.min(1.3, 1 + travel / 420);
+    marker.at = target;
+
+    marker.classList.add("is-visible");
+    marker.style.width = `${active.offsetWidth}px`;
+    marker.style.transform = `translateX(${target}px) scaleX(${stretch})`;
+
+    clearTimeout(settle);
+    settle = setTimeout(() => { marker.style.transform = `translateX(${target}px)`; }, 150);
+  }
+
   window.addEventListener("route:changed", (event) => {
     for (const link of links) {
       link.classList.toggle("is-active", link.dataset.route === event.detail);
       link.toggleAttribute("aria-current", link.dataset.route === event.detail);
     }
+    requestAnimationFrame(moveMarker);
+  });
+
+  window.addEventListener("resize", () => {
+    marker.at = undefined;
+    moveMarker();
   });
 
   return { menu, button };
@@ -74,66 +103,27 @@ export function buildHeader() {
   ]);
 }
 
-const FOOTER_LINKS = [
-  {
-    title: "Plataforma",
-    items: [
-      { label: "Pronóstico estacional", href: "#estacional" },
-      { label: "Monitoreo ENSO", href: "#enso" },
-      { label: "Descripción y modelos", href: "#descripcion" },
-      { label: "Consultas y sugerencias", href: "#consultas" },
-    ],
-  },
-  {
-    title: "Institucional",
-    items: [
-      { label: "SENAMHI", href: "https://www.senamhi.gob.pe", external: true },
-      { label: "Ministerio del Ambiente", href: "https://www.gob.pe/minam", external: true },
-      { label: "Avisos y pronósticos", href: "https://www.senamhi.gob.pe/?p=pronostico-meteorologico", external: true },
-    ],
-  },
+const INSTITUTIONS = [
+  { label: "SENAMHI", href: "https://www.senamhi.gob.pe" },
+  { label: "Ministerio del Ambiente", href: "https://www.gob.pe/minam" },
 ];
 
+/** Una sola franja: la navegacion ya esta arriba y repetirla no aporta. */
 export function buildFooter() {
-  const columns = FOOTER_LINKS.map((group) =>
-    el("nav", { class: "footer__col", "aria-label": group.title }, [
-      el("h2", { class: "footer__title", text: group.title }),
-      el("ul", { class: "footer__list" }, group.items.map((item) =>
-        el("li", {}, [
-          el("a", {
-            class: "footer__link",
-            href: item.href,
-            target: item.external ? "_blank" : null,
-            rel: item.external ? "noopener noreferrer" : null,
-            text: item.label,
-          }),
-        ]),
-      )),
-    ]),
-  );
-
   return el("footer", { class: "footer" }, [
-    el("div", { class: "footer__grid" }, [
-      el("div", { class: "footer__brand" }, [
-        el("p", { class: "footer__wordmark", text: "SORIAN" }),
-        el("p", { class: "footer__tagline", text: "Sistema Operacional de Resolución Integrada para la Predicción del Clima" }),
-        el("p", { class: "footer__org", text: "Subdirección de Cambio Climático y Modelamiento Atmosférico · SENAMHI" }),
-        el("div", { class: "footer__logos" }, [
-          el("img", { src: "assets/logo-minam.png", alt: "Ministerio del Ambiente", width: "728", height: "150", loading: "lazy" }),
-          el("img", { src: "assets/logo-senamhi.png", alt: "SENAMHI", width: "350", height: "160", loading: "lazy" }),
-        ]),
+    el("div", { class: "footer__bar" }, [
+      el("span", { class: "footer__brand" }, [
+        el("span", { class: "footer__wordmark", text: "SORIAN" }),
+        el("span", { class: "footer__org", text: "Subdirección de Cambio Climático y Modelamiento Atmosférico · SENAMHI" }),
       ]),
-      ...columns,
-    ]),
-
-    el("p", { class: "footer__note" }, [
-      el("strong", { text: "Nota. " }),
-      "Los resultados se basan en modelos numéricos y contienen incertidumbre. La información es de carácter referencial y no reemplaza una evaluación oficial. El SENAMHI no se responsabiliza por interpretaciones o usos inadecuados.",
-    ]),
-
-    el("div", { class: "footer__bottom" }, [
-      el("p", { text: `© ${new Date().getFullYear()} SENAMHI — Lima, Perú` }),
-      el("p", { class: "footer__version", text: "SORIAN v1.0" }),
+      el("p", { class: "footer__note", text: "Resultados de modelos numéricos, de carácter referencial." }),
+      el("nav", { class: "footer__links", "aria-label": "Enlaces institucionales" }, INSTITUTIONS.map((item) =>
+        el("a", {
+          class: "footer__link", href: item.href,
+          target: "_blank", rel: "noopener noreferrer", text: item.label,
+        }),
+      )),
+      el("span", { class: "footer__meta", text: `© ${new Date().getFullYear()} SENAMHI · v1.0` }),
     ]),
   ]);
 }
