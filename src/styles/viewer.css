@@ -183,7 +183,7 @@
 }
 
 /* Comparando, los dos panels bajan a su propia fila antes que recortarse */
-.controls__sides { display: flex; gap: .5rem; flex: 1 1 34rem; min-width: 0; }
+.controls__sides { display: flex; gap: .5rem; flex: 0 1 auto; min-width: 0; }
 .controls__actions { display: flex; gap: .5rem; flex: 0 0 auto; }
 
 /* Con un solo pronostico los mandos flotan sueltos: una barra continua
@@ -200,27 +200,29 @@
 .controls__single::-webkit-scrollbar { display: none; }
 
 /* Cada grupo es una tarjeta: el rotulo manda sobre sus opciones en vez de
-   competir con ellas en la misma fila. */
+   competir con ellas en la misma fila. Todo va apretado a proposito: los
+   mandos flotan sobre el mapa y cada pixel de alto tapa datos. */
 .controls__single .selector {
-  display: grid;
-  gap: .3125rem;
-  padding: .4375rem .625rem .5rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .25rem .5rem .25rem .625rem;
   background: rgb(255 255 255 / 93%);
   backdrop-filter: blur(10px);
   border: 1px solid rgb(255 255 255 / 70%);
   border-radius: var(--radius-sm);
   box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
 }
-.controls__single .selector__label { padding-left: .125rem; }
+.controls__single .selector__label { padding-left: .125rem; font-size: .5625rem; }
 .controls__single .chip { box-shadow: none; }
 
 /* Boton de comparacion */
 .compare {
   display: flex;
   align-items: center;
-  gap: .4375rem;
+  gap: .375rem;
   flex: 0 0 auto;
-  padding: .5rem .875rem;
+  padding: .4375rem .6875rem;
   border: 1px solid rgb(255 255 255 / 70%);
   border-radius: var(--radius-sm);
   background: rgb(255 255 255 / 93%);
@@ -228,7 +230,7 @@
   box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
   font: inherit;
   font-weight: 700;
-  font-size: .8125rem;
+  font-size: .75rem;
   color: var(--navy);
   cursor: pointer;
 }
@@ -247,28 +249,31 @@
   font-size: .625rem;
   font-weight: 800;
 }
-.compare__icon { width: 20px; height: 20px; flex: 0 0 auto; }
+.compare__icon { width: 17px; height: 17px; flex: 0 0 auto; }
 .compare__icon svg { width: 100%; height: 100%; display: block; }
 
 /* Un panel por lado, sobre la mitad del mapa que gobierna */
 .side-panel {
-  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  flex: 0 1 auto;
   min-width: 0;
-  padding: .375rem .625rem .5rem;
+  padding: .25rem .5rem .25rem .625rem;
   background: rgb(255 255 255 / 93%);
   backdrop-filter: blur(10px);
   border: 1px solid rgb(255 255 255 / 70%);
   border-radius: var(--radius-sm);
   box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
-  border-top: 3px solid var(--navy);
+  border-left: 3px solid var(--navy);
 }
-.side-panel--b { border-top-color: var(--blue); }
+.side-panel--b { border-left-color: var(--blue); }
 
 .side-panel__head {
   display: flex;
   align-items: center;
   gap: .375rem;
-  margin-bottom: .3125rem;
+  flex: 0 0 auto;
   font-size: .625rem;
   font-weight: 700;
   letter-spacing: .07em;
@@ -320,11 +325,28 @@
 /* el fondo lo pone la pastilla que se desliza por detras */
 .chip.is-active { background: transparent; border-color: transparent; color: #fff; }
 .chip__glyph { width: 17px; height: 17px; flex: 0 0 auto; }
+
+/* Sobre el mapa las capsulas se aprietan; en la hoja tactil no. */
+.viewer__overlay--top .chip { min-height: 30px; padding: .1875rem .5625rem; font-size: .75rem; gap: .25rem; }
+.viewer__overlay--top .chip__glyph { width: 15px; height: 15px; }
 .chip__glyph svg { width: 100%; height: 100%; display: block; }
 .chip__short { display: none; }
 
-/* Comparando hay dos juegos de controles: las variables quedan en su
-   pictograma, que ya las identifica, y asi caben sin recortarse. */
+/* Comparando hay dos juegos de controles. Las variables quedan en su
+   pictograma y los rotulos ceden su sitio a una linea divisoria: el panel
+   ya dice de que lado es y los modelos se reconocen por su nombre. */
+.side-panel .selector__label {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.side-panel__body > .selector + .selector {
+  border-left: 1px solid var(--line);
+  padding-left: .625rem;
+}
+
 .side-panel .chip__glyph { width: 19px; height: 19px; }
 .side-panel .chip:has(.chip__glyph) .chip__label,
 .side-panel .chip:has(.chip__glyph) .chip__short { display: none; }

@@ -240,9 +240,13 @@ export function createViewer(container, controls) {
     }
 
     const size = map.getSize();
+    // por debajo de los mandos: taparlos justo al consultar seria peor
+    const band = controls.getBoundingClientRect().bottom - mapNode.getBoundingClientRect().top;
+    const y = Math.max(point.y, band + 12);
+
     readout.classList.toggle("probe--flip-x", point.x > size.x - 190);
-    readout.classList.toggle("probe--flip-y", point.y > size.y - 150);
-    readout.style.transform = `translate(${point.x}px, ${point.y}px)`;
+    readout.classList.toggle("probe--flip-y", y > size.y - 150);
+    readout.style.transform = `translate(${point.x}px, ${y}px)`;
   }
 
   function hide() { readout.hidden = true; }
