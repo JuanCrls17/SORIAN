@@ -175,16 +175,32 @@
 .timeline__step:hover { background: var(--accent); }
 .timeline__step.is-active { background: var(--navy); color: #fff; }
 
-/* Leaflet: minimo tactil de 44px y controles alineados al diseno */
+/* Controles de zoom discretos: en tactil se usa el gesto de pellizco */
 .leaflet-touch .leaflet-bar a,
 .leaflet-bar a.leaflet-control-zoom-in,
 .leaflet-bar a.leaflet-control-zoom-out {
-  width: 40px; height: 40px; line-height: 40px;
-  font-size: 1.125rem;
+  width: 32px; height: 32px; line-height: 32px;
+  font-size: 1rem;
   color: var(--navy);
+  background: rgb(255 255 255 / 88%);
+  backdrop-filter: blur(6px);
 }
-.leaflet-touch .leaflet-bar { border: 0; box-shadow: 0 3px 14px rgb(10 28 72 / 16%); }
-.leaflet-control-attribution { font-size: .625rem; }
+.leaflet-touch .leaflet-bar {
+  border: 0;
+  box-shadow: 0 2px 8px rgb(10 28 72 / 14%);
+  opacity: .82;
+  transition: opacity .15s;
+}
+.leaflet-touch .leaflet-bar:hover { opacity: 1; }
+
+.leaflet-control-attribution {
+  font-size: .5625rem;
+  padding: 0 .3125rem;
+  background: rgb(255 255 255 / 62%);
+  color: var(--muted);
+}
+.leaflet-control-attribution a { color: var(--muted); }
+
 .leaflet-top.leaflet-right { margin-top: 3.25rem; }
 
 @media (max-width: 720px) {
@@ -213,3 +229,108 @@
 .chart__title { font-size: clamp(.9375rem, 2.2vw, 1.0625rem); margin: 0 0 .25rem; text-wrap: balance; }
 .chart__subtitle { font-size: .8125rem; color: var(--muted); margin: 0; }
 .chart__plot { min-height: clamp(360px, 58dvh, 620px); }
+
+/* ---------- Cortina de comparacion ---------- */
+.swipe { position: absolute; inset: 0; z-index: 450; pointer-events: none; }
+
+.swipe__handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  margin-left: -1.5px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgb(10 28 72 / 30%), 0 0 12px rgb(10 28 72 / 30%);
+  cursor: ew-resize;
+  pointer-events: auto;
+  touch-action: none;
+}
+.swipe__handle:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.swipe__grip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 10px rgb(10 28 72 / 32%);
+}
+.swipe__grip::before,
+.swipe__grip::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 0; height: 0;
+  border-block: 5px solid transparent;
+  transform: translateY(-50%);
+}
+.swipe__grip::before { left: 9px; border-right: 7px solid var(--navy); }
+.swipe__grip::after { right: 9px; border-left: 7px solid var(--navy); }
+.swipe__handle.is-dragging .swipe__grip { transform: translate(-50%, -50%) scale(1.1); }
+
+.swipe__label {
+  position: absolute;
+  top: 4.5rem;
+  padding: .25rem .5rem;
+  border-radius: 6px;
+  background: rgb(10 28 72 / 88%);
+  color: #fff;
+  font-size: .6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  max-width: 42%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.swipe__label--left { left: .5rem; }
+.swipe__label--right { right: 3.25rem; }
+
+@media (max-width: 720px) {
+  .swipe__label { top: 5.25rem; font-size: .625rem; max-width: 40%; }
+}
+.swipe__label:empty { display: none; }
+
+/* ---------- Conmutador de lado ---------- */
+.chip--toggle { display: inline-flex; align-items: center; gap: .375rem; }
+.chip__icon { font-size: .875rem; line-height: 1; }
+
+.sides { display: flex; gap: .25rem; flex: 0 0 auto; }
+.sides__btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .0625rem;
+  min-height: 36px;
+  padding: .1875rem .5rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  max-width: 11rem;
+}
+.sides__btn.is-active { border-color: var(--navy); box-shadow: inset 0 0 0 1px var(--navy); }
+.sides__tag {
+  font-size: .5625rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sides__btn.is-active .sides__tag { color: var(--navy); }
+.sides__name {
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 10rem;
+}
+
+/* Con dos escalas visibles, la leyenda se apila */
+.viewer__panel--legend { display: grid; gap: .5rem; }

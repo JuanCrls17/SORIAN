@@ -61,7 +61,10 @@ export function buildHeader() {
         el("span", { class: "brand__divider", "aria-hidden": "true" }),
         el("span", { class: "brand__name" }, [
           el("strong", { text: "SORIAN" }),
-          el("small", { text: "Predicción del clima" }),
+          el("small", { class: "brand__full" }, [
+            el("span", { class: "brand__full-long", text: "Sistema Operacional de Resolución Integrada para la Predicción del Clima" }),
+            el("span", { class: "brand__full-short", text: "Predicción del clima" }),
+          ]),
         ]),
       ]),
       button,

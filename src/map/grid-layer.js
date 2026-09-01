@@ -13,6 +13,7 @@ export function createGridLayer(L) {
       this._palette = palette;
       this._frame = null;
       this._opacity = 0.75;
+      this._clip = null;
     },
 
     onAdd(map) {
@@ -38,6 +39,12 @@ export function createGridLayer(L) {
 
     setOpacity(value) {
       this._opacity = value;
+      this._render();
+    },
+
+    /** Limita el dibujo a una banda horizontal, para comparar dos capas. */
+    setClip(from, to) {
+      this._clip = from === null ? null : { from, to };
       this._render();
     },
 
@@ -82,6 +89,13 @@ export function createGridLayer(L) {
       const ctx = this._ctx;
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       ctx.clearRect(0, 0, size.x, size.y);
+
+      ctx.save();
+      if (this._clip) {
+        ctx.beginPath();
+        ctx.rect(this._clip.from, 0, this._clip.to - this._clip.from, size.y);
+        ctx.clip();
+      }
       ctx.globalAlpha = this._opacity;
 
       const { lat0, lon0, dlat, dlon, ny, nx } = this._grid;
@@ -107,7 +121,7 @@ export function createGridLayer(L) {
           );
         }
       }
-      ctx.globalAlpha = 1;
+      ctx.restore();
     },
   });
 }

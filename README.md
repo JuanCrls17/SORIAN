@@ -11,8 +11,8 @@ Perú y Sudamérica.
 
 | Sección | Descripción |
 |---|---|
-| Estacional | Anomalías mensuales de precipitación y temperatura. 3 modelos × 3 variables × 6 meses. |
-| ENSO | Predicción multimodelo de la anomalía de TSM en las regiones Niño 1+2 y 3.4. |
+| Estacional | Anomalías mensuales de precipitación y temperatura. 3 modelos × 3 variables × 6 meses, con comparación de cortina entre dos pronósticos. |
+| ENSO | Predicción multimodelo de la anomalía de TSM en las regiones Niño 1+2 y 3.4, con selección libre de los 22 modelos. |
 | Subestacional | Predicciones semanales. En desarrollo. |
 | Descripción | Modelos integrados, configuración WRF y referencias científicas. |
 | Consultas | Formulario de sugerencias y observaciones. |
@@ -33,8 +33,11 @@ src/
   map/
     viewer.js           visor de mapa: capas, leyenda y línea de tiempo
     grid-layer.js       capa canvas para la grilla regular
+    swipe.js            cortina de comparación entre dos capas
     legend.js           escala de color discreta
-  charts/plotly.js      carga diferida y adaptación responsive
+  charts/
+    plotly.js           carga diferida y adaptación responsive
+    series.js           selección de series del gráfico
   ui/                   nav, selectores y helpers de DOM
   styles/               base, layout, componentes, visor
 data/
@@ -63,7 +66,19 @@ mensuales:
 
 Un byte por celda en lugar de un polígono con su estilo: **24,3 MB → 35 KB por
 visor.** El renderizado ocurre en un único canvas (`grid-layer.js`), no en 26.196
-nodos SVG.
+nodos SVG. Comparar dos pronósticos solo recorta el canvas de cada capa, así que
+la cortina se arrastra sin volver a dibujar la grilla.
+
+## Enlaces directos
+
+El hash admite parámetros, de modo que cualquier vista se puede compartir:
+
+```
+#estacional?modelo=ecmwf&variable=tpara
+#estacional?modelo=ecmwf&variable=tpara&modelo2=ncep&variable2=mx2t24a
+```
+
+Los dos últimos parámetros abren la comparación de cortina.
 
 ## Actualizar los datos
 

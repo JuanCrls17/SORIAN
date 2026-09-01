@@ -3,6 +3,7 @@ import { load } from "../data.js";
 import { el, clear, spinner, errorBox } from "../ui/dom.js";
 import { createGridLayer } from "./grid-layer.js";
 import { buildLegend, describeBin } from "./legend.js";
+import { createSwipe } from "./swipe.js";
 
 export function createViewer(container, controls) {
   const mapNode = el("div", { class: "viewer__map" });
@@ -29,18 +30,23 @@ export function createViewer(container, controls) {
     preferCanvas: true,
     zoomSnap: 0,
     zoomDelta: 0.5,
+    attributionControl: false,
   });
 
+  L.control.attribution({ position: "bottomright", prefix: false }).addTo(map);
   L.tileLayer(MAP.tiles, { attribution: MAP.attribution, maxZoom: MAP.maxZoom }).addTo(map);
   L.control.zoom({ position: "topright" }).addTo(map);
 
-  let grid = null;
-  let layer = null;
+  const sides = {
+    a: { grid: null, layer: null, request: 0 },
+    b: { grid: null, layer: null, request: 0 },
+  };
+
   let borders = null;
   let index = 0;
   let timer = null;
   let framed = false;
-  let request = 0;
+  let swipe = null;
 
   load(PATHS.borders)
     .then((geo) => {
@@ -51,7 +57,19 @@ export function createViewer(container, controls) {
     })
     .catch(() => { /* el mapa sigue siendo utilizable sin fronteras */ });
 
+  function applyClip() {
+    const width = map.getSize().x;
+    if (!swipe) {
+      sides.a.layer?.setClip(null);
+      return;
+    }
+    const cut = width * swipe.ratio();
+    sides.a.layer?.setClip(0, cut);
+    sides.b.layer?.setClip(cut, width);
+  }
+
   function renderTimeline() {
+    const months = sides.a.grid?.months ?? [];
     clear(timeline).append(
       el("button", {
         class: "timeline__play", type: "button",
@@ -59,7 +77,7 @@ export function createViewer(container, controls) {
         onClick: toggle,
       }, timer ? "❚❚" : "▶"),
       el("div", { class: "timeline__steps", role: "tablist" },
-        grid.months.map((month, i) =>
+        months.map((month, i) =>
           el("button", {
             class: `timeline__step${i === index ? " is-active" : ""}`,
             type: "button", role: "tab", "aria-selected": String(i === index),
@@ -72,7 +90,9 @@ export function createViewer(container, controls) {
 
   function show(next) {
     index = next;
-    layer.setFrame(grid.frames[index]);
+    for (const side of Object.values(sides)) {
+      if (side.grid && side.layer) side.layer.setFrame(side.grid.frames[index]);
+    }
     renderTimeline();
   }
 
@@ -81,7 +101,8 @@ export function createViewer(container, controls) {
       clearInterval(timer);
       timer = null;
     } else {
-      timer = setInterval(() => show((index + 1) % grid.months.length), ANIMATION_INTERVAL);
+      const total = sides.a.grid?.months.length ?? 1;
+      timer = setInterval(() => show((index + 1) % total), ANIMATION_INTERVAL);
     }
     renderTimeline();
   }
@@ -89,6 +110,19 @@ export function createViewer(container, controls) {
   function stop() {
     clearInterval(timer);
     timer = null;
+  }
+
+  function renderLegend() {
+    const { a, b } = sides;
+    if (!a.grid) return;
+
+    clear(legendNode);
+    if (b.grid && b.grid.title !== a.grid.title) {
+      legendNode.append(buildLegend(a.grid.scale, a.grid.title));
+      legendNode.append(buildLegend(b.grid.scale, b.grid.title));
+    } else {
+      legendNode.append(buildLegend(a.grid.scale, a.grid.title));
+    }
   }
 
   /**
@@ -104,52 +138,81 @@ export function createViewer(container, controls) {
   }
 
   function report(latlng) {
-    const bin = layer?.valueAt(latlng);
+    const { a, b } = sides;
+    if (!a.grid) return;
+
+    const point = map.latLngToContainerPoint(latlng);
+    const side = swipe && point.x > map.getSize().x * swipe.ratio() && b.grid ? b : a;
+    const bin = side.layer?.valueAt(latlng);
+
     readout.textContent = bin == null
       ? ""
-      : `${describeBin(grid.scale, bin)} · ${latlng.lat.toFixed(1)}°, ${latlng.lng.toFixed(1)}°`;
+      : `${describeBin(side.grid.scale, bin)} · ${latlng.lat.toFixed(1)}°, ${latlng.lng.toFixed(1)}°`;
   }
 
   map.on("mousemove", (event) => report(event.latlng));
   map.on("click", (event) => report(event.latlng));
   map.on("mouseout", () => { readout.textContent = ""; });
+  map.on("move zoom resize", applyClip);
 
-  async function open(model, variable) {
+  async function open(key, model, variable) {
+    const side = sides[key];
     stop();
-    const ticket = ++request;
-    clear(legendNode).append(spinner("Cargando…"));
+    const ticket = ++side.request;
+    if (key === "a") clear(legendNode).append(spinner("Cargando…"));
 
     let data;
     try {
       data = await load(PATHS.grid(model, variable));
     } catch (error) {
-      if (ticket !== request) return;
-      clear(legendNode).append(errorBox("No se pudo cargar.", () => open(model, variable)));
+      if (ticket !== side.request) return;
+      clear(legendNode).append(errorBox("No se pudo cargar.", () => open(key, model, variable)));
       return;
     }
 
-    if (ticket !== request) return;
-    grid = data;
+    if (ticket !== side.request) return;
+    side.grid = data;
 
-    if (layer) map.removeLayer(layer);
-    layer = new GridLayer(grid.grid, grid.scale.map((bin) => bin.color));
-    layer.addTo(map);
+    if (side.layer) map.removeLayer(side.layer);
+    side.layer = new GridLayer(data.grid, data.scale.map((bin) => bin.color));
+    side.layer.addTo(map);
     borders?.bringToFront();
 
     if (!framed) {
-      frame(grid.grid);
+      frame(data.grid);
       framed = true;
     }
 
-    index = 0;
-    show(0);
-    clear(legendNode).append(buildLegend(grid.scale, grid.title));
+    if (index >= data.months.length) index = 0;
+    side.layer.setFrame(data.frames[index]);
+    applyClip();
+    renderTimeline();
+    renderLegend();
+  }
+
+  function closeSide() {
+    sides.b.request += 1;
+    if (sides.b.layer) map.removeLayer(sides.b.layer);
+    sides.b = { grid: null, layer: null, request: sides.b.request };
+    swipe?.remove();
+    swipe = null;
+    applyClip();
+    renderLegend();
+  }
+
+  function compare(enabled) {
+    if (!enabled) return closeSide();
+    if (swipe) return;
+    swipe = createSwipe(mapNode, applyClip);
+    applyClip();
   }
 
   return {
     open,
+    compare,
     stop,
-    invalidate: () => map.invalidateSize(),
+    labels: (left, right) => swipe?.setLabels(left, right),
+    invalidate: () => { map.invalidateSize(); applyClip(); },
     destroy: () => { stop(); map.remove(); },
   };
 }
