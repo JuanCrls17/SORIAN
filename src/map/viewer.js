@@ -7,13 +7,16 @@ import { buildLegend, describeBin, formatLatLng } from "./legend.js";
 import { createSwipe } from "./swipe.js";
 import { renderAnalysis } from "./analysis.js";
 
-const COARSE = window.matchMedia("(pointer: coarse)");
-
 export function createViewer(container, controls) {
   const mapNode = el("div", { class: "viewer__map" });
   const legendNode = el("div", { class: "viewer__panel viewer__panel--legend" });
   const timeline = el("div", { class: "viewer__panel viewer__panel--time" });
-  const readout = el("div", { class: "probe", role: "status", "aria-live": "polite", hidden: true });
+  // El punto consultado se lee en una franja bajo el mapa: dentro se
+  // encimaba con la linea de tiempo y con los propios mandos.
+  const readout = el("p", { class: "readout", role: "status", "aria-live": "polite" }, [
+    el("span", { class: "readout__hint", text: "Apunta el mapa para consultar un punto" }),
+  ]);
+  const dot = el("span", { class: "probe-dot", "aria-hidden": "true", hidden: true });
 
   const analysis = el("aside", {
     class: "analysis", hidden: true, "aria-label": "Distribución del dominio",
@@ -23,10 +26,10 @@ export function createViewer(container, controls) {
     mapNode,
     el("div", { class: "viewer__overlay viewer__overlay--top" }, [controls]),
     el("div", { class: "viewer__overlay viewer__overlay--bottom" }, [legendNode, timeline]),
-    readout,
+    dot,
   ]);
 
-  container.append(stage, analysis);
+  container.append(stage, analysis, readout);
 
   const L = window.L;
   const GridLayer = createGridLayer(L);
@@ -224,32 +227,17 @@ export function createViewer(container, controls) {
 
     const units = side.grid.title.match(/\(([^)]+)\)/)?.[1] ?? "";
     clear(readout).append(
-      el("span", { class: "probe__head", text: `${side.label} · ${side.grid.months[index]}` }),
-      el("strong", { class: "probe__value", text: `${describeBin(side.grid.scale, bin)} ${units}` }),
-      el("span", { class: "probe__place", text: formatLatLng(event.latlng) }),
+      el("span", { class: "readout__head", text: `${side.label} · ${side.grid.months[index]}` }),
+      el("strong", { class: "readout__value", text: `${describeBin(side.grid.scale, bin)} ${units}` }),
+      el("span", { class: "readout__place", text: formatLatLng(event.latlng) }),
     );
 
-    readout.hidden = false;
-
-    // con el dedo encima, una sonda que persigue al puntero queda tapada:
-    // en tactil se ancla al borde superior del mapa
-    if (COARSE.matches) {
-      readout.classList.add("probe--docked");
-      readout.style.transform = "";
-      return;
-    }
-
-    const size = map.getSize();
-    // por debajo de los mandos: taparlos justo al consultar seria peor
-    const band = controls.getBoundingClientRect().bottom - mapNode.getBoundingClientRect().top;
-    const y = Math.max(point.y, band + 12);
-
-    readout.classList.toggle("probe--flip-x", point.x > size.x - 190);
-    readout.classList.toggle("probe--flip-y", y > size.y - 150);
-    readout.style.transform = `translate(${point.x}px, ${y}px)`;
+    dot.hidden = false;
+    dot.style.transform = `translate(${point.x}px, ${point.y}px)`;
   }
 
-  function hide() { readout.hidden = true; }
+  // la ultima lectura se queda en la franja; solo desaparece la marca
+  function hide() { dot.hidden = true; }
 
   map.on("mousemove", report);
   map.on("click", report);

@@ -8,6 +8,7 @@
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--accent);
@@ -18,11 +19,12 @@
 .viewer__stage { position: relative; grid-area: 1 / 1; min-width: 0; min-height: 0; overflow: hidden; }
 
 .viewer--summary { grid-template-columns: minmax(0, 1fr) 22rem; }
+.readout { grid-column: 1 / -1; }
 /* Fila fija para el reparto: con `auto` el contenido se comeria el mapa */
 @media (max-width: 899px) {
   .viewer--summary {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) 46%;
+    grid-template-rows: minmax(0, 1fr) 46% auto;
   }
 }
 .viewer__map { position: absolute; inset: 0; z-index: 0; }
@@ -123,54 +125,71 @@
 }
 
 .viewer__panel {
-  background: rgb(255 255 255 / 92%);
+  background: rgb(255 255 255 / 90%);
   backdrop-filter: blur(10px);
-  border: 1px solid rgb(255 255 255 / 70%);
+  border: 1px solid rgb(255 255 255 / 65%);
   border-radius: var(--radius-sm);
-  box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
+  box-shadow: 0 2px 10px rgb(10 28 72 / 12%);
 }
 
-/* Sonda: sigue al puntero y resume el punto consultado.
-   `display: grid` anularia el atributo hidden, de ahi la regla explicita. */
-.probe[hidden] { display: none; }
-
-.probe {
+/* Marca del punto consultado: solo senala donde, el valor se lee abajo */
+.probe-dot {
   position: absolute;
   z-index: 600;
   top: 0;
   left: 0;
-  display: grid;
-  gap: .0625rem;
-  margin: .75rem 0 0 .75rem;
-  padding: .4375rem .625rem;
-  min-width: 9rem;
-  border-radius: var(--radius-sm);
-  background: rgb(10 28 72 / 93%);
-  backdrop-filter: blur(6px);
-  color: #fff;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px var(--navy), 0 1px 6px rgb(10 28 72 / 45%);
   pointer-events: none;
-  box-shadow: 0 4px 16px rgb(10 28 72 / 28%);
 }
-.probe--flip-x { margin-left: -.75rem; translate: -100% 0; }
-.probe--flip-y { margin-top: -.75rem; translate: 0 -100%; }
-.probe--flip-x.probe--flip-y { translate: -100% -100%; }
-.probe__head {
+
+/* Franja de lectura, bajo el mapa y nunca encima de el */
+.readout {
+  display: flex;
+  align-items: baseline;
+  gap: .5rem .75rem;
+  min-height: 30px;
+  margin: 0;
+  padding: .25rem .75rem;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  font-size: .75rem;
+  color: var(--muted);
+}
+.readout__head {
   font-size: .625rem;
   font-weight: 700;
-  letter-spacing: .05em;
+  letter-spacing: .06em;
   text-transform: uppercase;
-  color: #9dc4e8;
+  color: var(--navy);
 }
-.probe__value { font-size: .9375rem; font-variant-numeric: tabular-nums; }
-.probe__place { font-size: .6875rem; color: #c3d3e6; font-variant-numeric: tabular-nums; }
+.readout__value {
+  font-size: .875rem;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.readout__place { margin-left: auto; font-variant-numeric: tabular-nums; }
+.readout__hint { font-style: italic; opacity: .8; }
 
-/* Anclada al borde superior: en tactil el dedo tapa el punto consultado */
-.probe--docked {
-  top: .5rem;
-  left: .5rem;
-  right: .5rem;
-  margin: 0;
-  transform: none !important;
+/* En pantalla estrecha la lectura cabe en una linea: el rotulo cede
+   caracteres antes que partir el valor o las coordenadas. */
+@media (max-width: 480px) {
+  .readout { gap: .5rem; padding: .25rem .5rem; font-size: .6875rem; }
+  .readout__head {
+    min-width: 0;
+    flex: 0 1 auto;
+    font-size: .5625rem;
+    letter-spacing: .04em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .readout__value { font-size: .75rem; }
+  .readout__head, .readout__value, .readout__place { white-space: nowrap; }
+  .readout__value, .readout__place { flex: 0 0 auto; }
 }
 
 /* ---------- Controles ---------- */
@@ -220,17 +239,17 @@
 .compare {
   display: flex;
   align-items: center;
-  gap: .375rem;
+  gap: .3125rem;
   flex: 0 0 auto;
-  padding: .4375rem .6875rem;
+  padding: .3125rem .5625rem;
   border: 1px solid rgb(255 255 255 / 70%);
   border-radius: var(--radius-sm);
-  background: rgb(255 255 255 / 93%);
+  background: rgb(255 255 255 / 90%);
   backdrop-filter: blur(10px);
-  box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
+  box-shadow: 0 2px 8px rgb(10 28 72 / 12%);
   font: inherit;
-  font-weight: 700;
-  font-size: .75rem;
+  font-weight: 600;
+  font-size: .6875rem;
   color: var(--navy);
   cursor: pointer;
 }
@@ -240,16 +259,16 @@
 .compare--detail.is-active { background: var(--blue); border-color: var(--blue); }
 .compare__warn {
   position: absolute;
-  top: -5px; right: -5px;
+  top: -4px; right: -4px;
   display: grid; place-items: center;
-  width: 16px; height: 16px;
+  width: 14px; height: 14px;
   border-radius: 50%;
   background: #d98324;
   color: #fff;
-  font-size: .625rem;
+  font-size: .5625rem;
   font-weight: 800;
 }
-.compare__icon { width: 17px; height: 17px; flex: 0 0 auto; }
+.compare__icon { width: 15px; height: 15px; flex: 0 0 auto; }
 .compare__icon svg { width: 100%; height: 100%; display: block; }
 
 /* Un panel por lado, sobre la mitad del mapa que gobierna */
@@ -353,16 +372,16 @@
 .side-panel .chip:has(.chip__glyph) { padding: .25rem .5rem; }
 
 /* ---------- Leyenda ---------- */
-.viewer__panel--legend { padding: .5rem .625rem; max-width: 20rem; }
+.viewer__panel--legend { padding: .4375rem .5625rem; max-width: 17rem; }
 .legend { margin: 0; }
 .legend__title {
-  font-size: .6875rem;
+  font-size: .625rem;
   font-weight: 700;
   color: var(--navy);
-  margin-bottom: .375rem;
+  margin-bottom: .3125rem;
   line-height: 1.3;
 }
-.legend__bar { display: flex; height: 11px; border-radius: 3px; overflow: hidden; }
+.legend__bar { display: flex; height: 9px; border-radius: 3px; overflow: hidden; }
 .legend__swatch { flex: 1; }
 .legend__ticks {
   display: flex;
@@ -377,14 +396,14 @@
 .viewer__panel--time {
   display: flex;
   align-items: center;
-  gap: .25rem;
-  padding: .3125rem;
+  gap: .1875rem;
+  padding: .25rem;
   max-width: 100%;
   min-width: 0;
 }
 .timeline__play {
   flex: 0 0 auto;
-  width: 36px; height: 36px;
+  width: 30px; height: 30px;
   display: grid; place-items: center;
   border: 0;
   border-radius: 6px;
@@ -404,8 +423,8 @@
 .timeline__steps::-webkit-scrollbar { display: none; }
 .timeline__step {
   flex: 0 0 auto;
-  min-height: 36px;
-  padding: .3125rem .625rem;
+  min-height: 30px;
+  padding: .25rem .5rem;
   border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;
@@ -424,8 +443,8 @@
 .map-btn {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border: 1px solid rgb(255 255 255 / 70%);
   border-radius: var(--radius-sm);
@@ -437,7 +456,7 @@
   transition: background .12s, color .12s;
 }
 .map-btn:hover { background: var(--accent); color: var(--blue-600); }
-.map-btn svg { width: 18px; height: 18px; display: block; }
+.map-btn svg { width: 15px; height: 15px; display: block; }
 
 .outlet--app:fullscreen { background: var(--canvas); padding: .5rem; }
 
@@ -454,10 +473,10 @@
 .leaflet-touch .leaflet-bar a,
 .leaflet-bar a.leaflet-control-zoom-in,
 .leaflet-bar a.leaflet-control-zoom-out {
-  width: 34px;
-  height: 34px;
-  line-height: 33px;
-  font-size: 1.0625rem;
+  width: 28px;
+  height: 28px;
+  line-height: 27px;
+  font-size: .9375rem;
   font-weight: 600;
   color: var(--navy);
   background: transparent;
@@ -498,8 +517,6 @@
   .timeline__play { width: 34px; height: 34px; }
 
   .leaflet-top.leaflet-right { margin-top: .5rem; }
-  .probe { min-width: 8.5rem; padding: .375rem .5625rem; }
-  .probe__value { font-size: .875rem; }
 }
 
 
@@ -758,44 +775,40 @@
 .sheet__done { width: 100%; }
 
 /* ============ Disposicion amplia ============
-   Con pantalla grande los mandos crecen: hay sitio de sobra y la lectura
-   gana mas de lo que costaria apretarlos. */
+   Con pantalla grande los mandos ganan algo de aire, pero siguen flotando
+   sobre los datos: crecer de mas seria tapar mas mapa. */
 @media (min-width: 1200px) {
-  .viewer__overlay { padding: .75rem; gap: .75rem; }
+  .viewer__overlay { padding: .625rem; gap: .625rem; }
 
-  .compare { padding: .625rem 1.125rem; font-size: .9375rem; }
-  .compare__icon { width: 22px; height: 22px; }
+  .compare { padding: .375rem .625rem; font-size: .75rem; }
+  .compare__icon { width: 16px; height: 16px; }
 
-  .controls__single { padding: .5rem .875rem; gap: .75rem; }
-  .selector { gap: .5rem; }
-  .selector__label { font-size: .6875rem; }
-  .selector__options { gap: .375rem; }
+  .controls__single { gap: .625rem; }
+  .selector__label { font-size: .625rem; }
+  .selector__options { gap: .3125rem; }
 
-  .chip { min-height: 42px; padding: .4375rem .9375rem; font-size: .9375rem; }
-  .chip__glyph { width: 20px; height: 20px; }
-  .side-panel .chip__glyph { width: 22px; height: 22px; }
+  .viewer__overlay--top .chip { min-height: 32px; padding: .25rem .6875rem; font-size: .8125rem; }
+  .viewer__overlay--top .chip__glyph { width: 17px; height: 17px; }
+  .side-panel .chip__glyph { width: 19px; height: 19px; }
 
-  .side-panel { padding: .5rem .875rem .625rem; }
-  .side-panel__head { font-size: .6875rem; margin-bottom: .4375rem; }
-  .side-panel__icon { width: 17px; height: 17px; }
+  .side-panel { padding: .3125rem .5rem .3125rem .625rem; }
+  .side-panel__head { font-size: .625rem; }
+  .side-panel__icon { width: 16px; height: 16px; }
 
-  .viewer__panel--legend { padding: .75rem .875rem; max-width: 24rem; }
-  .legend__title { font-size: .8125rem; margin-bottom: .5rem; }
-  .legend__bar { height: 14px; }
-  .legend__ticks { font-size: .6875rem; margin-top: .25rem; }
+  .viewer__panel--legend { padding: .5rem .625rem; max-width: 20rem; }
+  .legend__title { font-size: .6875rem; margin-bottom: .375rem; }
+  .legend__bar { height: 10px; }
+  .legend__ticks { font-size: .625rem; }
 
-  .viewer__panel--time { padding: .4375rem; gap: .375rem; }
-  .timeline__play { width: 42px; height: 42px; font-size: .875rem; }
-  .timeline__step { min-height: 42px; padding: .4375rem .875rem; font-size: .875rem; }
-
-  .probe { min-width: 11rem; padding: .5625rem .75rem; }
-  .probe__head { font-size: .6875rem; }
-  .probe__value { font-size: 1.0625rem; }
-  .probe__place { font-size: .75rem; }
+  .viewer__panel--time { padding: .25rem; gap: .1875rem; }
+  .timeline__play { width: 32px; height: 32px; font-size: .8125rem; }
+  .timeline__step { min-height: 32px; padding: .25rem .625rem; font-size: .8125rem; }
 
   .leaflet-touch .leaflet-bar a,
   .leaflet-bar a.leaflet-control-zoom-in,
   .leaflet-bar a.leaflet-control-zoom-out {
-    width: 40px; height: 40px; line-height: 39px; font-size: 1.1875rem;
+    width: 30px; height: 30px; line-height: 29px; font-size: 1rem;
   }
+  .map-btn { width: 30px; height: 30px; }
 }
+
