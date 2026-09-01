@@ -54,8 +54,8 @@
   display: block;
   color: #fff;
   font-size: clamp(2.75rem, 11vw, 4.75rem);
-  font-weight: 300;
-  letter-spacing: .18em;
+  font-weight: 600;
+  letter-spacing: .15em;
   line-height: 1;
   text-indent: .18em;
 }

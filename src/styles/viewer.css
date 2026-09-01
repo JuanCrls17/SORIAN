@@ -6,6 +6,8 @@
   position: relative;
   flex: 1;
   min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--accent);
@@ -13,7 +15,74 @@
   isolation: isolate;
 }
 
+.viewer__stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
 .viewer__map { position: absolute; inset: 0; z-index: 0; }
+
+/* ---------- Resumen del dominio ---------- */
+.analysis { display: none; }
+
+/* Con mucho ancho el mapa no puede llenarlo sin recortar buena parte del
+   dominio: ese margen se dedica al respaldo cuantitativo de la lectura. */
+@media (min-width: 1400px) {
+  .viewer { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; }
+
+  .analysis {
+    display: block;
+    grid-area: 1 / 2;
+    overflow-y: auto;
+    padding: 1rem 1.125rem;
+    background: var(--surface);
+    border-left: 1px solid var(--line);
+    font-size: .8125rem;
+  }
+  .analysis:empty { display: none; }
+}
+
+.analysis__head { margin-bottom: .875rem; }
+.analysis__title { font-size: .9375rem; margin: 0 0 .125rem; }
+.analysis__sub { font-size: .75rem; color: var(--muted); margin: 0; }
+
+.analysis__split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .5rem;
+  margin-bottom: 1rem;
+}
+.analysis__half {
+  display: grid;
+  gap: .0625rem;
+  padding: .625rem .75rem;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  border-left: 3px solid var(--line);
+}
+.analysis__half--neg { border-left-color: #9d6115; }
+.analysis__half--pos { border-left-color: #12766e; }
+.analysis__pct { font-size: 1.375rem; font-weight: 700; color: var(--navy); line-height: 1.1; }
+.analysis__tag { font-size: .6875rem; color: var(--muted); }
+
+.analysis__bars { display: grid; gap: .1875rem; margin-bottom: .875rem; }
+.analysis__row {
+  display: grid;
+  grid-template-columns: 12px 5.5rem 1fr 2.75rem;
+  align-items: center;
+  gap: .4375rem;
+  padding: .125rem .25rem;
+  border-radius: 4px;
+}
+.analysis__row.is-peak { background: var(--accent); }
+.analysis__swatch { width: 12px; height: 12px; border-radius: 2px; }
+.analysis__range { font-size: .6875rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.analysis__track { height: 7px; background: var(--accent); border-radius: 4px; overflow: hidden; }
+.analysis__row.is-peak .analysis__track { background: #dfe6ee; }
+.analysis__fill { display: block; height: 100%; background: var(--navy); border-radius: 4px; }
+.analysis__value {
+  font-size: .6875rem;
+  text-align: right;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.analysis__note { font-size: .6875rem; color: var(--muted); line-height: 1.5; margin: 0; }
 .grid-layer { position: absolute; top: 0; left: 0; pointer-events: none; }
 
 .viewer__overlay {
@@ -43,7 +112,10 @@
   box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
 }
 
-/* Sonda: sigue al puntero y resume el punto consultado */
+/* Sonda: sigue al puntero y resume el punto consultado.
+   `display: grid` anularia el atributo hidden, de ahi la regla explicita. */
+.probe[hidden] { display: none; }
+
 .probe {
   position: absolute;
   z-index: 600;
@@ -61,7 +133,9 @@
   pointer-events: none;
   box-shadow: 0 4px 16px rgb(10 28 72 / 28%);
 }
-.probe--flip { margin-left: 0; translate: -100% 0; }
+.probe--flip-x { margin-left: -.75rem; translate: -100% 0; }
+.probe--flip-y { margin-top: -.75rem; translate: 0 -100%; }
+.probe--flip-x.probe--flip-y { translate: -100% -100%; }
 .probe__head {
   font-size: .625rem;
   font-weight: 700;
@@ -83,6 +157,7 @@
 
 .controls__single,
 .controls__sides { display: flex; gap: .5rem; flex: 1; min-width: 0; }
+.controls__actions { display: flex; gap: .5rem; flex: 0 0 auto; }
 
 .controls__single {
   align-items: center;
@@ -280,23 +355,37 @@
 .timeline__step:hover { background: var(--accent); }
 .timeline__step.is-active { background: var(--navy); color: #fff; }
 
-/* Controles de zoom discretos: en tactil se usa el gesto de pellizco */
+/* Controles de mapa: un unico bloque con el mismo acabado que los paneles */
+.leaflet-touch .leaflet-bar,
+.leaflet-bar {
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
+  overflow: hidden;
+  background: rgb(255 255 255 / 93%);
+  backdrop-filter: blur(10px);
+}
+
 .leaflet-touch .leaflet-bar a,
 .leaflet-bar a.leaflet-control-zoom-in,
 .leaflet-bar a.leaflet-control-zoom-out {
-  width: 32px; height: 32px; line-height: 32px;
-  font-size: 1rem;
+  width: 34px;
+  height: 34px;
+  line-height: 33px;
+  font-size: 1.0625rem;
+  font-weight: 600;
   color: var(--navy);
-  background: rgb(255 255 255 / 88%);
-  backdrop-filter: blur(6px);
-}
-.leaflet-touch .leaflet-bar {
+  background: transparent;
   border: 0;
-  box-shadow: 0 2px 8px rgb(10 28 72 / 14%);
-  opacity: .82;
-  transition: opacity .15s;
+  transition: background .12s, color .12s;
 }
-.leaflet-touch .leaflet-bar:hover { opacity: 1; }
+.leaflet-touch .leaflet-bar a:first-child,
+.leaflet-touch .leaflet-bar a:last-child { border-radius: 0; }
+.leaflet-bar a + a { border-top: 1px solid var(--line); }
+
+.leaflet-bar a:hover { background: var(--accent); color: var(--blue-600); }
+.leaflet-bar a:active { background: var(--blue); color: #fff; }
+.leaflet-bar a.leaflet-disabled { color: #b6c0cc; background: transparent; }
 
 .leaflet-control-attribution {
   font-size: .5625rem;
@@ -308,22 +397,26 @@
 
 .leaflet-top.leaflet-right { margin-top: 3.25rem; }
 
+/* ============ Disposicion compacta ============
+   El mapa queda despejado; los mandos bajan a una barra al alcance del
+   pulgar y las opciones se eligen en una hoja inferior. */
 @media (max-width: 860px) {
-  .viewer__overlay--top { flex-direction: column; }
-  .controls { flex-direction: column; }
-  .controls__sides { flex-direction: column; }
-  .compare { align-self: flex-start; }
+  .viewer__overlay--top { display: none; }
+  .viewer__overlay { padding: .4375rem; gap: .4375rem; }
   .viewer__overlay--bottom { flex-direction: column; align-items: stretch; }
-  .viewer__panel--legend { max-width: none; }
-  .selector__label { display: none; }
-  .chip { font-size: .75rem; padding: .25rem .5rem; }
-  .leaflet-top.leaflet-right { margin-top: 3.5rem; }
+
+  .viewer__panel--legend { max-width: none; padding: .4375rem .5rem; }
+  .legend__title { font-size: .625rem; }
+
+  .viewer__panel--time { padding: .25rem; }
+  .timeline__step { font-size: .75rem; padding: .3125rem .5625rem; min-height: 34px; }
+  .timeline__play { width: 34px; height: 34px; }
+
+  .leaflet-top.leaflet-right { margin-top: .5rem; }
+  .probe { min-width: 8.5rem; padding: .375rem .5625rem; }
+  .probe__value { font-size: .875rem; }
 }
 
-@media (max-width: 380px) {
-  .chip__label { display: none; }
-  .chip__short { display: inline; }
-}
 
 /* ---------- Graficos ENSO ---------- */
 .chart {
@@ -425,3 +518,155 @@
 
 /* Las etiquetas del mapa base van sobre la grilla, sin capturar el puntero */
 .leaflet-shadow-pane { z-index: 500; pointer-events: none; }
+
+/* ---------- Barra de mandos (compacta) ---------- */
+.dock { display: none; }
+
+@media (max-width: 860px) {
+  .dock {
+    display: grid;
+    gap: .375rem;
+    flex: 0 0 auto;
+    padding-top: .4375rem;
+  }
+  .dock__row { display: flex; gap: .375rem; }
+  .dock__row--actions .compare { flex: 1 1 0; justify-content: center; }
+
+  .dock__pick {
+    flex: 1 1 0;
+    min-width: 0;
+    display: grid;
+    gap: .0625rem;
+    padding: .5rem .75rem;
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--navy);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    font: inherit;
+    cursor: pointer;
+  }
+  .dock__pick--b { border-top-color: var(--blue); }
+  .dock__pick:active { background: var(--accent); }
+
+  .dock__label,
+  .dock__side {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    font-size: .5625rem;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .dock__pick--b .dock__side { color: var(--blue-600); }
+  .dock__side-icon { width: 13px; height: 13px; }
+  .dock__side-icon svg { width: 100%; height: 100%; display: block; }
+
+  .dock__value {
+    font-size: .875rem;
+    font-weight: 700;
+    color: var(--navy);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* ---------- Hoja de opciones ---------- */
+.sheet { position: fixed; inset: 0; z-index: 1000; }
+.sheet[hidden] { display: none; }
+
+.sheet__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(10 28 72 / 45%);
+  opacity: 0;
+  transition: opacity .18s;
+}
+.sheet.is-open .sheet__scrim { opacity: 1; }
+
+.sheet__panel {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: grid;
+  gap: 1rem;
+  padding: .5rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-radius: 1rem 1rem 0 0;
+  box-shadow: 0 -8px 32px rgb(10 28 72 / 24%);
+  translate: 0 100%;
+  transition: translate .18s ease-out;
+  max-height: 80dvh;
+  overflow-y: auto;
+}
+.sheet.is-open .sheet__panel { translate: 0 0; }
+
+.sheet__grip {
+  justify-self: center;
+  width: 42px; height: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: var(--line);
+  cursor: pointer;
+}
+.sheet__title { font-size: 1rem; margin: 0; }
+
+.sheet__body { display: grid; gap: 1.25rem; }
+.sheet__body .selector { display: grid; gap: .5rem; align-items: stretch; }
+.sheet__body .selector__label { display: block; font-size: .6875rem; }
+.sheet__body .selector__options { display: grid; grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr)); gap: .5rem; }
+.sheet__body .chip {
+  justify-content: center;
+  min-height: 48px;
+  border-radius: var(--radius-sm);
+  font-size: .9375rem;
+}
+.sheet__body .chip__glyph { width: 20px; height: 20px; }
+.sheet__done { width: 100%; }
+
+/* ============ Disposicion amplia ============
+   Con pantalla grande los mandos crecen: hay sitio de sobra y la lectura
+   gana mas de lo que costaria apretarlos. */
+@media (min-width: 1200px) {
+  .viewer__overlay { padding: .75rem; gap: .75rem; }
+
+  .compare { padding: .625rem 1.125rem; font-size: .9375rem; }
+  .compare__icon { width: 22px; height: 22px; }
+
+  .controls__single { padding: .5rem .875rem; gap: .75rem; }
+  .selector { gap: .5rem; }
+  .selector__label { font-size: .6875rem; }
+  .selector__options { gap: .375rem; }
+
+  .chip { min-height: 42px; padding: .4375rem .9375rem; font-size: .9375rem; }
+  .chip__glyph { width: 20px; height: 20px; }
+  .side-panel .chip__glyph { width: 22px; height: 22px; }
+
+  .side-panel { padding: .5rem .875rem .625rem; }
+  .side-panel__head { font-size: .6875rem; margin-bottom: .4375rem; }
+  .side-panel__icon { width: 17px; height: 17px; }
+
+  .viewer__panel--legend { padding: .75rem .875rem; max-width: 24rem; }
+  .legend__title { font-size: .8125rem; margin-bottom: .5rem; }
+  .legend__bar { height: 14px; }
+  .legend__ticks { font-size: .6875rem; margin-top: .25rem; }
+
+  .viewer__panel--time { padding: .4375rem; gap: .375rem; }
+  .timeline__play { width: 42px; height: 42px; font-size: .875rem; }
+  .timeline__step { min-height: 42px; padding: .4375rem .875rem; font-size: .875rem; }
+
+  .probe { min-width: 11rem; padding: .5625rem .75rem; }
+  .probe__head { font-size: .6875rem; }
+  .probe__value { font-size: 1.0625rem; }
+  .probe__place { font-size: .75rem; }
+
+  .leaflet-touch .leaflet-bar a,
+  .leaflet-bar a.leaflet-control-zoom-in,
+  .leaflet-bar a.leaflet-control-zoom-out {
+    width: 40px; height: 40px; line-height: 39px; font-size: 1.1875rem;
+  }
+}

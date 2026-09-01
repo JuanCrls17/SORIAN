@@ -38,7 +38,8 @@ src/
   charts/
     plotly.js           carga diferida y adaptación responsive
     series.js           selección de series del gráfico
-  ui/                   nav, selectores, pictogramas y helpers de DOM
+    analysis.js         reparto del dominio por clase de anomalía
+  ui/                   nav, selectores, pictogramas, hoja y helpers de DOM
   styles/               base, layout, componentes, visor
 data/
   grids/                9 grillas de pronóstico (~35 KB c/u)
@@ -68,6 +69,18 @@ Un byte por celda en lugar de un polígono con su estilo: **24,3 MB → 35 KB po
 visor.** El renderizado ocurre en un único canvas (`grid-layer.js`), no en 26.196
 nodos SVG. Comparar dos pronósticos solo recorta el canvas de cada capa, así que
 la cortina se arrastra sin volver a dibujar la grilla.
+
+## Dos disposiciones
+
+La interfaz no se adapta: se resuelve dos veces.
+
+- **Amplia** (≥ 860 px) — los mandos flotan sobre el mapa y crecen a partir de
+  1200 px. Desde 1400 px aparece un panel lateral con el reparto del dominio
+  por clase de anomalía: qué porcentaje cae bajo y sobre lo normal, y cuál es
+  el rango dominante. Ese margen no se puede llenar con mapa sin recortar la
+  mayor parte de la latitud, así que se dedica al respaldo cuantitativo.
+- **Compacta** (< 860 px) — el mapa queda despejado y los mandos bajan a una
+  barra al alcance del pulgar; las opciones se eligen en una hoja inferior.
 
 ## Representación del campo
 

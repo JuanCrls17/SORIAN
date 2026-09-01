@@ -32,9 +32,21 @@ function colorFor(value, scale, rgb) {
   return rgb[rgb.length - 1];
 }
 
+const DEG = Math.PI / 180;
+
+/** Web Mercator: latitud en grados -> ordenada proyectada. */
+const toMercator = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * DEG) / 2));
+
+/** Ordenada proyectada -> latitud en grados. */
+const fromMercator = (y) => (2 * Math.atan(Math.exp(y)) - Math.PI / 2) / DEG;
+
 /**
  * Devuelve un ImageData de (nx*factor) x (ny*factor) con el campo
  * interpolado bilinealmente. La fila 0 es la del norte.
+ *
+ * Las filas se reparten uniformemente en el espacio de Mercator, no en
+ * grados: el bitmap se dibuja con un escalado lineal en pantalla, y un
+ * muestreo uniforme en latitud desplazaria el campo al alejarse del ecuador.
  */
 export function smoothField(frame, grid, scale, factor) {
   const { nx, ny } = grid;
@@ -51,9 +63,15 @@ export function smoothField(frame, grid, scale, factor) {
     return index === NO_DATA ? null : centers[index];
   };
 
+  const { lat0, dlat } = grid;
+  const mercTop = toMercator(lat0 + ny * dlat);
+  const mercBottom = toMercator(lat0);
+  const mercSpan = mercTop - mercBottom;
+
   for (let y = 0; y < height; y += 1) {
     // el canvas crece hacia abajo y la grilla hacia el norte
-    const gy = (ny - 1) - (y + 0.5) / factor + 0.5;
+    const lat = fromMercator(mercTop - ((y + 0.5) / height) * mercSpan);
+    const gy = (lat - lat0) / dlat - 0.5;
     const row0 = Math.max(0, Math.min(ny - 1, Math.floor(gy)));
     const row1 = Math.min(ny - 1, row0 + 1);
     const fy = Math.max(0, Math.min(1, gy - row0));

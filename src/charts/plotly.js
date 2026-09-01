@@ -3,6 +3,8 @@ import { PATHS } from "../config.js";
 const REFERENCE_WIDTH = 1100;
 const MIN_SCALE = 0.6;
 const NARROW = 720;
+const SIDE_BY_SIDE = 980;
+const GUTTER = 0.06;
 
 let loader = null;
 
@@ -40,6 +42,35 @@ export function adaptLayout(layout, width) {
   delete adapted.title;
   adapted.autosize = true;
   adapted.height = Math.round((layout.height ?? 700) * (0.55 + 0.45 * scale));
+
+  // Las dos regiones Niño llegan apiladas; con ancho suficiente se colocan
+  // en paralelo para poder contrastarlas de una sola mirada.
+  const paired = width >= SIDE_BY_SIDE && adapted.yaxis2 && adapted.xaxis2;
+  if (paired) {
+    adapted.yaxis = { ...adapted.yaxis, domain: [0, 1] };
+    adapted.yaxis2 = { ...adapted.yaxis2, domain: [0, 1] };
+    adapted.xaxis = { ...adapted.xaxis, domain: [0, 0.5 - GUTTER / 2] };
+    adapted.xaxis2 = { ...adapted.xaxis2, domain: [0.5 + GUTTER / 2, 1] };
+    adapted.height = Math.round(adapted.height * 0.62);
+
+    // los rotulos de cada region acompañan a su panel
+    adapted.annotations = (adapted.annotations ?? []).map((note) => {
+      if (note.yref !== "paper" || note.y === undefined) return note;
+      const second = note.y < 0.5;
+      return { ...note, x: second ? 0.75 : 0.25, y: 1.02, yanchor: "bottom" };
+    });
+
+    // cada leyenda se ancla a su propio panel
+    if (adapted.legend) {
+      adapted.legend = { ...adapted.legend, x: 0.01, y: 0.99, xanchor: "left", yanchor: "top" };
+    }
+    if (adapted.legend2) {
+      adapted.legend2 = { ...adapted.legend2, x: 0.53, y: 0.99, xanchor: "left", yanchor: "top" };
+    }
+
+    // el sello institucional ya figura en la cabecera del sitio
+    delete adapted.images;
+  }
   adapted.margin = {
     l: Math.round(52 * scale) + 8,
     r: Math.round(24 * scale),

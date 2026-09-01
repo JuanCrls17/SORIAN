@@ -4,6 +4,7 @@ import { el, clear, spinner, errorBox } from "../ui/dom.js";
 import { createGridLayer } from "./grid-layer.js";
 import { buildLegend, describeBin, formatLatLng } from "./legend.js";
 import { createSwipe } from "./swipe.js";
+import { renderAnalysis } from "./analysis.js";
 
 export function createViewer(container, controls) {
   const mapNode = el("div", { class: "viewer__map" });
@@ -11,12 +12,16 @@ export function createViewer(container, controls) {
   const timeline = el("div", { class: "viewer__panel viewer__panel--time" });
   const readout = el("div", { class: "probe", role: "status", "aria-live": "polite", hidden: true });
 
-  container.append(
+  const analysis = el("aside", { class: "analysis", "aria-label": "Resumen del dominio" });
+
+  const stage = el("div", { class: "viewer__stage" }, [
     mapNode,
     el("div", { class: "viewer__overlay viewer__overlay--top" }, [controls]),
     el("div", { class: "viewer__overlay viewer__overlay--bottom" }, [legendNode, timeline]),
     readout,
-  );
+  ]);
+
+  container.append(stage, analysis);
 
   const L = window.L;
   const GridLayer = createGridLayer(L);
@@ -59,6 +64,8 @@ export function createViewer(container, controls) {
   let framed = false;
   let swipe = null;
   let smooth = false;
+  let domain = null;
+  let sized = null;
 
   load(PATHS.borders)
     .then((geo) => {
@@ -105,6 +112,13 @@ export function createViewer(container, controls) {
       if (side.grid && side.layer) side.layer.setFrame(side.grid.frames[index]);
     }
     renderTimeline();
+    updateAnalysis();
+  }
+
+  function updateAnalysis() {
+    const { grid, layer, label } = sides.a;
+    if (!grid || !layer?._frame) return;
+    renderAnalysis(analysis, grid, layer._frame, grid.months[index], label ?? "");
   }
 
   function toggle() {
@@ -150,7 +164,11 @@ export function createViewer(container, controls) {
     // datos, y alejarse mas solo mostraria vacio.
     map.setMinZoom(fit);
     map.setMaxBounds(bounds.pad(MAP.padding / 100));
-    map.setView(bounds.getCenter(), Math.min(fit + (cover - fit) * 0.55, MAP.maxZoom));
+    // Cuanto mas apaisado es el marco, mas se acerca el encuadre al que
+    // cubre; encajarlo entero dejaria franjas vacias a los lados.
+    const size = map.getSize();
+    const wide = Math.min(1, Math.max(0, size.x / size.y - 1));
+    map.setView(bounds.getCenter(), Math.min(fit + (cover - fit) * (0.45 + 0.25 * wide), MAP.maxZoom));
   }
 
   /** Sonda que sigue al puntero: modelo, mes, valor y posicion del punto. */
@@ -172,9 +190,9 @@ export function createViewer(container, controls) {
 
     const size = map.getSize();
     readout.hidden = false;
-    readout.classList.toggle("probe--flip", point.x > size.x - 190);
-    readout.style.transform =
-      `translate(${point.x}px, ${Math.min(point.y, size.y - 90)}px)`;
+    readout.classList.toggle("probe--flip-x", point.x > size.x - 190);
+    readout.classList.toggle("probe--flip-y", point.y > size.y - 150);
+    readout.style.transform = `translate(${point.x}px, ${point.y}px)`;
   }
 
   function hide() { readout.hidden = true; }
@@ -217,12 +235,14 @@ export function createViewer(container, controls) {
       frame(data.grid);
       framed = true;
     }
+    domain = data.grid;
 
     if (index >= data.months.length) index = 0;
     side.layer.setFrame(data.frames[index]);
     applyClip();
     renderTimeline();
     renderLegend();
+    updateAnalysis();
   }
 
   function closeSide() {
@@ -252,7 +272,17 @@ export function createViewer(container, controls) {
     compare,
     setSmooth,
     stop,
-    invalidate: () => { map.invalidateSize(); applyClip(); },
+    invalidate: () => {
+      map.invalidateSize();
+      // el primer encuadre puede caer antes de que el contenedor tenga su
+      // tamano final; al estabilizarse se recalcula una sola vez
+      const size = map.getSize();
+      if (domain && sized !== `${size.x}x${size.y}`) {
+        sized = `${size.x}x${size.y}`;
+        frame(domain);
+      }
+      applyClip();
+    },
     destroy: () => { stop(); map.remove(); },
   };
 }
