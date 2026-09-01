@@ -1,0 +1,19 @@
+# Artefactos del pipeline de origen (se procesan con tools/)
+visor_*.html
+BOXPLOT.html
+PERCENTILES.html
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+.idea/
+*.swp

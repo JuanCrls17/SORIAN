@@ -1,0 +1,170 @@
+.viewer {
+  display: grid;
+  gap: .625rem;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: .625rem;
+}
+
+.viewer > * { min-width: 0; }
+
+.viewer__map {
+  position: relative;
+  width: 100%;
+  height: clamp(320px, 58dvh, 620px);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--accent);
+  z-index: 0;
+}
+
+.grid-layer { position: absolute; top: 0; left: 0; pointer-events: none; }
+
+/* Leaflet fija 30px con `.leaflet-touch .leaflet-bar a`; aqui se iguala
+   la especificidad para cumplir el minimo tactil de 44px. */
+.leaflet-touch .leaflet-bar a,
+.leaflet-bar a.leaflet-control-zoom-in,
+.leaflet-bar a.leaflet-control-zoom-out {
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+  font-size: 1.25rem;
+}
+
+.viewer__readout {
+  min-height: 1.25rem;
+  font-size: .8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+/* ---------- Leyenda ---------- */
+.legend { margin: 0; }
+.legend__title {
+  font-size: .8125rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: .375rem;
+}
+.legend__scale {
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: .25rem;
+  -webkit-overflow-scrolling: touch;
+}
+.legend__step { flex: 1 0 auto; min-width: 2.25rem; text-align: right; }
+.legend__swatch { display: block; height: 12px; }
+.legend__step:first-child .legend__swatch { border-radius: 3px 0 0 3px; }
+.legend__step:last-child .legend__swatch { border-radius: 0 3px 3px 0; }
+.legend__tick {
+  display: block;
+  font-size: .625rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  transform: translateX(50%);
+  white-space: nowrap;
+}
+.legend__note { font-size: .6875rem; color: var(--muted); margin: .375rem 0 0; }
+
+/* ---------- Línea de tiempo ---------- */
+.timeline {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  padding-top: .625rem;
+}
+
+.timeline__play {
+  flex: 0 0 auto;
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 1rem;
+}
+.timeline__play:hover { border-color: var(--blue); }
+
+.timeline__steps {
+  display: flex;
+  gap: .375rem;
+  min-width: 0;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+.timeline__steps::-webkit-scrollbar { height: 4px; }
+.timeline__steps::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+
+.timeline__step {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  min-height: 44px;
+  padding: .5rem .75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font: inherit;
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.timeline__step.is-active { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+/* ---------- Gráficos ---------- */
+.chart {
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem .5rem .5rem;
+}
+.chart__caption { padding: 0 .5rem .75rem; }
+.chart__title {
+  font-size: clamp(.9375rem, 2.4vw, 1.125rem);
+  margin: 0 0 .25rem;
+  text-wrap: balance;
+}
+.chart__subtitle { font-size: .8125rem; color: var(--muted); margin: 0; }
+.chart__plot { min-height: clamp(360px, 60dvh, 640px); }
+.chart__legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: .25rem .75rem;
+  padding: .75rem .5rem 0;
+  border-top: 1px solid var(--line);
+  margin-top: .5rem;
+}
+.chart__legend:empty { display: none; }
+.chart__legend-item { display: flex; align-items: center; gap: .5rem; font-size: .75rem; }
+.chart__legend-swatch {
+  width: 14px; height: 14px; flex: 0 0 auto;
+  border: 1px solid rgb(0 0 0 / 25%); border-radius: 3px;
+}
+.chart .js-plotly-plot { width: 100% !important; }
+
+@media (min-width: 860px) {
+  .viewer { grid-template-areas: "map legend" "map timeline" "map readout"; grid-template-columns: 1fr 15rem; gap: .875rem; padding: .875rem; }
+  .viewer__map { grid-area: map; height: clamp(460px, 68dvh, 720px); }
+  .viewer__legend { grid-area: legend; }
+  .timeline { grid-area: timeline; flex-direction: column; align-items: stretch; border-top: 0; padding-top: 0; }
+  .timeline__steps { flex-direction: column; overflow: visible; }
+  .timeline__step { width: 100%; text-align: center; }
+  .timeline__play { width: 100%; }
+  .viewer__readout { grid-area: readout; align-self: end; }
+  .legend__scale { flex-direction: column-reverse; overflow: visible; }
+  .legend__step { display: flex; align-items: flex-start; gap: .5rem; min-width: 0; }
+  .legend__swatch { width: 26px; height: 15px; border-radius: 0 !important; flex: 0 0 auto; }
+  .legend__tick { transform: translateY(-50%); line-height: 1; }
+}
