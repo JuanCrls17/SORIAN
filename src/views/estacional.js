@@ -150,9 +150,9 @@ export default function estacional(outlet) {
   }
 
   /**
-   * Disposicion amplia: los mandos flotan sobre el mapa. Comparando, cada
-   * panel se pega a la mitad que gobierna y las acciones quedan en medio,
-   * que es donde actuan sobre las dos.
+   * Disposicion amplia: los mandos flotan sobre el mapa. Comparando, los dos
+   * lados van dentro de una misma caja para que compartan fila con las
+   * acciones y, si no cabe todo, bajen juntos en vez de partirse.
    */
   function renderWide() {
     clear(dock);
@@ -161,7 +161,7 @@ export default function estacional(outlet) {
     controls.classList.toggle("controls--compare", state.comparing);
     clear(controls).append(
       ...(state.comparing
-        ? [sidePanel(SIDES[0]), actions, sidePanel(SIDES[1])]
+        ? [actions, el("div", { class: "controls__pair" }, [sidePanel(SIDES[0]), sidePanel(SIDES[1])])]
         : [actions, el("div", { class: "controls__single" }, [
             selectorGroup("Modelo", MODELS, state.a.model, (id) => update("a", { model: id }), "modelo-a"),
             selectorGroup("Variable", VARIABLES, state.a.variable, (id) => update("a", { variable: id }), "variable-a"),
