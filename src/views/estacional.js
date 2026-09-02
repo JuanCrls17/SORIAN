@@ -159,6 +159,8 @@ export default function estacional(outlet) {
     const actions = el("div", { class: "controls__actions" }, actionButtons());
 
     controls.classList.toggle("controls--compare", state.comparing);
+    // el panel de reparto le come ancho a la barra: el CSS no puede saberlo solo
+    controls.classList.toggle("controls--tight", state.comparing && state.summary);
     clear(controls).append(
       ...(state.comparing
         ? [actions, el("div", { class: "controls__pair" }, [sidePanel(SIDES[0]), sidePanel(SIDES[1])])]

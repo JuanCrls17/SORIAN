@@ -402,12 +402,23 @@
 .side-panel__icon { width: 15px; height: 15px; }
 .side-panel__icon svg { width: 100%; height: 100%; display: block; }
 
+/* Una sola linea, siempre. Envolviendo, los modelos quedaban arriba, las
+   variables abajo y el rotulo del lado flotando en medio de las dos: tres
+   alturas distintas dentro de una barra que se lee de un vistazo. Si aun asi
+   no cabe, el cuerpo se desplaza a lo ancho, como los mandos del modo simple,
+   antes que romper la fila. */
 .side-panel__body {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: .5rem .625rem;
+  flex-wrap: nowrap;
+  gap: .625rem;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.side-panel__body::-webkit-scrollbar { display: none; }
+.side-panel__body .selector,
+.side-panel__body .selector__options { flex-wrap: nowrap; }
 
 .selector { display: flex; align-items: center; flex-wrap: wrap; gap: .375rem; flex: 0 1 auto; min-width: 0; }
 .selector__label {
@@ -460,6 +471,20 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+/* Comparando con el reparto abierto, a la barra le queda poco mas de la mitad
+   del ancho. Por debajo de 1600 px eso ya no da para los dos rotulos, asi que
+   ceden su sitio -se retiran de la vista, no del arbol- y quedan el
+   pictograma y el filete de color, que ya dicen de que mitad se trata. */
+@media (max-width: 1600px) {
+  .controls--tight .side-panel__head > span:not(.side-panel__icon) {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
 .side-panel__body > .selector + .selector {
   border-left: 1px solid var(--line);
   padding-left: .625rem;
