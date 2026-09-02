@@ -39,14 +39,17 @@ export default function enso(outlet) {
 
   outlet.classList.add("outlet--wide");
   outlet.append(
-    el("header", { class: "view__header" }, [
-      el("h1", { text: "Monitoreo y predicción ENSO" }),
-      el("p", {
-        class: "view__lead",
-        text: "Anomalía de la temperatura superficial del mar en las regiones Niño. Predicción multimodelo frente a la evolución observada.",
-      }),
+    // el encabezado dice que se mira y la barra como: van juntos en un renglon
+    el("div", { class: "view__top" }, [
+      el("header", { class: "view__header" }, [
+        el("h1", { text: "Monitoreo y predicción ENSO" }),
+        el("p", {
+          class: "view__lead",
+          text: "Anomalía de la temperatura superficial del mar en las regiones Niño. Predicción multimodelo frente a la evolución observada.",
+        }),
+      ]),
+      el("div", { class: "toolbar" }, [tabs, scope]),
     ]),
-    el("div", { class: "toolbar" }, [tabs, scope]),
     stage,
   );
 

@@ -151,6 +151,23 @@
 }
 .toolbar .tabs { margin: 0; flex: 1 1 22rem; max-width: 34rem; }
 
+/* El encabezado y la barra comparten renglon: el titulo dice que se mira y
+   los mandos, como, asi que separarlos en dos bandas gastaba alto sin
+   explicar nada. La entradilla cede ancho -de 65 a 46 caracteres- porque es
+   lo unico que puede encogerse sin volverse ilegible. Cuando ya no caben
+   lado a lado, la barra baja entera bajo el texto. */
+.view__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2.5rem;
+  margin-bottom: 1.5rem;
+}
+.view__top .view__header { flex: 1 1 24rem; min-width: 0; margin-bottom: 0; }
+.view__top .view__lead { max-width: 46ch; }
+.view__top .toolbar { flex: 1 1 32rem; min-width: 0; margin-bottom: 0; }
+
 /* Conmutador de opcion unica, para alternar entre vistas del mismo dato */
 .segmented {
   position: relative;
