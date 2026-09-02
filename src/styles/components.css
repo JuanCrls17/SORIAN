@@ -10,11 +10,9 @@
   opacity: 0;
   pointer-events: none;
   transform-origin: center;
-  transition:
-    transform .34s cubic-bezier(.22, .92, .3, 1.08),
-    width .34s cubic-bezier(.22, .92, .3, 1.08),
-    height .2s ease,
-    opacity .18s linear;
+  /* el viaje lo anima marker.js por fotogramas: una transicion aqui pelearia
+     con ellos y aplanaria el estirado */
+  transition: opacity .18s linear;
 }
 .marker.is-visible { opacity: 1; }
 
