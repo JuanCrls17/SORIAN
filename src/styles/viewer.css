@@ -215,16 +215,30 @@
   min-width: 0;
 }
 
-/* Comparando, cada panel se pega a la mitad del mapa que gobierna: puestos
-   juntos a un lado no se sabe cual manda sobre cual.
-   Las acciones suben siempre a su propia fila y los dos paneles se reparten
-   la de abajo a partes iguales. Repartirlos segun el hueco libre no servia:
-   el ancho disponible tambien depende de si el panel de reparto esta abierto,
-   que ninguna media query de ventana ve, y entonces uno de los dos caia bajo
-   el otro, espejado y de otro ancho. */
-.controls--compare { justify-content: space-between; }
+/* Comparando, los dos lados forman una sola barra continua partida por el
+   centro, y no dos pastillas sueltas. Estiradas al 50% cada una dejaba un
+   hueco blanco dentro de si misma junto al corte; ajustadas a su contenido
+   quedaban de distinto ancho segun el nombre del modelo elegido. Como barra
+   unica el reparto es siempre el mismo y cada lado conserva su filete de
+   color en el borde exterior, que es lo que dice cual manda sobre cual.
+
+   Las acciones suben siempre a su propia fila. Repartir segun el hueco libre
+   no servia: el ancho disponible tambien depende de si el panel de reparto
+   esta abierto, que ninguna media query de ventana ve. */
+.controls--compare { column-gap: 0; row-gap: .625rem; }
 .controls--compare .controls__actions { order: -1; flex: 1 1 100%; }
 .controls--compare .side-panel { flex: 1 1 0; max-width: none; }
+
+/* Las esquinas interiores se cuadran para que la union no se note y el corte
+   queda como un filete tenue: el panel B ya no lleva borde izquierdo, asi que
+   solo hay una linea entre los dos y no dos superpuestas. */
+.controls--compare .side-panel--a {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  border-right-color: rgb(10 28 72 / 12%);
+}
+.controls--compare .side-panel--b {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
 .controls__actions { display: flex; gap: .5rem; flex: 0 0 auto; }
 
 /* Con un solo pronostico los mandos flotan sueltos: una barra continua
