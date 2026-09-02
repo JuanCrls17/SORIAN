@@ -86,10 +86,13 @@ body.is-app .footer { display: none; }
 .brand__logo--senamhi { height: 26px; }
 .brand__divider { width: 1px; height: 26px; background: var(--line); }
 .brand__name { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+/* el interletraje abre la palabra; el margen negativo recoge el hueco que
+   deja detras de la ultima letra, para que la linea de abajo alinee */
 .brand__name strong {
   font-size: 1.25rem;
   font-weight: 700;
-  letter-spacing: .18em;
+  letter-spacing: .24em;
+  margin-right: -.24em;
   line-height: 1.1;
   color: var(--navy);
 }
@@ -257,7 +260,7 @@ body.is-app .footer { display: none; }
   .brand__logo { height: 32px; }
   .brand__logo--senamhi { height: 36px; }
   .brand__divider { height: 34px; }
-  .brand__name strong { font-size: 1.5rem; font-weight: 700; letter-spacing: .16em; }
+  .brand__name strong { font-size: 1.5rem; font-weight: 700; letter-spacing: .22em; margin-right: -.22em; }
   .brand__name small { font-size: .6875rem; }
 }
 
@@ -274,13 +277,6 @@ body.is-app .footer { display: none; }
     #c7eae5 64%, #98d7cd 73%, #67bbb1 82%, #35978f 91%, #003c30 100%);
 }
 
-/* Los Andes recortados contra el fondo de la pagina: el pie emerge en vez
-   de empezar con un corte recto. Decorativo, de ahi el aria-hidden. */
-.footer__range { line-height: 0; background: var(--canvas); }
-.footer__range svg { display: block; width: 100%; height: 38px; }
-.footer__ridge--far { fill: var(--navy); opacity: .38; }
-.footer__ridge--near { fill: var(--navy); }
-
 .footer__bar {
   display: flex;
   flex-wrap: wrap;
@@ -288,11 +284,11 @@ body.is-app .footer { display: none; }
   gap: .375rem 1.5rem;
   max-width: 1600px;
   margin-inline: auto;
-  padding: .5rem 1.5rem .75rem;
+  padding: .375rem 1.5rem;
 }
 
 .footer__brand { display: inline-flex; align-items: baseline; gap: .625rem; flex: 0 0 auto; }
-.footer__wordmark { font-size: .9375rem; font-weight: 700; letter-spacing: .16em; color: #fff; }
+.footer__wordmark { font-size: .9375rem; font-weight: 700; letter-spacing: .2em; margin-right: -.2em; color: #fff; }
 .footer__org { font-size: .75rem; color: #8fa8c6; }
 
 .footer__note { flex: 1 1 16rem; min-width: 0; margin: 0; font-size: .6875rem; }
@@ -327,8 +323,7 @@ body.is-app .footer { display: none; }
 
 /* En movil solo queda lo que identifica: marca, subdireccion, PEGASO y ano. */
 @media (max-width: 860px) {
-  .footer__range svg { height: 26px; }
-  .footer__bar { padding: .5rem 1rem .625rem; gap: .25rem .75rem; line-height: 1.4; }
+  .footer__bar { padding: .375rem 1rem; gap: .125rem .75rem; line-height: 1.4; }
   /* marca y ano comparten linea; la subdireccion baja a la siguiente */
   .footer__brand { display: contents; }
   .footer__wordmark { flex: 0 0 auto; font-size: .8125rem; }
