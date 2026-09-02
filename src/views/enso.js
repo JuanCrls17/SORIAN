@@ -26,6 +26,7 @@ export default function enso(outlet) {
   let regions = null;
   let drawn = [];
   let resizeTimer = null;
+  let viewportWidth = window.innerWidth;
 
   const caption = el("div", { class: "chart__caption" });
   const key = el("div", { class: "key" });
@@ -168,7 +169,16 @@ export default function enso(outlet) {
     }
   }
 
+  /**
+   * Solo el ancho cambia el reparto de paneles: el alto sale de multiplicarlo.
+   * Y en movil la barra del navegador se repliega al desplazarse, lo que emite
+   * un resize de solo alto; redibujar ahi vacia los paneles, la pagina encoge
+   * de golpe y el scroll vuelve al principio, asi que no se puede recorrer.
+   */
   function onResize() {
+    if (window.innerWidth === viewportWidth) return;
+    viewportWidth = window.innerWidth;
+
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => show(), 250);
   }

@@ -49,7 +49,15 @@ export function buildNav() {
     requestAnimationFrame(() => moveTo(activeLink()));
   });
 
-  window.addEventListener("resize", () => moveTo(activeLink()));
+  // Solo el ancho recoloca la pastilla. En movil la barra del navegador se
+  // repliega al desplazarse y emite un resize de solo alto: atenderlo obliga
+  // a medir el menu en cada gesto de scroll sin que nada haya cambiado.
+  let ancho = window.innerWidth;
+  window.addEventListener("resize", () => {
+    if (window.innerWidth === ancho) return;
+    ancho = window.innerWidth;
+    moveTo(activeLink());
+  });
 
   return { menu, button };
 }
