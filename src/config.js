@@ -17,7 +17,7 @@ export const VARIABLES = [
 ];
 
 // Submuestreo por celda al reconstruir el campo continuo.
-export const SMOOTH_FACTOR = 6;
+export const SMOOTH_FACTOR = 8;
 
 export const SIDES = [
   { id: "a", label: "Izquierda" },
