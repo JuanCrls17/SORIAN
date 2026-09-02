@@ -2,12 +2,14 @@ import { el } from "./dom.js";
 import { navigate } from "../router.js";
 import { slidingMarker } from "./marker.js";
 
+// La descripcion cierra la lista: explica el sistema, y quien llega ya sabe
+// que busca. Los visores van delante por ser el trabajo diario.
 export const SECTIONS = [
   { id: "inicio", label: "Inicio" },
-  { id: "descripcion", label: "Descripción" },
   { id: "estacional", label: "Estacional" },
   { id: "enso", label: "ENSO" },
   { id: "consultas", label: "Consultas" },
+  { id: "descripcion", label: "Descripción" },
 ];
 
 export function buildNav() {
@@ -89,26 +91,55 @@ export function buildHeader() {
   ]);
 }
 
-const INSTITUTIONS = [
-  { label: "SENAMHI", href: "https://www.senamhi.gob.pe" },
-  { label: "Ministerio del Ambiente", href: "https://www.gob.pe/minam" },
-];
+/**
+ * Silueta andina: dos crestas, la de atras mas tenue, para que el pie no
+ * arranque con un corte recto. Se estira a lo ancho, asi que los picos van
+ * irregulares a proposito; una cadencia regular delataria el estirado.
+ */
+const RIDGE_FAR =
+  "M0,60 L0,40 L70,24 L140,36 L210,18 L290,34 L360,22 L440,38 L520,16 " +
+  "L600,32 L680,20 L760,36 L840,24 L920,38 L1000,22 L1080,34 L1140,26 " +
+  "L1200,36 L1200,60 Z";
 
-/** Una sola franja: la navegacion ya esta arriba y repetirla no aporta. */
+const RIDGE_NEAR =
+  "M0,60 L0,50 L60,38 L120,48 L200,30 L260,44 L330,36 L400,50 L470,32 " +
+  "L540,46 L610,28 L690,44 L770,34 L850,48 L930,36 L1010,46 L1090,32 " +
+  "L1150,42 L1200,34 L1200,60 Z";
+
+function ridge() {
+  const band = el("div", { class: "footer__range", "aria-hidden": "true" });
+  band.innerHTML =
+    `<svg viewBox="0 0 1200 60" preserveAspectRatio="none" focusable="false">` +
+    `<path class="footer__ridge footer__ridge--far" d="${RIDGE_FAR}"/>` +
+    `<path class="footer__ridge footer__ridge--near" d="${RIDGE_NEAR}"/>` +
+    `</svg>`;
+  return band;
+}
+
+/**
+ * Una sola franja: la navegacion ya esta arriba y repetirla no aporta. Los
+ * enlaces institucionales tampoco, que ya firman la cabecera con su logo; en
+ * su sitio se nombra PEGASO, que es de la misma casa y no se encuentra solo.
+ */
 export function buildFooter() {
   return el("footer", { class: "footer" }, [
+    el("div", { class: "footer__scale", "aria-hidden": "true" }),
+    ridge(),
     el("div", { class: "footer__bar" }, [
       el("span", { class: "footer__brand" }, [
         el("span", { class: "footer__wordmark", text: "SORIAN" }),
         el("span", { class: "footer__org", text: "Subdirección de Cambio Climático y Modelamiento Atmosférico · SENAMHI" }),
       ]),
       el("p", { class: "footer__note", text: "Resultados de modelos numéricos, de carácter referencial." }),
-      el("nav", { class: "footer__links", "aria-label": "Enlaces institucionales" }, INSTITUTIONS.map((item) =>
-        el("a", {
-          class: "footer__link", href: item.href,
-          target: "_blank", rel: "noopener noreferrer", text: item.label,
-        }),
-      )),
+      el("a", {
+        class: "footer__sibling",
+        href: "https://smn-senamhi.github.io/PEGASO/",
+        target: "_blank", rel: "noopener noreferrer",
+      }, [
+        el("span", { class: "footer__sibling-lead", text: "También del SENAMHI" }),
+        el("span", { class: "footer__sibling-name", text: "PEGASO" }),
+        el("span", { class: "footer__sibling-go", "aria-hidden": "true" }),
+      ]),
       el("span", { class: "footer__meta", text: `© ${new Date().getFullYear()} SENAMHI · v1.0` }),
     ]),
   ]);
