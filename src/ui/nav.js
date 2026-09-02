@@ -68,14 +68,14 @@ export function buildNav() {
 /**
  * La A va sin travesano, como la de PEGASO. No es una fuente distinta: es una
  * lambda mayuscula, que en cualquier palo seco tiene el mismo trazo que una A
- * a la que le falta la barra. Como el signo no es una A, el nombre real viaja
- * aparte para quien lee la pagina con voz.
+ * a la que le falta la barra.
+ *
+ * Como el signo no es una A, la palabra se anuncia como imagen con su nombre
+ * real. Duplicar el texto para lector de pantalla tambien servia, pero al
+ * copiar la pagina salia "SORIANSORIAN".
  */
-function wordmark(tag, cls) {
-  return el(tag, { class: cls }, [
-    el("span", { "aria-hidden": "true", text: "SORI\u039BN" }),
-    el("span", { class: "sr-only", text: "SORIAN" }),
-  ]);
+export function wordmark(tag, cls) {
+  return el(tag, { class: cls, role: "img", "aria-label": "SORIAN", text: "SORI\u039BN" });
 }
 
 export function buildHeader() {
@@ -114,10 +114,7 @@ export function buildFooter() {
   return el("footer", { class: "footer" }, [
     el("div", { class: "footer__scale", "aria-hidden": "true" }),
     el("div", { class: "footer__bar" }, [
-      el("span", { class: "footer__brand" }, [
-        wordmark("span", "footer__wordmark"),
-        el("span", { class: "footer__org", text: "Subdirección de Cambio Climático y Modelamiento Atmosférico · SENAMHI" }),
-      ]),
+      wordmark("span", "footer__wordmark"),
       el("p", { class: "footer__note", text: "Resultados de modelos numéricos, de carácter referencial." }),
       el("a", {
         class: "footer__sibling",

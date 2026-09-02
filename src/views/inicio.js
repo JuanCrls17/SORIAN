@@ -1,5 +1,6 @@
 import { el } from "../ui/dom.js";
 import { navigate } from "../router.js";
+import { wordmark } from "../ui/nav.js";
 import { ICONS } from "../ui/icons.js";
 
 const ACCESS = [
@@ -23,7 +24,7 @@ export default function inicio(outlet) {
       el("div", { class: "hero__content" }, [
         el("p", { class: "hero__eyebrow", text: "SENAMHI · Subdirección de Cambio Climático y Modelamiento Atmosférico" }),
         el("h1", { class: "hero__title" }, [
-          el("span", { class: "wordmark", text: "SORIAN" }),
+          wordmark("span", "wordmark"),
         ]),
         el("p", { class: "hero__subtitle", text: "Sistema Operacional de Resolución Integrada para la Predicción del Clima" }),
         el("p", { class: "hero__text", text: "Información climática mensual y estacional para el Perú y Sudamérica, integrada desde los principales modelos globales de predicción." }),

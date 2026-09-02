@@ -287,9 +287,7 @@ body.is-app .footer { display: none; }
   padding: .375rem 1.5rem;
 }
 
-.footer__brand { display: inline-flex; align-items: baseline; gap: .625rem; flex: 0 0 auto; }
 .footer__wordmark { font-size: .9375rem; font-weight: 700; letter-spacing: .2em; margin-right: -.2em; color: #fff; }
-.footer__org { font-size: .75rem; color: #8fa8c6; }
 
 .footer__note { flex: 1 1 16rem; min-width: 0; margin: 0; font-size: .6875rem; }
 
@@ -321,15 +319,11 @@ body.is-app .footer { display: none; }
 
 .footer__meta { flex: 0 0 auto; color: #8fa8c6; font-variant-numeric: tabular-nums; }
 
-/* En movil solo queda lo que identifica: marca, subdireccion, PEGASO y ano. */
+/* En movil solo queda lo que identifica: marca, PEGASO y ano. */
 @media (max-width: 860px) {
   .footer__bar { padding: .375rem 1rem; gap: .125rem .75rem; line-height: 1.4; }
-  /* marca y ano comparten linea; la subdireccion baja a la siguiente */
-  .footer__brand { display: contents; }
   .footer__wordmark { flex: 0 0 auto; font-size: .8125rem; }
   .footer__meta { flex: 1 1 auto; text-align: right; font-size: .6875rem; }
-  /* la subdireccion cierra abajo, para no partir la primera linea */
-  .footer__org { order: 1; flex: 1 1 100%; font-size: .6875rem; }
-  .footer__sibling { order: 2; margin-top: .125rem; }
+  .footer__sibling { margin-top: .125rem; }
   .footer__note { display: none; }
 }
