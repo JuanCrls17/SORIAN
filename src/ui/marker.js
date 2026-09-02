@@ -20,6 +20,7 @@ export function slidingMarker(track, key) {
   const marker = el("span", { class: "marker", "aria-hidden": "true" });
   track.prepend(marker);
   let settle = null;
+  let current = null;
 
   const place = (box, stretch) => {
     const squash = 1 / (1 + (stretch - 1) * 0.62);
@@ -28,12 +29,45 @@ export function slidingMarker(track, key) {
     marker.style.transform = `translate(${box.left}px, ${box.top}px) scale(${stretch}, ${squash})`;
   };
 
+  const boxOf = (node) => ({
+    left: node.offsetLeft, top: node.offsetTop,
+    width: node.offsetWidth, height: node.offsetHeight,
+  });
+
+  /**
+   * El sitio de la pastilla se guarda en pixeles, asi que deja de valer en
+   * cuanto la pista cambia de ancho. Y cambia sola: al terminar de cargar el
+   * grafico la pagina crece, aparece la barra de desplazamiento y la ventana
+   * pierde unos pixeles, de modo que la pastilla se quedaba desplazada
+   * respecto de la opcion activa sin que nadie hubiera tocado nada.
+   *
+   * El observador se desconecta el solo cuando su pastilla sale del arbol,
+   * que es lo que ocurre cada vez que el grupo se vuelve a dibujar.
+   */
+  if (typeof ResizeObserver === "function") {
+    let width = track.clientWidth;
+    const observer = new ResizeObserver(() => {
+      if (!marker.isConnected) return observer.disconnect();
+      if (track.clientWidth === width || !current?.offsetWidth) return;
+
+      width = track.clientWidth;
+      const box = boxOf(current);
+      lastPlace.set(key, box);
+      marker.style.transition = "none";
+      place(box, 1);
+      requestAnimationFrame(() => { marker.style.transition = ""; });
+    });
+    observer.observe(track);
+  }
+
   return function moveTo(active) {
     if (!active?.offsetWidth) {
+      current = null;
       marker.classList.remove("is-visible");
       return;
     }
 
+    current = active;
     const to = {
       left: active.offsetLeft, top: active.offsetTop,
       width: active.offsetWidth, height: active.offsetHeight,
