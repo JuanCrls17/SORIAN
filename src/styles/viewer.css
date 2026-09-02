@@ -225,12 +225,16 @@
    alto cuesta datos tapados. Los dos lados van dentro de la misma caja, de
    modo que cuando no cabe todo bajan juntos y la barra nunca se parte por
    la mitad; sueltos, el flex-wrap dejaba un lado arriba y el otro debajo. */
-.controls--compare { row-gap: .625rem; }
+/* La barra no baja nunca de fila: se queda a la derecha de las acciones y,
+   si falta sitio, comprime su contenido en vez de irse debajo. */
+.controls--compare { flex-wrap: nowrap; }
 .controls--compare .controls__actions { flex: 0 0 auto; }
 
 .controls__pair {
   display: flex;
-  align-items: center;
+  /* estirados, los dos lados miden lo mismo aunque uno parta en dos lineas:
+     de lo contrario el corte del centro dejaria de ser continuo */
+  align-items: stretch;
   flex: 0 1 auto;
   min-width: 0;
 }
