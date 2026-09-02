@@ -216,20 +216,15 @@
 }
 
 /* Comparando, cada panel se pega a la mitad del mapa que gobierna: puestos
-   juntos a un lado no se sabe cual manda sobre cual. */
+   juntos a un lado no se sabe cual manda sobre cual.
+   Las acciones suben siempre a su propia fila y los dos paneles se reparten
+   la de abajo a partes iguales. Repartirlos segun el hueco libre no servia:
+   el ancho disponible tambien depende de si el panel de reparto esta abierto,
+   que ninguna media query de ventana ve, y entonces uno de los dos caia bajo
+   el otro, espejado y de otro ancho. */
 .controls--compare { justify-content: space-between; }
-
-/* Sin ancho para los tres en fila, las acciones suben y los paneles se
-   reparten debajo, cada uno sobre su mitad. */
-@media (max-width: 1299px) {
-  .controls--compare .controls__actions { order: -1; flex: 1 1 100%; }
-}
-
-/* Ya sin sitio para dos paneles enteros, comparten la fila a partes
-   iguales y su contenido se reparte en dos lineas. */
-@media (max-width: 1023px) {
-  .controls--compare .side-panel { flex: 1 1 0; max-width: none; }
-}
+.controls--compare .controls__actions { order: -1; flex: 1 1 100%; }
+.controls--compare .side-panel { flex: 1 1 0; max-width: none; }
 .controls__actions { display: flex; gap: .5rem; flex: 0 0 auto; }
 
 /* Con un solo pronostico los mandos flotan sueltos: una barra continua
