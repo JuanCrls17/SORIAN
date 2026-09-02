@@ -36,24 +36,40 @@
 .btn--ghost:hover { background: rgb(255 255 255 / 12%); }
 
 /* ---------- Portada ---------- */
+/* La ilustracion no es una columna al lado del texto: es el fondo de toda la
+   portada, y el texto va encima. Partirla en dos mitades dejaba el globo
+   encajonado y media portada vacia. */
 .hero {
   position: relative;
+  isolation: isolate;
   overflow: hidden;
   margin: -1rem -1rem 1rem;
-  padding: 2.5rem 1.25rem 3rem;
+  padding: 3rem 1.25rem 3.25rem;
   color: #fff;
-  background:
-    radial-gradient(120% 90% at 78% 45%, #123a86 0%, #0a1c48 55%, #061027 100%);
+  background: #061027;
 }
+
+/* Velo entre la imagen y el texto. Sin el, el globo compite con lo que hay
+   que leer; se abre hacia donde no hay texto para que la imagen respire. */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg,
+    rgb(6 16 39 / 88%) 0%, rgb(6 16 39 / 80%) 50%, rgb(6 16 39 / 93%) 100%);
+}
+
 @media (min-width: 760px) {
   .hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, .85fr);
-    align-items: center;
-    gap: 2rem;
     margin-inline: 0;
-    padding: 4rem 3rem;
+    padding: 5rem 3rem;
     border-radius: var(--radius);
+  }
+  .hero::after {
+    background: linear-gradient(100deg,
+      #061027 0%, rgb(6 16 39 / 92%) 28%, rgb(6 16 39 / 58%) 52%,
+      rgb(6 16 39 / 14%) 78%, rgb(6 16 39 / 0%) 100%);
   }
 }
 
@@ -89,22 +105,17 @@
 
 .hero__art {
   position: absolute;
-  inset: auto -30% -35% auto;
-  filter: drop-shadow(0 0 40px rgb(30 110 220 / 45%));
-  width: min(78vw, 26rem);
-  aspect-ratio: 1;
-  opacity: .5;
-  background: url("../../assets/globo-sm.webp") center / contain no-repeat;
+  inset: 0;
+  z-index: -2;
+  background: url("../../assets/globo-sm.webp") 72% center / cover no-repeat;
 }
 @media (min-width: 760px) {
   .hero__art {
-    position: relative;
-    inset: auto;
-    width: 100%;
-    max-width: 26rem;
-    justify-self: center;
-    opacity: 1;
     background-image: url("../../assets/globo.webp");
+    /* mas alto que la portada: el globo se sale por arriba y por abajo, que
+       es lo que hace que se lea como fondo y no como una figura pegada */
+    background-position: 74% center;
+    background-size: auto 132%;
   }
 }
 
