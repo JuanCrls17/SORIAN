@@ -23,11 +23,21 @@ export function createGridLayer(L) {
 
     onAdd(map) {
       this._map = map;
-      this._canvas = L.DomUtil.create("canvas", "grid-layer");
+
+      // `leaflet-zoom-animated` no es decorativa: fija transform-origin en la
+      // esquina superior izquierda y aporta la transicion del zoom. Sin ella
+      // el lienzo se escala desde su centro mientras el resto del mapa lo
+      // hace desde la esquina, y el campo se descoloca durante la animacion.
+      this._animated = Boolean(map.options.zoomAnimation && L.Browser.any3d);
+      this._canvas = L.DomUtil.create(
+        "canvas",
+        `grid-layer${this._animated ? " leaflet-zoom-animated" : ""}`,
+      );
+
       this._ctx = this._canvas.getContext("2d");
       map.getPane("overlayPane").appendChild(this._canvas);
       map.on("moveend zoomend resize", this._render, this);
-      map.on("zoomanim", this._onZoomAnim, this);
+      if (this._animated) map.on("zoomanim", this._onZoomAnim, this);
       this._reset();
     },
 
