@@ -34,11 +34,12 @@ src/
     grid-layer.js       capa canvas para la grilla regular
     swipe.js            cortina de comparación entre dos capas
     interpolate.js      reconstrucción continua del campo
-    legend.js           escala de color discreta
+    legend.js           escala de color y lectura del punto en palabras
+    analysis.js         reparto del dominio por clase de anomalía
   charts/
     plotly.js           carga diferida y adaptación responsive
+    regions.js          reparto de la figura ENSO en regiones Niño
     series.js           selección de series del gráfico
-    analysis.js         reparto del dominio por clase de anomalía
   ui/                   nav, selectores, pictogramas, hoja y helpers de DOM
   styles/               base, layout, componentes, visor
 data/
@@ -74,11 +75,14 @@ la cortina se arrastra sin volver a dibujar la grilla.
 
 La interfaz no se adapta: se resuelve dos veces.
 
-- **Amplia** (≥ 860 px) — los mandos flotan sobre el mapa y crecen a partir de
-  1200 px. Desde 1400 px aparece un panel lateral con el reparto del dominio
-  por clase de anomalía: qué porcentaje cae bajo y sobre lo normal, y cuál es
-  el rango dominante. Ese margen no se puede llenar con mapa sin recortar la
-  mayor parte de la latitud, así que se dedica al respaldo cuantitativo.
+- **Amplia** (≥ 860 px) — los mandos flotan sobre el mapa en una sola franja:
+  a la izquierda tres acciones recogidas en una pastilla de iconos y, a su
+  derecha, la selección de modelo y variable. Comparando, los dos lados forman
+  una barra continua partida por el centro, cada mitad sobre el lado que
+  gobierna. El **Reparto** del dominio por clase de anomalía —qué porcentaje
+  cae bajo y sobre lo normal, y cuál es el rango dominante— se abre a petición
+  en un panel lateral, no por ancho de ventana: quita sitio al mapa y no
+  siempre se necesita.
 - **Compacta** (< 860 px) — el mapa queda despejado y los mandos bajan a una
   barra al alcance del pulgar; las opciones se eligen en una hoja inferior.
 
@@ -87,17 +91,40 @@ La interfaz no se adapta: se resuelve dos veces.
 El visor ofrece dos lecturas de la misma grilla:
 
 - **Celdas** — el dato tal como lo entrega el modelo, sin interpolar.
-- **Continuo** — reconstrucción bilineal entre centros de celda.
+- **Continuo** — reconstrucción del campo entre centros de celda, con
+  interpolación bicúbica (Catmull-Rom). Frente a la bilineal, la pendiente no
+  cambia de golpe al cruzar un nodo, que es lo que dibujaba rombos sobre los
+  centros de celda. Junto a la costa, donde falta vecindario para el núcleo de
+  4×4, cae a bilineal.
 
-El suavizado interpola el **valor** y solo después aplica la escala de color;
-interpolar en RGB mezclaría tonos de la paleta divergente y produciría colores
-que no corresponden a ningún valor.
+El suavizado interpola el **valor** y solo después aplica el color; interpolar
+en RGB mezclaría tonos de la paleta divergente y produciría colores que no
+corresponden a ningún valor. El color se toma de una rampa continua entre las
+dos clases contiguas, de modo que un valor a medio camino recibe el tono a
+medio camino: encajarlo en su clase devolvía el campo a colores planos con un
+salto seco en cada frontera. La mezcla es siempre entre vecinos de una escala
+ordenada, así que nunca aparece un tono ajeno a la paleta.
 
 La opción continua se ofrece por defecto solo en temperatura. La precipitación
 es un campo espacialmente discontinuo y suavizarlo sugiere transiciones
 graduales que el modelo no resuelve, por lo que el control avisa al activarlo.
 En ningún caso el suavizado añade resolución: no aporta información que el
 modelo no haya producido.
+
+### Lectura del punto
+
+La fuente publica el campo **clasificado por rangos**, no por valor: una celda
+da su clase de la escala y no una cifra puntual. Por eso la franja bajo el mapa
+dice primero qué significa —«Algo más lluvia de lo normal»— y deja el intervalo
+detrás, como respaldo de quien quiera la cifra.
+
+La frase sale del propio índice de la clase, sin dato nuevo: la escala es
+divergente y simétrica, así que el lado dice hacia dónde se desvía la celda y
+la distancia al centro, cuánto. El vocabulario cambia con la variable, que una
+anomalía de temperatura no se lee como una de lluvia. Las dos clases de los
+extremos no tienen tope real —su límite exterior es solo donde la escala deja
+de dividir—, y se leen «80.4 o más» en vez de dar como medida una cifra que no
+lo es.
 
 ## Enlaces directos
 
@@ -107,10 +134,11 @@ El hash admite parámetros, de modo que cualquier vista se puede compartir:
 #estacional?modelo=ecmwf&variable=tpara
 #estacional?modelo=ecmwf&variable=tpara&modelo2=ncep&variable2=mx2t24a
 #estacional?modelo=ecmwf&variable=mx2t24a&detalle=continuo
+#estacional?modelo=ecmwf&variable=tpara&reparto=1
 ```
 
 `modelo2` y `variable2` abren la comparación de cortina; `detalle=continuo`
-activa la reconstrucción del campo.
+activa la reconstrucción del campo y `reparto=1`, el panel de distribución.
 
 ## Actualizar los datos
 
