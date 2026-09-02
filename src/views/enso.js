@@ -34,7 +34,7 @@ export default function enso(outlet) {
   const panels = el("div", { class: "chart__panels" });
   const stage = el("section", { class: "chart" }, [caption, key, panels, categories]);
 
-  const tabs = el("div", { class: "tabs", role: "tablist", "aria-label": "Tipo de gráfico" });
+  const tabs = el("div", { class: "segmented", role: "tablist", "aria-label": "Tipo de gráfico" });
   const scope = el("div", { class: "segmented", role: "group", "aria-label": "Región Niño" });
 
   outlet.classList.add("outlet--wide");
@@ -53,17 +53,23 @@ export default function enso(outlet) {
     stage,
   );
 
+  /* Mismo conmutador que las regiones, que vive al lado: dos mandos con la
+     misma forma se leen como un par. La pista de cada vista pasa al tooltip;
+     escrita bajo el rotulo obligaba a una tarjeta de dos lineas que ademas
+     partia el texto de forma distinta en cada una. */
   function renderTabs() {
     clear(tabs).append(...VIEWS.map((item) =>
       el("button", {
-        class: `tab${item.id === view ? " is-active" : ""}`,
+        class: `segmented__option${item.id === view ? " is-active" : ""}`,
         type: "button", role: "tab", "aria-selected": String(item.id === view),
+        title: item.hint,
+        text: item.label,
         onClick: () => { view = item.id; show(); },
-      }, [
-        el("span", { class: "tab__label", text: item.label }),
-        el("span", { class: "tab__hint", text: item.hint }),
-      ]),
+      }),
     ));
+
+    const moveTo = slidingMarker(tabs, "enso-view");
+    requestAnimationFrame(() => moveTo(tabs.querySelector(".is-active")));
   }
 
   function renderScope() {
