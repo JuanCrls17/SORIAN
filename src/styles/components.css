@@ -110,6 +110,37 @@
   }
 }
 
+/* La portada entra en vez de aparecer de golpe. El texto sube unos pixeles
+   mientras aparece y el globo se revela algo despues, creciendo apenas, para
+   que la mirada llegue primero al nombre y luego a la ilustracion.
+
+   Cada regla declara solo el fotograma inicial: el final es el estado propio
+   del elemento, que no es el mismo en movil -el globo vive al 50% de opacidad
+   detras del texto- que en pantalla amplia. Y nada de esto corre si el
+   sistema pide movimiento reducido. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__eyebrow,
+  .hero__title,
+  .hero__subtitle,
+  .hero__text,
+  .hero__actions { animation: hero-rise .55s cubic-bezier(.2, .75, .3, 1) backwards; }
+
+  .hero__eyebrow { animation-delay: .05s; }
+  .hero__title { animation-delay: .13s; }
+  .hero__subtitle { animation-delay: .21s; }
+  .hero__text { animation-delay: .28s; }
+  .hero__actions { animation-delay: .35s; }
+
+  .hero__art { animation: hero-reveal .9s cubic-bezier(.2, .7, .3, 1) .18s backwards; }
+}
+
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(14px); }
+}
+@keyframes hero-reveal {
+  from { opacity: 0; transform: scale(.93); }
+}
+
 /* ---------- Accesos ---------- */
 .access { display: grid; gap: .875rem; }
 @media (min-width: 760px) { .access { grid-template-columns: 1fr 1fr; } }
