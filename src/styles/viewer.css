@@ -246,7 +246,6 @@
 .controls__pair .side-panel--b {
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
-.controls__actions { display: flex; gap: .5rem; flex: 0 0 auto; }
 
 /* Con un solo pronostico los mandos flotan sueltos: una barra continua
    cruzaria el mapa de lado a lado y taparia datos sin necesidad. */
@@ -313,6 +312,52 @@
 }
 .compare__icon { width: 15px; height: 15px; flex: 0 0 auto; }
 .compare__icon svg { width: 100%; height: 100%; display: block; }
+
+/* Las tres acciones se agrupan en una sola pastilla de iconos. Sueltas y con
+   rotulo ocupaban 329 px de la fila, y el texto repetia lo que ya dice el
+   relleno de activo: "Comparando" es el boton en navy, "Continuo" el azul.
+   El nombre no se pierde -sigue en el tooltip, que ademas explica cada una,
+   y queda en el arbol para lector de pantalla-, solo deja de ocupar sitio
+   sobre el mapa. */
+.controls__actions {
+  display: flex;
+  gap: .125rem;
+  flex: 0 0 auto;
+  padding: .3125rem;
+  background: rgb(255 255 255 / 93%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
+}
+/* dentro de la pastilla cada boton pierde su propio fondo: si no, se verian
+   tres pastillas dentro de una cuarta */
+.controls__actions .compare {
+  width: 32px;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  border-radius: calc(var(--radius-sm) - 3px);
+}
+.controls__actions .compare:hover { background: var(--accent); }
+.controls__actions .compare.is-active { background: var(--navy); }
+.controls__actions .compare--detail.is-active { background: var(--blue); }
+.controls__actions .compare__icon { width: 17px; height: 17px; }
+.controls__actions .compare__warn { top: -1px; right: -1px; }
+
+/* el rotulo se retira de la vista, no del arbol */
+.controls__actions .compare__label {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
 /* Un panel por lado, sobre la mitad del mapa que gobierna */
 .side-panel {
