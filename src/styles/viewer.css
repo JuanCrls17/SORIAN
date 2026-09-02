@@ -582,7 +582,11 @@
 .map-btn:hover { background: var(--accent); color: var(--blue-600); }
 .map-btn svg { width: 15px; height: 15px; display: block; }
 
-.outlet--app:fullscreen { background: var(--canvas); padding: .5rem; }
+/* En pantalla completa el elemento es la aplicacion entera: la cabecera queda
+   arriba y el visor ocupa el resto. El fondo hay que declararlo, que el que
+   pone el navegador por omision es negro. */
+#app:fullscreen { height: 100%; background: var(--canvas); }
+#app:fullscreen .outlet--app { padding: .5rem; }
 
 .leaflet-touch .leaflet-bar,
 .leaflet-bar {

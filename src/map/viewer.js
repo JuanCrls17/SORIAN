@@ -91,8 +91,10 @@ export function createViewer(container, controls) {
     .catch(() => { /* el mapa sigue siendo utilizable sin fronteras */ });
 
   /**
-   * Pantalla completa sobre la vista entera, no solo el mapa: los mandos y
-   * la linea de tiempo tienen que seguir al alcance.
+   * Pantalla completa sobre la aplicacion entera, no solo el mapa: ademas de
+   * los mandos y la linea de tiempo, la cabecera tiene que seguir ahi. Sin
+   * ella no se sabe que sitio se esta mirando ni se puede cambiar de seccion,
+   * y para volver habria que salir de pantalla completa primero.
    */
   function addFullscreen() {
     if (!document.fullscreenEnabled) return;
@@ -102,7 +104,7 @@ export function createViewer(container, controls) {
       title: "Pantalla completa", "aria-label": "Pantalla completa",
       html: EXPAND_ICON,
       onClick: () => {
-        const target = container.parentElement ?? container;
+        const target = container.closest("#app") ?? container.parentElement ?? container;
         if (document.fullscreenElement) document.exitFullscreen();
         else target.requestFullscreen?.();
       },
