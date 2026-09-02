@@ -1,4 +1,5 @@
 import { el, clear } from "../ui/dom.js";
+import { isCompact } from "../ui/media.js";
 
 /** Agrupa las trazas por nombre de serie: un modelo aporta varias trazas. */
 export function groupSeries(traces) {
@@ -43,59 +44,75 @@ export function staticLegend(node, items) {
  * Selector de series. Con todo visible, el primer clic aisla la serie elegida;
  * a partir de ahi cada clic suma o quita, de modo que la seleccion se arma
  * eligiendo lo que interesa en vez de descartando lo que no.
+ *
+ * Son una veintena de modelos, asi que la lista va plegada en pantalla
+ * estrecha: desplegada empujaria el grafico fuera de la vista.
  */
 export function seriesFilter(node, groups, onChange) {
   const names = groups.map((group) => group.name);
   let shown = new Set(names);
 
-  function apply() {
+  const tally = el("strong");
+  const all = el("button", {
+    class: "series__action", type: "button", text: "Todos",
+    onClick: () => set(new Set(names)),
+  });
+  const none = el("button", {
+    class: "series__action", type: "button", text: "Limpiar",
+    onClick: () => set(new Set()),
+  });
+
+  const items = groups.map((group) => ({
+    name: group.name,
+    button: el("button", {
+      class: "series__item", type: "button", onClick: () => pick(group.name),
+    }, [
+      el("span", { class: "series__swatch", style: `background:${group.color}` }),
+      el("span", { class: "series__name", text: group.name }),
+    ]),
+  }));
+
+  const box = el("details", { class: "series__box" }, [
+    el("summary", { class: "series__head" }, [
+      el("span", { class: "series__count" }, [tally, ` de ${names.length} modelos`]),
+      el("span", { class: "series__more", "aria-hidden": "true" }),
+    ]),
+    el("div", { class: "series__body" }, [
+      el("div", { class: "series__actions" }, [all, none]),
+      el("div", { class: "series__list" }, items.map((item) => item.button)),
+    ]),
+  ]);
+  box.open = !isCompact();
+
+  clear(node).append(box);
+
+  function set(next) {
+    shown = next;
+    sync();
     onChange(shown);
-    render();
   }
 
   function pick(name) {
-    if (shown.size === names.length) shown = new Set([name]);
-    else if (shown.has(name)) shown.delete(name);
-    else shown.add(name);
-    apply();
+    if (shown.size === names.length) return set(new Set([name]));
+
+    const next = new Set(shown);
+    if (next.has(name)) next.delete(name);
+    else next.add(name);
+    set(next);
   }
 
-  function render() {
-    const count = shown.size;
+  /** Solo refresca el estado: rehacer el DOM plegaria la lista en cada clic. */
+  function sync() {
+    tally.textContent = String(shown.size);
+    all.disabled = shown.size === names.length;
+    none.disabled = shown.size === 0;
 
-    clear(node).append(
-      el("div", { class: "series__head" }, [
-        el("span", { class: "series__count" }, [
-          el("strong", { text: String(count) }),
-          ` de ${names.length} modelos`,
-        ]),
-        el("div", { class: "series__actions" }, [
-          el("button", {
-            class: "series__action", type: "button", text: "Todos",
-            disabled: count === names.length,
-            onClick: () => { shown = new Set(names); apply(); },
-          }),
-          el("button", {
-            class: "series__action", type: "button", text: "Limpiar",
-            disabled: count === 0,
-            onClick: () => { shown = new Set(); apply(); },
-          }),
-        ]),
-      ]),
-      el("div", { class: "series__list" }, groups.map((group) => {
-        const active = shown.has(group.name);
-        return el("button", {
-          class: `series__item${active ? " is-active" : ""}`,
-          type: "button",
-          "aria-pressed": String(active),
-          onClick: () => pick(group.name),
-        }, [
-          el("span", { class: "series__swatch", style: `background:${group.color}` }),
-          el("span", { class: "series__name", text: group.name }),
-        ]);
-      })),
-    );
+    for (const { name, button } of items) {
+      const active = shown.has(name);
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    }
   }
 
-  render();
+  sync();
 }
