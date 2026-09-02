@@ -319,11 +319,13 @@ body.is-app .footer { display: none; }
 
 .footer__meta { flex: 0 0 auto; color: #8fa8c6; font-variant-numeric: tabular-nums; }
 
-/* En movil solo queda lo que identifica: marca, PEGASO y ano. */
+/* En movil solo queda lo que identifica: la marca y PEGASO. */
 @media (max-width: 860px) {
   .footer__bar { padding: .375rem 1rem; gap: .125rem .75rem; line-height: 1.4; }
   .footer__wordmark { flex: 0 0 auto; font-size: .8125rem; }
-  .footer__meta { flex: 1 1 auto; text-align: right; font-size: .6875rem; }
-  .footer__sibling { margin-top: .125rem; }
+  /* el ano y la version se van: en una franja de una linea competian por el
+     sitio con lo unico que hace falta ahi, quien firma y a donde lleva */
+  .footer__meta { display: none; }
+  .footer__sibling { margin-left: auto; }
   .footer__note { display: none; }
 }
