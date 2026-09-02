@@ -26,10 +26,11 @@ export function buildLegend(scale, title) {
   ]);
 }
 
+/** La fuente publica el campo por clases, asi que un punto da su intervalo. */
 export function describeBin(scale, index) {
   if (index === null) return "sin dato";
   const bin = scale[index];
-  return `${format(bin.min)} a ${format(bin.max)}`;
+  return `entre ${format(bin.min)} y ${format(bin.max)}`;
 }
 
 /** -8.6, -71.3 -> 8.6° S, 71.3° O */

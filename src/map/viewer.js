@@ -13,7 +13,11 @@ export function createViewer(container, controls) {
   const timeline = el("div", { class: "viewer__panel viewer__panel--time" });
   // El punto consultado se lee en una franja bajo el mapa: dentro se
   // encimaba con la linea de tiempo y con los propios mandos.
-  const readout = el("p", { class: "readout", role: "status", "aria-live": "polite" }, [
+  const readout = el("p", {
+    class: "readout", role: "status", "aria-live": "polite",
+    // el visor de origen publica el campo por clases de color, no por valor
+    title: "El pronóstico se publica clasificado por rangos: la celda cae en este intervalo de la escala.",
+  }, [
     el("span", { class: "readout__hint", text: "Apunta el mapa para consultar un punto" }),
   ]);
   const dot = el("span", { class: "probe-dot", "aria-hidden": "true", hidden: true });
@@ -229,6 +233,7 @@ export function createViewer(container, controls) {
     clear(readout).append(
       el("span", { class: "readout__head", text: `${side.label} · ${side.grid.months[index]}` }),
       el("strong", { class: "readout__value", text: `${describeBin(side.grid.scale, bin)} ${units}` }),
+      el("span", { class: "readout__kind", text: "clase de la escala" }),
       el("span", { class: "readout__place", text: formatLatLng(event.latlng) }),
     );
 

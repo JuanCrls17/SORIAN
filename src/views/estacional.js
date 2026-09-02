@@ -149,17 +149,23 @@ export default function estacional(outlet) {
     ]);
   }
 
-  /** Disposicion amplia: los mandos flotan sobre el mapa. */
+  /**
+   * Disposicion amplia: los mandos flotan sobre el mapa. Comparando, cada
+   * panel se pega a la mitad que gobierna y las acciones quedan en medio,
+   * que es donde actuan sobre las dos.
+   */
   function renderWide() {
     clear(dock);
+    const actions = el("div", { class: "controls__actions" }, actionButtons());
+
+    controls.classList.toggle("controls--compare", state.comparing);
     clear(controls).append(
-      el("div", { class: "controls__actions" }, actionButtons()),
-      state.comparing
-        ? el("div", { class: "controls__sides" }, SIDES.map(sidePanel))
-        : el("div", { class: "controls__single" }, [
+      ...(state.comparing
+        ? [sidePanel(SIDES[0]), actions, sidePanel(SIDES[1])]
+        : [actions, el("div", { class: "controls__single" }, [
             selectorGroup("Modelo", MODELS, state.a.model, (id) => update("a", { model: id }), "modelo-a"),
             selectorGroup("Variable", VARIABLES, state.a.variable, (id) => update("a", { variable: id }), "variable-a"),
-          ]),
+          ])]),
     );
   }
 
@@ -168,6 +174,7 @@ export default function estacional(outlet) {
    * barra al alcance del pulgar; las opciones se eligen en una hoja.
    */
   function renderCompact() {
+    controls.classList.remove("controls--compare");
     clear(controls);
 
     const sides = state.comparing ? SIDES : [SIDES[0]];

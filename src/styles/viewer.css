@@ -172,6 +172,12 @@
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
+.readout__kind {
+  font-size: .625rem;
+  letter-spacing: .03em;
+  color: var(--muted);
+  opacity: .85;
+}
 .readout__place { margin-left: auto; font-variant-numeric: tabular-nums; }
 .readout__hint { font-style: italic; opacity: .8; }
 
@@ -188,6 +194,7 @@
     text-overflow: ellipsis;
   }
   .readout__value { font-size: .75rem; }
+  .readout__kind { display: none; }
   .readout__head, .readout__value, .readout__place { white-space: nowrap; }
   .readout__value, .readout__place { flex: 0 0 auto; }
 }
@@ -198,11 +205,25 @@
   align-items: center;
   flex-wrap: wrap;
   gap: .625rem;
+  flex: 1 1 auto;
   min-width: 0;
 }
 
-/* Comparando, los dos panels bajan a su propia fila antes que recortarse */
-.controls__sides { display: flex; gap: .5rem; flex: 0 1 auto; min-width: 0; }
+/* Comparando, cada panel se pega a la mitad del mapa que gobierna: puestos
+   juntos a un lado no se sabe cual manda sobre cual. */
+.controls--compare { justify-content: space-between; }
+
+/* Sin ancho para los tres en fila, las acciones suben y los paneles se
+   reparten debajo, cada uno sobre su mitad. */
+@media (max-width: 1299px) {
+  .controls--compare .controls__actions { order: -1; flex: 1 1 100%; }
+}
+
+/* Ya sin sitio para dos paneles enteros, comparten la fila a partes
+   iguales y su contenido se reparte en dos lineas. */
+@media (max-width: 1023px) {
+  .controls--compare .side-panel { flex: 1 1 0; max-width: none; }
+}
 .controls__actions { display: flex; gap: .5rem; flex: 0 0 auto; }
 
 /* Con un solo pronostico los mandos flotan sueltos: una barra continua
@@ -278,6 +299,7 @@
   gap: .625rem;
   flex: 0 1 auto;
   min-width: 0;
+  max-width: calc(50% - .25rem);
   padding: .25rem .5rem .25rem .625rem;
   background: rgb(255 255 255 / 93%);
   backdrop-filter: blur(10px);
@@ -286,7 +308,13 @@
   box-shadow: 0 3px 14px rgb(10 28 72 / 16%);
   border-left: 3px solid var(--navy);
 }
-.side-panel--b { border-left-color: var(--blue); }
+/* el panel derecho se refleja: su rotulo mira hacia su mitad */
+.side-panel--b {
+  flex-direction: row-reverse;
+  border-left: 0;
+  border-right: 3px solid var(--blue);
+  padding: .25rem .625rem .25rem .5rem;
+}
 
 .side-panel__head {
   display: flex;
@@ -779,6 +807,8 @@
    sobre los datos: crecer de mas seria tapar mas mapa. */
 @media (min-width: 1200px) {
   .viewer__overlay { padding: .625rem; gap: .625rem; }
+  /* la columna del zoom se mantiene libre pese al relleno de arriba */
+  .viewer__overlay--top { padding-right: 3.25rem; }
 
   .compare { padding: .375rem .625rem; font-size: .75rem; }
   .compare__icon { width: 16px; height: 16px; }
