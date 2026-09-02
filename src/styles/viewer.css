@@ -216,18 +216,22 @@
 }
 
 /* Comparando, los dos lados forman una sola barra continua partida por el
-   centro, y no dos pastillas sueltas. Estiradas al 50% cada una dejaba un
-   hueco blanco dentro de si misma junto al corte; ajustadas a su contenido
-   quedaban de distinto ancho segun el nombre del modelo elegido. Como barra
-   unica el reparto es siempre el mismo y cada lado conserva su filete de
-   color en el borde exterior, que es lo que dice cual manda sobre cual.
+   centro, y no dos pastillas sueltas. Sueltas y ajustadas al contenido
+   quedaban de distinto ancho segun el modelo elegido; estiradas al 50% cada
+   una abria dentro de si misma un vacio blanco junto al corte -mas de 300 px
+   por lado a 1440- que tapaba el mapa sin llevar nada.
+
+   Por eso la barra se ajusta a lo que contiene y se centra: el corte cae
+   cerca del divisor, el blanco sobrante se reparte a los extremos y cada
+   lado conserva su filete de color en el borde exterior, que es lo que dice
+   cual manda sobre cual.
 
    Las acciones suben siempre a su propia fila. Repartir segun el hueco libre
    no servia: el ancho disponible tambien depende de si el panel de reparto
    esta abierto, que ninguna media query de ventana ve. */
-.controls--compare { column-gap: 0; row-gap: .625rem; }
+.controls--compare { column-gap: 0; row-gap: .625rem; justify-content: center; }
 .controls--compare .controls__actions { order: -1; flex: 1 1 100%; }
-.controls--compare .side-panel { flex: 1 1 0; max-width: none; }
+.controls--compare .side-panel { flex: 0 1 auto; max-width: none; }
 
 /* Las esquinas interiores se cuadran para que la union no se note y el corte
    queda como un filete tenue: el panel B ya no lleva borde izquierdo, asi que
