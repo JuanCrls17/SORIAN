@@ -3,7 +3,7 @@ import { load } from "../data.js";
 import { el, clear, spinner, errorBox } from "../ui/dom.js";
 import { EXPAND_ICON, COLLAPSE_ICON } from "../ui/icons.js";
 import { createGridLayer } from "./grid-layer.js";
-import { buildLegend, describeBin, formatLatLng } from "./legend.js";
+import { buildLegend, describeAnomaly, describeBin, formatLatLng } from "./legend.js";
 import { createSwipe } from "./swipe.js";
 import { renderAnalysis } from "./analysis.js";
 
@@ -15,8 +15,9 @@ export function createViewer(container, controls) {
   // encimaba con la linea de tiempo y con los propios mandos.
   const readout = el("p", {
     class: "readout", role: "status", "aria-live": "polite",
-    // el visor de origen publica el campo por clases de color, no por valor
-    title: "El pronóstico se publica clasificado por rangos: la celda cae en este intervalo de la escala.",
+    // el visor de origen publica el campo por clases de color, no por valor:
+    // la lectura dice que significa la clase y deja su intervalo como respaldo
+    title: "El pronóstico se publica clasificado por rangos respecto al promedio histórico: la celda cae en este intervalo de la escala, no en un valor exacto.",
   }, [
     el("span", { class: "readout__hint", text: "Apunta el mapa para consultar un punto" }),
   ]);
@@ -232,8 +233,8 @@ export function createViewer(container, controls) {
     const units = side.grid.title.match(/\(([^)]+)\)/)?.[1] ?? "";
     clear(readout).append(
       el("span", { class: "readout__head", text: `${side.label} · ${side.grid.months[index]}` }),
-      el("strong", { class: "readout__value", text: `${describeBin(side.grid.scale, bin)} ${units}` }),
-      el("span", { class: "readout__kind", text: "clase de la escala" }),
+      el("strong", { class: "readout__value", text: describeAnomaly(side.grid.scale, bin, side.variable) }),
+      el("span", { class: "readout__kind", text: describeBin(side.grid.scale, bin, units) }),
       el("span", { class: "readout__place", text: formatLatLng(event.latlng) }),
     );
 
@@ -270,6 +271,7 @@ export function createViewer(container, controls) {
     if (ticket !== side.request) return;
     side.grid = data;
     side.label = labelOf(model, variable);
+    side.variable = variable;
 
     if (side.layer) map.removeLayer(side.layer);
     side.layer = new GridLayer(data.grid, data.scale.map((bin) => bin.color), data.scale);

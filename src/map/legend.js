@@ -26,11 +26,68 @@ export function buildLegend(scale, title) {
   ]);
 }
 
-/** La fuente publica el campo por clases, asi que un punto da su intervalo. */
-export function describeBin(scale, index) {
+/**
+ * La escala es de anomalias y esta partida en dos mitades simetricas: el lado
+ * del indice dice hacia donde se desvia la celda y su distancia al centro,
+ * cuanto. Ese par (direccion, intensidad) es lo que se puede poner en palabras
+ * sin atribuir al dato una precision que no tiene.
+ */
+/** 0 en el centro de la escala, 4 en su clase extrema. */
+function intensity(scale, index) {
+  const mid = scale.length / 2;
+  const rank = index < mid ? mid - index : index - mid + 1;
+  const frac = (rank - 1) / (mid - 1);
+
+  if (frac === 0) return 0;
+  if (frac === 1) return 4;
+  if (frac <= 0.3) return 1;
+  return frac <= 0.6 ? 2 : 3;
+}
+
+const WORDING = {
+  precipitacion: {
+    neutral: "Lluvia en torno a lo normal",
+    more: ["Algo más lluvia de lo normal", "Bastante más lluvia de lo normal",
+      "Mucha más lluvia de lo normal", "Lluvia excepcionalmente alta"],
+    less: ["Algo menos lluvia de lo normal", "Bastante menos lluvia de lo normal",
+      "Mucha menos lluvia de lo normal", "Lluvia excepcionalmente baja"],
+  },
+  temperatura: {
+    neutral: "Temperatura en torno a lo normal",
+    more: ["Algo más cálido de lo normal", "Bastante más cálido de lo normal",
+      "Mucho más cálido de lo normal", "Calor excepcional"],
+    less: ["Algo más frío de lo normal", "Bastante más frío de lo normal",
+      "Mucho más frío de lo normal", "Frío excepcional"],
+  },
+};
+
+const KIND = { tpara: "precipitacion", mx2t24a: "temperatura", mn2t24a: "temperatura" };
+
+/** Lo que la celda significa, en palabras: direccion e intensidad del desvio. */
+export function describeAnomaly(scale, index, variable) {
   if (index === null) return "sin dato";
+
+  const words = WORDING[KIND[variable] ?? "precipitacion"];
+  const level = intensity(scale, index);
+  if (level === 0) return words.neutral;
+
+  return index < scale.length / 2 ? words.less[level - 1] : words.more[level - 1];
+}
+
+/**
+ * La fuente publica el campo por clases, asi que un punto da su intervalo. Las
+ * dos clases de los extremos no tienen tope real: su limite exterior es solo
+ * donde la escala deja de dividir, y darlo como cifra lo haria pasar por dato.
+ */
+export function describeBin(scale, index, units = "") {
+  if (index === null) return "";
+  const suffix = units ? ` ${units}` : "";
+
+  if (index === 0) return `${format(scale[0].max)}${suffix} o menos`;
+  if (index === scale.length - 1) return `${format(scale.at(-1).min)}${suffix} o más`;
+
   const bin = scale[index];
-  return `entre ${format(bin.min)} y ${format(bin.max)}`;
+  return `${format(bin.min)} a ${format(bin.max)}${suffix}`;
 }
 
 /** -8.6, -71.3 -> 8.6° S, 71.3° O */
