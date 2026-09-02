@@ -44,7 +44,7 @@
   isolation: isolate;
   overflow: hidden;
   margin: -1rem -1rem 1rem;
-  padding: 3rem 1.25rem 3.25rem;
+  padding: 3rem 1rem 3.25rem;
   color: #fff;
   background: #061027;
 }
@@ -61,10 +61,15 @@
 }
 
 @media (min-width: 760px) {
+  /* La portada llega a los bordes de la ventana. Recuadrada dejaba a los lados
+     dos franjas del gris de la pagina contra una imagen oscura, y ese corte
+     partia la pantalla en tres. El margen negativo la saca del ancho util y el
+     relleno devuelve el texto a la misma columna que las tarjetas de abajo. */
   .hero {
-    margin-inline: 0;
-    padding: 5rem 3rem;
-    border-radius: var(--radius);
+    margin-inline: calc(50% - 50vw);
+    padding-block: 5rem;
+    padding-inline: calc(50vw - 50%);
+    border-radius: 0;
   }
   .hero::after {
     background: linear-gradient(100deg,
