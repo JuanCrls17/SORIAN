@@ -142,35 +142,84 @@
 }
 
 /* ---------- Tira de pronostico ---------- */
-/* Cierra la portada con lo unico que no se deja contar por escrito: los tres
-   campos tal como los dibuja el visor. Llega a los bordes y baja hasta el pie
-   -de ahi el margen inferior negativo, que se come el respiro del contenedor-
-   para que la pagina no acabe en una franja blanca vacia. */
+/* Cierra la portada con los tres campos tal como los dibuja el visor. Llega a
+   los bordes y baja hasta el pie -de ahi el margen inferior negativo, que se
+   come el respiro del contenedor- para que la pagina no acabe en una franja
+   blanca vacia. */
 .strip {
   margin: 1.5rem calc(50% - 50vw) -2.5rem;
-  padding: 3.5rem calc(50vw - 50%) 3rem;
+  padding: 2.75rem calc(50vw - 50%) 3rem;
   overflow: hidden;
   color: #fff;
   background: #061027;
 }
 
+/* Encabezado de lamina, no de folleto: que se ve a la izquierda, de donde
+   sale y de cuando a la derecha. */
+.strip__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: .875rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+}
+.strip__heading {
+  margin: 0;
+  /* los encabezados van en navy: sobre este fondo hay que decirlo */
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.strip__meta { margin: 0; color: #8fa8c4; font-size: .8125rem; }
+.strip__month { color: #dce8f5; font-variant-numeric: tabular-nums; }
+
 .strip__row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.5rem;
+  gap: 1.25rem;
   will-change: transform;
 }
 
-.strip__panel { margin: 0; }
+/* Las tres laminas comparten rejilla, asi que el mapa y la escala arrancan a
+   la misma altura aunque un rotulo ocupe dos lineas. */
+@supports (grid-template-rows: subgrid) {
+  .strip__row { grid-template-rows: auto auto auto; }
+  .strip__plate { grid-template-rows: subgrid; grid-row: span 3; row-gap: .625rem; }
+}
+
+.strip__plate {
+  display: grid;
+  gap: .625rem;
+  margin: 0;
+  padding: .875rem;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 4%);
+}
+
+.strip__name {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .5rem;
+  font-size: .9375rem;
+  font-weight: 600;
+  color: #fff;
+}
+.strip__units { font-weight: 500; font-size: .6875rem; color: #8fa8c4; }
+.strip__label--short { display: none; }
 
 .strip__field {
   display: block;
   width: 100%;
-  /* provisional: la proporcion definitiva la pone el modulo con el dominio ya
-     proyectado, y asi la fila no da un salto de alto al llegar el dato */
+  /* provisional: la proporcion definitiva la pone el modulo con la ventana ya
+     proyectada, y asi la fila no da un salto de alto al llegar el dato */
   aspect-ratio: 6 / 7;
-  border-radius: .75rem;
+  border-radius: .5rem;
   background: rgb(255 255 255 / 4%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 8%);
   opacity: 0;
   transition: opacity 1.1s ease;
 }
@@ -178,42 +227,39 @@
    rectangulo vacio mientras carga la grilla */
 .strip__field.is-ready { opacity: 1; }
 
-.strip__caption {
-  margin-top: .625rem;
-  color: #dce8f5;
-  font-size: .8125rem;
-  text-align: center;
-}
-
-.strip__stamp {
-  margin: 1.75rem 0 0;
-  color: #8fa8c4;
-  font-size: .75rem;
-  letter-spacing: .05em;
-  text-align: center;
-}
-.strip__month { color: #dce8f5; font-variant-numeric: tabular-nums; }
+/* La leyenda es la del visor, con sus mismas clases; aqui solo cambia de
+   fondo, asi que se le ajustan los tonos. */
+.strip .legend__bar { height: 8px; border-radius: 2px; }
+.strip .legend__ticks { color: #8fa8c4; font-size: .625rem; }
 
 /* La entrada se arma desde JS -.is-armed-, no aqui: si el modulo no llega a
    correr, la tira se ve entera en vez de quedarse invisible. */
-.strip.is-armed .strip__panel,
-.strip.is-armed .strip__stamp {
+.strip.is-armed .strip__head,
+.strip.is-armed .strip__plate {
   opacity: 0;
   transform: translateY(18px);
   transition: opacity .7s ease, transform .8s cubic-bezier(.2, .75, .3, 1);
 }
-.strip.is-armed .strip__panel:nth-child(2) { transition-delay: .1s; }
-.strip.is-armed .strip__panel:nth-child(3) { transition-delay: .2s; }
-.strip.is-armed .strip__stamp { transition-delay: .3s; }
+.strip.is-armed .strip__plate:nth-child(1) { transition-delay: .1s; }
+.strip.is-armed .strip__plate:nth-child(2) { transition-delay: .2s; }
+.strip.is-armed .strip__plate:nth-child(3) { transition-delay: .3s; }
 
-.strip.is-armed.is-in .strip__panel,
-.strip.is-armed.is-in .strip__stamp { opacity: 1; transform: none; }
+.strip.is-armed.is-in .strip__head,
+.strip.is-armed.is-in .strip__plate { opacity: 1; transform: none; }
 
 @media (max-width: 759px) {
-  .strip { margin-inline: -1rem; padding: 2.5rem 1rem 2rem; }
+  .strip { margin-inline: -1rem; padding: 2rem 1rem 2.25rem; }
+  .strip__head { margin-bottom: 1rem; }
   .strip__row { gap: .5rem; }
-  .strip__field { border-radius: .5rem; }
-  .strip__caption { margin-top: .5rem; font-size: .6875rem; }
+  .strip__plate { padding: .5rem; gap: .4375rem; border-radius: .625rem; }
+  .strip__name { display: grid; gap: 0; font-size: .75rem; }
+  .strip__label--long { display: none; }
+  .strip__label--short { display: inline; }
+  .strip__units { font-size: .625rem; }
+  .strip__field { border-radius: .375rem; }
+  /* a este ancho las cifras de la escala se pisan: queda la barra, que es
+     la que dice que la escala es divergente y donde cae el cero */
+  .strip .legend__ticks { display: none; }
 }
 
 /* ---------- Accesos ---------- */

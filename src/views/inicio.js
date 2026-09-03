@@ -49,24 +49,37 @@ export default function inicio(outlet) {
   );
 
   // Aqui abajo no va un fondo decorativo: van los tres campos tal como los
-  // dibuja el visor, a plena vista y recorriendo los mismos meses. Es la
-  // pagina diciendo que tiene dentro, sin prometerlo con adjetivos.
+  // dibuja el visor, cada uno rotulado y con su escala, que es lo que separa
+  // una lamina de un pronostico de una mancha de color.
   const month = el("strong", { class: "strip__month" });
   const panels = VARIABLES.map((variable) => ({
     variable: variable.id,
     canvas: el("canvas", { class: "strip__field", "aria-hidden": "true" }),
+    legend: el("div", { class: "strip__legend" }),
   }));
 
   const row = el("div", { class: "strip__row" }, panels.map((panel, i) =>
-    el("figure", { class: "strip__panel" }, [
+    el("figure", { class: "strip__plate" }, [
+      el("figcaption", { class: "strip__name" }, [
+        // en columnas estrechas el nombre largo parte en dos y descuadra la
+        // lamina; el corto es el que ya usa la barra del visor
+        el("span", { class: "strip__label" }, [
+          el("span", { class: "strip__label--long", text: VARIABLES[i].label }),
+          el("span", { class: "strip__label--short", text: VARIABLES[i].short }),
+        ]),
+        el("span", { class: "strip__units", text: VARIABLES[i].units }),
+      ]),
       panel.canvas,
-      el("figcaption", { class: "strip__caption", text: VARIABLES[i].label }),
+      panel.legend,
     ]),
   ));
 
   const band = el("section", { class: "strip" }, [
+    el("header", { class: "strip__head" }, [
+      el("h2", { class: "strip__heading", text: "Anomalías previstas" }),
+      el("p", { class: "strip__meta" }, ["ECMWF · ", month]),
+    ]),
     row,
-    el("p", { class: "strip__stamp" }, ["Anomalías previstas · ECMWF · ", month]),
   ]);
   outlet.append(band);
 

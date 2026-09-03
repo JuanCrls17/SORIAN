@@ -16,7 +16,8 @@ export function buildLegend(scale, title) {
     .map((bin) => el("span", { class: "legend__tick", text: String(format(bin.min)) }));
 
   return el("figure", { class: "legend" }, [
-    el("figcaption", { class: "legend__title", text: title }),
+    // sin titulo cuando quien la coloca ya ha rotulado el campo por su cuenta
+    title ? el("figcaption", { class: "legend__title", text: title }) : null,
     el("div", { class: "legend__bar" }, swatches),
     el("div", { class: "legend__ticks" }, [
       el("span", { class: "legend__tick", text: String(format(scale[0].max)) }),

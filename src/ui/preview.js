@@ -1,6 +1,7 @@
 import { PATHS, VARIABLES } from "../config.js";
 import { load, decodeFrame } from "../data.js";
 import { smoothField } from "../map/interpolate.js";
+import { buildLegend } from "../map/legend.js";
 
 /**
  * Submuestreo por celda. Alto, porque de la grilla entera solo se muestra la
@@ -90,8 +91,8 @@ export function forecastStrip(panels, onMonth, model = "ecmwf") {
   // Cada variable se dibuja como la dibuja el visor: la precipitacion es
   // discontinua en el espacio, asi que va en celdas -interpolarla sugeriria
   // transiciones que el modelo no resuelve- y la temperatura, continua.
-  const items = panels.map(({ canvas, variable }) => ({
-    canvas, variable, ctx: canvas.getContext("2d"), cache: [], data: null, lines: null,
+  const items = panels.map(({ canvas, legend, variable }) => ({
+    canvas, legend, variable, ctx: canvas.getContext("2d"), cache: [], data: null, lines: null,
     continuous: VARIABLES.find((v) => v.id === variable)?.continuous ?? true,
   }));
 
@@ -197,6 +198,9 @@ export function forecastStrip(panels, onMonth, model = "ecmwf") {
         item.data = sets[i];
         item.proj = projection(sets[i].grid);
         item.canvas.style.aspectRatio = String(item.proj.ratio);
+        // la misma leyenda del visor, con las mismas clases: un campo de
+        // anomalias sin escala es una mancha de color y no un dato
+        item.legend?.append(buildLegend(sets[i].scale));
       });
 
       for (const item of items) {
