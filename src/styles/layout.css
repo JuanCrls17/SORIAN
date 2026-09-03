@@ -278,86 +278,28 @@ body.is-app .footer { display: none; }
     #c7eae5 64%, #98d7cd 73%, #67bbb1 82%, #35978f 91%, #003c30 100%);
 }
 
+/* Un solo renglon: marca, aviso, PEGASO y copyright. */
 .footer__inner {
-  max-width: 1600px;
-  margin-inline: auto;
-  padding: 2rem 2rem 1.5rem;
-}
-
-/* ---------- Fila superior: marca + PEGASO ---------- */
-.footer__top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  padding-bottom: 1.25rem;
-  margin-bottom: 1.25rem;
-  border-bottom: 1px solid rgb(255 255 255 / 8%);
-}
-
-.footer__brand {
-  display: flex;
-  flex-direction: column;
-  gap: .25rem;
+  gap: .75rem 1.25rem;
+  max-width: 1600px;
+  margin-inline: auto;
+  padding: .5rem 2rem;
 }
 
 .footer__wordmark {
-  font-size: 1.25rem;
+  flex: 0 0 auto;
+  font-size: 1rem;
   font-weight: 700;
-  letter-spacing: .22em;
-  margin-right: -.22em;
+  letter-spacing: .2em;
+  margin-right: -.2em;
   color: #fff;
   line-height: 1;
 }
 
-.footer__subtitle {
-  display: block;
-  font-size: .6875rem;
-  color: #7a96b4;
-  letter-spacing: .02em;
-  line-height: 1.4;
-}
-
-/* Invitacion a PEGASO como pill sutil */
-.footer__sibling {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  flex: 0 0 auto;
-  padding: .5rem .875rem;
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 999px;
-  text-decoration: none;
-  color: #8fa8c6;
-  transition: background .18s ease, border-color .18s ease, color .18s ease;
-}
-.footer__sibling-lead { font-size: .6875rem; }
-.footer__sibling-name {
-  font-size: .8125rem;
-  font-weight: 700;
-  letter-spacing: .1em;
-  color: #dce8f5;
-}
-.footer__sibling-go::before { content: "\2197"; font-size: .75rem; }
-
-.footer__sibling:hover {
-  background: rgb(255 255 255 / 8%);
-  border-color: rgb(255 255 255 / 18%);
-  color: #dce8f5;
-}
-.footer__sibling:hover .footer__sibling-name { color: #fff; }
-
-/* ---------- Fila inferior: aviso + copyright ---------- */
-.footer__bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .75rem 1.5rem;
-  flex-wrap: wrap;
-}
-
 .footer__note {
-  flex: 1 1 16rem;
+  flex: 1 1 auto;
   min-width: 0;
   margin: 0;
   font-size: .6875rem;
@@ -371,25 +313,39 @@ body.is-app .footer { display: none; }
   font-variant-numeric: tabular-nums;
 }
 
-/* ---------- Responsive ---------- */
-@media (max-width: 860px) {
-  .footer__inner { padding: 1.5rem 1rem 1.25rem; }
-
-  .footer__top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .footer__wordmark { font-size: 1.0625rem; }
-
-  .footer__sibling {
-    align-self: flex-start;
-    padding: .375rem .75rem;
-  }
-
-  .footer__bottom { flex-direction: column; align-items: flex-start; gap: .25rem; }
+/* Invitacion a PEGASO como pill sutil */
+.footer__sibling {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  flex: 0 0 auto;
+  padding: .3125rem .75rem;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 999px;
+  text-decoration: none;
+  color: #8fa8c6;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
 }
 
+.footer__sibling-lead { font-size: .6875rem; }
+.footer__sibling-name {
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: #dce8f5;
+}
+.footer__sibling-go::before { content: "\2197"; font-size: .6875rem; }
+
+.footer__sibling:hover {
+  background: rgb(255 255 255 / 8%);
+  border-color: rgb(255 255 255 / 18%);
+  color: #dce8f5;
+}
+.footer__sibling:hover .footer__sibling-name { color: #fff; }
+
+@media (max-width: 860px) {
+  .footer__inner { padding: .5rem 1rem; gap: .75rem; }
+  /* en el telefono el renglon solo da para la marca y el enlace hermano */
+  .footer__note, .footer__meta { display: none; }
+  .footer__sibling { margin-left: auto; }
+}
