@@ -112,26 +112,33 @@ export function buildHeader() {
 }
 
 /**
- * Una sola franja: la navegacion ya esta arriba y repetirla no aporta. Los
- * enlaces institucionales tampoco, que ya firman la cabecera con su logo; en
- * su sitio se nombra PEGASO, que es de la misma casa y no se encuentra solo.
+ * Pie de dos franjas: la primera identifica al sistema y enlaza PEGASO, la
+ * segunda lleva el aviso legal y el copyright. La navegacion ya esta en la
+ * cabecera y repetirla aqui no aportaba.
  */
 export function buildFooter() {
   return el("footer", { class: "footer" }, [
     el("div", { class: "footer__scale", "aria-hidden": "true" }),
-    el("div", { class: "footer__bar" }, [
-      wordmark("span", "footer__wordmark"),
-      el("p", { class: "footer__note", text: "Resultados de modelos numéricos, de carácter referencial." }),
-      el("a", {
-        class: "footer__sibling",
-        href: "https://smn-senamhi.github.io/PEGASO/",
-        target: "_blank", rel: "noopener noreferrer",
-      }, [
-        el("span", { class: "footer__sibling-lead", text: "También del SENAMHI" }),
-        el("span", { class: "footer__sibling-name", text: "PEGASO" }),
-        el("span", { class: "footer__sibling-go", "aria-hidden": "true" }),
+    el("div", { class: "footer__inner" }, [
+      el("div", { class: "footer__top" }, [
+        el("div", { class: "footer__brand" }, [
+          wordmark("span", "footer__wordmark"),
+          el("span", { class: "footer__subtitle", text: "Subdirección de Cambio Climático y Modelamiento Atmosférico — SENAMHI" }),
+        ]),
+        el("a", {
+          class: "footer__sibling",
+          href: "https://smn-senamhi.github.io/PEGASO/",
+          target: "_blank", rel: "noopener noreferrer",
+        }, [
+          el("span", { class: "footer__sibling-lead", text: "También del SENAMHI" }),
+          el("span", { class: "footer__sibling-name", text: "PEGASO" }),
+          el("span", { class: "footer__sibling-go", "aria-hidden": "true" }),
+        ]),
       ]),
-      el("span", { class: "footer__meta", text: `© ${new Date().getFullYear()} SENAMHI · v1.0` }),
+      el("div", { class: "footer__bottom" }, [
+        el("p", { class: "footer__note", text: "Resultados de modelos numéricos, de carácter referencial." }),
+        el("span", { class: "footer__meta", text: `© ${new Date().getFullYear()} SENAMHI · v1.0` }),
+      ]),
     ]),
   ]);
 }

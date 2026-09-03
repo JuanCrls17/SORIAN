@@ -143,12 +143,12 @@
 
 /* ---------- Tira de pronostico ---------- */
 /* Cierra la portada con los tres campos tal como los dibuja el visor. Llega a
-   los bordes y baja hasta el pie -de ahi el margen inferior negativo, que se
-   come el respiro del contenedor- para que la pagina no acabe en una franja
-   blanca vacia. */
+   los bordes de la ventana para que el fondo oscuro acompane hasta el pie sin
+   franjas vacias. El margen inferior negativo se come el relleno del outlet
+   para que no quede una franja clara entre la banda y el pie. */
 .strip {
   margin: 1.5rem calc(50% - 50vw) -2.5rem;
-  padding: 2rem calc(50vw - 50%) 2.25rem;
+  padding: 2rem calc(50vw - 50%) 2.5rem;
   overflow: hidden;
   color: #fff;
   background: #061027;
