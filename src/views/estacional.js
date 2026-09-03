@@ -39,7 +39,7 @@ export default function estacional(outlet) {
   outlet.classList.add("outlet--app");
   document.body.classList.add("is-app");
   outlet.append(
-    el("h1", { class: "sr-only", text: "Pronóstico estacional" }),
+    el("h1", { class: "sr-only", text: "Predicción estacional" }),
     stage,
     dock,
     el("p", { class: "app-note" }, [
@@ -104,7 +104,7 @@ export default function estacional(outlet) {
         class: `compare${state.comparing ? " is-active" : ""}`,
         type: "button",
         "aria-pressed": String(state.comparing),
-        title: state.comparing ? "Volver a un solo pronóstico" : "Dividir el mapa y comparar",
+        title: state.comparing ? "Volver a una sola predicción" : "Dividir el mapa y comparar",
         onClick: () => setComparing(!state.comparing),
       }, [
         el("span", { class: "compare__icon", html: COMPARE_ICON }),
@@ -191,7 +191,7 @@ export default function estacional(outlet) {
               el("span", { class: "dock__side-icon", html: SIDE_ICONS[side.id] }),
               el("span", { text: side.label }),
             ])
-          : el("span", { class: "dock__label", text: "Pronóstico" }),
+          : el("span", { class: "dock__label", text: "Predicción" }),
         el("span", { class: "dock__value", text: describe(side.id) }),
       ]),
     );
@@ -204,7 +204,7 @@ export default function estacional(outlet) {
 
   function openSheet(side) {
     sheet.open(
-      state.comparing ? `Pronóstico · ${side.label}` : "Elegir pronóstico",
+      state.comparing ? `Predicción · ${side.label}` : "Elegir predicción",
       [
         selectorGroup("Modelo", MODELS, state[side.id].model, (id) => {
           update(side.id, { model: id });

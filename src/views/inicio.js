@@ -1,7 +1,5 @@
 import { el, clear } from "../ui/dom.js";
-import { navigate } from "../router.js";
 import { wordmark } from "../ui/nav.js";
-import { ICONS } from "../ui/icons.js";
 import { VARIABLES } from "../config.js";
 import { selectorGroup } from "../ui/selector.js";
 import { layeredBand } from "../ui/scroll.js";
@@ -26,7 +24,7 @@ export default function inicio(outlet) {
   /**
    * La puerta al visor estacional no es un rotulo con una flecha: es el
    * pronostico mismo, a sangre y renovandose, con el texto encima. El menu ya
-   * dice a donde se puede ir; una tarjeta que repita "Pronostico estacional"
+   * dice a donde se puede ir; una tarjeta que repita "Prediccion estacional"
    * solo lo dice otra vez. Esta lo ensena.
    *
    * El campo va desenfocado y bajo un velo porque aqui hace de fondo -para
@@ -50,7 +48,7 @@ export default function inicio(outlet) {
     el("div", { class: "showcase__body" }, [
       el("header", { class: "showcase__head" }, [
         el("div", { class: "showcase__intro" }, [
-          el("h2", { class: "showcase__title", text: "Pronóstico estacional" }),
+          el("h2", { class: "showcase__title", text: "Predicción estacional" }),
           el("p", { class: "showcase__text", text: "Anomalías mensuales de precipitación y temperatura. Tres modelos globales, seis meses de horizonte y comparación lado a lado." }),
         ]),
         controls,
@@ -65,20 +63,7 @@ export default function inicio(outlet) {
     ]),
   ]);
 
-  // ENSO no tiene mapa que ensenar -su dato es una serie-, asi que conserva
-  // su tarjeta, ahora sola y a lo ancho.
-  const enso = el("section", { class: "access" }, [
-    el("button", { class: "access__card", type: "button", onClick: () => navigate("enso") }, [
-      el("span", { class: "access__icon", html: ICONS.mx2t24a }),
-      el("span", { class: "access__body" }, [
-        el("span", { class: "access__title", text: "Monitoreo ENSO" }),
-        el("span", { class: "access__text", text: "Predicción multimodelo de la anomalía de temperatura superficial del mar en las regiones Niño 1+2 y 3.4." }),
-      ]),
-      el("span", { class: "access__go", "aria-hidden": "true", text: "→" }),
-    ]),
-  ]);
-
-  outlet.append(band, enso);
+  outlet.append(band);
 
   const panel = forecastPanel({
     canvas: field,

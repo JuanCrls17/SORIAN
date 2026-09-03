@@ -17,7 +17,7 @@ export function createViewer(container, controls) {
     class: "readout", role: "status", "aria-live": "polite",
     // el visor de origen publica el campo por clases de color, no por valor:
     // la lectura dice que significa la clase y deja su intervalo como respaldo
-    title: "El pronóstico se publica clasificado por rangos respecto al promedio histórico: la celda cae en este intervalo de la escala, no en un valor exacto.",
+    title: "La predicción se publica clasificada por rangos respecto al promedio histórico: la celda cae en este intervalo de la escala, no en un valor exacto.",
   }, [
     el("span", { class: "readout__hint", text: "Apunta el mapa para consultar un punto" }),
   ]);
