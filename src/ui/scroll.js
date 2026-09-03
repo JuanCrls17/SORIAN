@@ -1,8 +1,8 @@
 const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 /**
- * Banda que entra por capas y cuyo fondo se desplaza mas despacio que el
- * texto, de modo que la imagen parece quedarse atras al bajar.
+ * Banda que entra por capas y, si se le da una capa de fondo, la desplaza
+ * mas despacio que el texto, de modo que parece quedarse atras al bajar.
  *
  * El desplazamiento solo se calcula mientras la banda se ve: fuera de ella no
  * hay nada que mover, y escuchar el scroll todo el rato para recalcular una
@@ -14,7 +14,7 @@ const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)");
  * modulo no llega a ejecutarse, la banda se ve entera y quieta en vez de
  * quedarse en blanco para siempre.
  */
-export function layeredBand(section, layer, strength = 0.16) {
+export function layeredBand(section, layer = null, strength = 0.16) {
   let visible = false;
   let queued = false;
 
@@ -22,7 +22,7 @@ export function layeredBand(section, layer, strength = 0.16) {
 
   function update() {
     queued = false;
-    if (!visible || REDUCED.matches) return;
+    if (!visible || REDUCED.matches || !layer) return;
 
     const box = section.getBoundingClientRect();
     // -1 cuando la banda asoma por abajo, 0 en el centro, 1 al salir por arriba
@@ -48,8 +48,11 @@ export function layeredBand(section, layer, strength = 0.16) {
   }, { threshold: [0, 0.15, 0.5] });
 
   watcher.observe(section);
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", onScroll, { passive: true });
+  // sin capa que desplazar no hay nada que recalcular al hacer scroll
+  if (layer) {
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+  }
 
   return () => {
     watcher.disconnect();

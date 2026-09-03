@@ -1,25 +1,11 @@
-import { el } from "../ui/dom.js";
+import { el, clear } from "../ui/dom.js";
 import { navigate } from "../router.js";
 import { wordmark } from "../ui/nav.js";
 import { ICONS } from "../ui/icons.js";
 import { VARIABLES } from "../config.js";
+import { selectorGroup } from "../ui/selector.js";
 import { layeredBand } from "../ui/scroll.js";
-import { forecastStrip } from "../ui/preview.js";
-
-const ACCESS = [
-  {
-    route: "estacional",
-    icon: ICONS.tpara,
-    title: "Pronóstico estacional",
-    text: "Anomalías mensuales de precipitación y temperatura. Tres modelos globales, seis meses de horizonte y comparación lado a lado.",
-  },
-  {
-    route: "enso",
-    icon: ICONS.mx2t24a,
-    title: "Monitoreo ENSO",
-    text: "Predicción multimodelo de la anomalía de temperatura superficial del mar en las regiones Niño 1+2 y 3.4.",
-  },
-];
+import { forecastPanel } from "../ui/preview.js";
 
 export default function inicio(outlet) {
   outlet.append(
@@ -35,51 +21,80 @@ export default function inicio(outlet) {
       ]),
       el("div", { class: "hero__art", "aria-hidden": "true" }),
     ]),
-
-    el("section", { class: "access" }, ACCESS.map((item) =>
-      el("button", { class: "access__card", type: "button", onClick: () => navigate(item.route) }, [
-        el("span", { class: "access__icon", html: item.icon }),
-        el("span", { class: "access__body" }, [
-          el("span", { class: "access__title", text: item.title }),
-          el("span", { class: "access__text", text: item.text }),
-        ]),
-        el("span", { class: "access__go", "aria-hidden": "true", text: "→" }),
-      ]),
-    )),
   );
 
-  // Aqui abajo no va un fondo decorativo: van los tres campos tal como los
-  // dibuja el visor, cada uno rotulado y con su escala, que es lo que separa
-  // una lamina de un pronostico de una mancha de color.
-  const month = el("strong", { class: "strip__month" });
-  const panels = VARIABLES.map((variable) => ({
-    variable: variable.id,
-    canvas: el("canvas", { class: "strip__field", "aria-hidden": "true" }),
-    legend: el("div", { class: "strip__legend" }),
-  }));
+  /**
+   * La puerta al visor estacional no es un rotulo con una flecha: es el
+   * pronostico mismo, grande y renovandose. El menu ya dice a donde se puede
+   * ir; una tarjeta que repita "Pronostico estacional" solo lo dice otra vez.
+   * Esta lo ensena, y al picarla abre en el visor justo lo que se esta viendo.
+   */
+  const field = el("canvas", { class: "showcase__field", "aria-hidden": "true" });
+  const month = el("strong", { class: "showcase__month" });
+  const legend = el("div", { class: "showcase__legend" });
+  const controls = el("div", { class: "showcase__controls" });
 
-  const row = el("div", { class: "strip__row" }, panels.map((panel, i) =>
-    el("figure", { class: "strip__plate" }, [
-      el("figcaption", { class: "strip__name" }, [
-        VARIABLES[i].label,
-        el("span", { class: "strip__units", text: VARIABLES[i].units }),
-      ]),
-      panel.canvas,
-      panel.legend,
-    ]),
-  ));
-
-  const band = el("section", { class: "strip" }, [
-    el("header", { class: "strip__head" }, [
-      el("h2", { class: "strip__heading", text: "Anomalías previstas" }),
-      el("p", { class: "strip__meta" }, ["ECMWF · ", month]),
-    ]),
-    row,
+  const frame = el("a", {
+    class: "showcase__frame",
+    href: "#estacional",
+    "aria-label": "Abrir el pronóstico estacional en el visor",
+  }, [
+    field,
+    el("span", { class: "showcase__stamp" }, [month]),
+    el("span", { class: "showcase__cue", "aria-hidden": "true", text: "Abrir en el visor  →" }),
   ]);
-  outlet.append(band);
 
-  const stopBand = layeredBand(band, row, 0.05);
-  const stopStrip = forecastStrip(panels, (name) => { month.textContent = name ?? ""; });
+  const band = el("section", { class: "showcase" }, [
+    el("header", { class: "showcase__head" }, [
+      el("div", { class: "showcase__intro" }, [
+        el("h2", { class: "showcase__title", text: "Pronóstico estacional" }),
+        el("p", { class: "showcase__text", text: "Anomalías mensuales de precipitación y temperatura. Tres modelos globales, seis meses de horizonte y comparación lado a lado." }),
+      ]),
+      controls,
+    ]),
+    frame,
+    el("div", { class: "showcase__foot" }, [
+      legend,
+      el("p", { class: "showcase__hint", text: "Se renueva solo · elige una variable para fijarla" }),
+    ]),
+  ]);
 
-  return { destroy: () => { stopBand(); stopStrip(); } };
+  // ENSO no tiene mapa que ensenar -su dato es una serie-, asi que conserva
+  // su tarjeta, ahora sola y a lo ancho.
+  const enso = el("section", { class: "access" }, [
+    el("button", { class: "access__card", type: "button", onClick: () => navigate("enso") }, [
+      el("span", { class: "access__icon", html: ICONS.mx2t24a }),
+      el("span", { class: "access__body" }, [
+        el("span", { class: "access__title", text: "Monitoreo ENSO" }),
+        el("span", { class: "access__text", text: "Predicción multimodelo de la anomalía de temperatura superficial del mar en las regiones Niño 1+2 y 3.4." }),
+      ]),
+      el("span", { class: "access__go", "aria-hidden": "true", text: "→" }),
+    ]),
+  ]);
+
+  outlet.append(band, enso);
+
+  const panel = forecastPanel({
+    canvas: field,
+    legend,
+    onState: ({ variable, month: name }) => {
+      month.textContent = name ?? "";
+      // el enlace lleva al visor con lo que se esta viendo, no a un inicio
+      // generico: lo que se pica es lo que se abre
+      frame.setAttribute("href", `#estacional?modelo=ecmwf&variable=${variable}`);
+      renderControls(variable);
+    },
+  });
+
+  function renderControls(active) {
+    clear(controls).append(
+      selectorGroup("Variable", VARIABLES, active, (id) => panel.select(id), "portada-variable"),
+    );
+  }
+
+  // sin desplazamiento de fondo: la lamina va dentro de una tarjeta y moverla
+  // por dentro la descuadraria de su propio marco
+  const stopBand = layeredBand(band);
+
+  return { destroy: () => { stopBand(); panel.destroy(); } };
 }

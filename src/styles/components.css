@@ -141,129 +141,143 @@
   from { opacity: 0; transform: scale(.93); }
 }
 
-/* ---------- Tira de pronostico ---------- */
-/* Cierra la portada con los tres campos tal como los dibuja el visor. Va
-   sobre el lienzo de la pagina y con la misma lamina blanca que las tarjetas
-   de arriba: como bloque oscuro a sangre partia la pagina en dos mitades que
-   no se parecian en nada, y el final quedaba en una masa negra de casi
-   seiscientos pixeles entre la tira y el pie. */
-.strip { margin-top: 2rem; }
-
-/* Encabezado de lamina, no de folleto: que se ve a la izquierda, de donde
-   sale y de cuando a la derecha. */
-.strip__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-bottom: .625rem;
-  margin-bottom: .875rem;
-  border-bottom: 1px solid var(--line);
-}
-.strip__heading { margin: 0; font-size: 1.0625rem; font-weight: 700; color: var(--navy); }
-.strip__meta { margin: 0; font-size: .8125rem; color: var(--muted); }
-.strip__month { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
-
-.strip__row {
+/* ---------- Lamina de pronostico ---------- */
+/* La puerta al visor es el pronostico mismo, grande y renovandose solo: una
+   tarjeta que repitiera "Pronostico estacional" con una flecha ya lo dice el
+   menu. Los mandos son los del visor -mismas capsulas, misma pastilla-, de
+   modo que quien elige aqui una variable ya sabe usarlos alli. */
+.showcase {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: .875rem;
-  will-change: transform;
-}
-
-/* Las tres laminas comparten rejilla, asi que el mapa y la escala arrancan a
-   la misma altura aunque un rotulo ocupe dos lineas. */
-@supports (grid-template-rows: subgrid) {
-  .strip__row { grid-template-rows: auto auto auto; }
-  .strip__plate { grid-template-rows: subgrid; grid-row: span 3; row-gap: .5rem; }
-}
-
-.strip__plate {
-  display: grid;
-  gap: .5rem;
-  margin: 0;
-  padding: .875rem;
+  margin-top: 2rem;
+  padding: 1.125rem;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
 
-.strip__name {
+.showcase__head {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: .5rem;
-  font-size: .9375rem;
-  font-weight: 700;
-  color: var(--navy);
+  gap: .75rem 1.5rem;
+  flex-wrap: wrap;
 }
-.strip__units { font-weight: 500; font-size: .6875rem; color: var(--muted); }
+.showcase__intro { flex: 1 1 22rem; min-width: 0; }
+.showcase__title { margin: 0; font-size: 1.0625rem; font-weight: 700; color: var(--navy); }
+.showcase__text {
+  margin: .1875rem 0 0;
+  max-width: 44rem;
+  font-size: .875rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+/* puede encogerse: si no, las capsulas empujan la lamina fuera de la pagina */
+.showcase__controls { flex: 0 1 auto; min-width: 0; }
 
-.strip__field {
+/* El mapa entero es la puerta: se pica lo que se esta viendo y se abre eso
+   mismo en el visor, no una vista generica. */
+.showcase__frame {
+  position: relative;
   display: block;
-  width: 100%;
-  /* provisional: la proporcion definitiva la pone el modulo con la ventana ya
-     proyectada, y asi la fila no da un salto de alto al llegar el dato */
-  aspect-ratio: 7 / 5;
   border-radius: var(--radius-sm);
+  overflow: hidden;
   background: var(--accent);
   box-shadow: inset 0 0 0 1px rgb(10 28 72 / 8%);
+  transition: box-shadow .18s ease;
+}
+.showcase__frame:hover { box-shadow: inset 0 0 0 2px var(--blue); }
+.showcase__frame:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.showcase__field {
+  display: block;
+  width: 100%;
+  /* la ventana geografica se calcula con esta forma, asi que el mapa llena el
+     hueco sin deformarse y sin franjas muertas: cambiarla aqui basta */
+  aspect-ratio: 16 / 10;
   opacity: 0;
   transition: opacity 1.1s ease;
 }
-/* la clase la pone el modulo cuando ya hay campo: sin ella se veria el
-   rectangulo vacio mientras carga la grilla */
-.strip__field.is-ready { opacity: 1; }
+.showcase__field.is-ready { opacity: 1; }
 
-/* La leyenda es la del visor, con sus mismas clases y sus mismos colores;
-   aqui solo se ajusta el grosor de la barra al tamano de la lamina. */
-.strip .legend__bar { height: 8px; border-radius: 2px; }
+.showcase__stamp {
+  position: absolute;
+  top: .75rem;
+  left: .75rem;
+  padding: .25rem .625rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 92%);
+  color: var(--navy);
+  font-size: .75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 1px 4px rgb(10 28 72 / 18%);
+}
+
+.showcase__cue {
+  position: absolute;
+  right: .75rem;
+  bottom: .75rem;
+  padding: .375rem .8125rem;
+  border-radius: 999px;
+  background: var(--navy);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 700;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+.showcase__frame:hover .showcase__cue,
+.showcase__frame:focus-visible .showcase__cue { opacity: 1; transform: none; }
+/* sin puntero que se pose, la invitacion tiene que estar puesta */
+@media (hover: none) {
+  .showcase__cue { opacity: 1; transform: none; }
+}
+
+.showcase__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem 1.5rem;
+  flex-wrap: wrap;
+}
+.showcase__legend { flex: 1 1 16rem; max-width: 24rem; }
+.showcase__hint { margin: 0; flex: 0 0 auto; font-size: .75rem; color: var(--muted); }
 
 /* La entrada se arma desde JS -.is-armed-, no aqui: si el modulo no llega a
-   correr, la tira se ve entera en vez de quedarse invisible. */
-.strip.is-armed .strip__head,
-.strip.is-armed .strip__plate {
+   correr, la lamina se ve entera en vez de quedarse invisible. */
+.showcase.is-armed .showcase__head,
+.showcase.is-armed .showcase__frame,
+.showcase.is-armed .showcase__foot {
   opacity: 0;
   transform: translateY(14px);
   transition: opacity .7s ease, transform .8s cubic-bezier(.2, .75, .3, 1);
 }
-.strip.is-armed .strip__plate:nth-child(1) { transition-delay: .08s; }
-.strip.is-armed .strip__plate:nth-child(2) { transition-delay: .16s; }
-.strip.is-armed .strip__plate:nth-child(3) { transition-delay: .24s; }
+.showcase.is-armed .showcase__frame { transition-delay: .08s; }
+.showcase.is-armed .showcase__foot { transition-delay: .16s; }
 
-.strip.is-armed.is-in .strip__head,
-.strip.is-armed.is-in .strip__plate { opacity: 1; transform: none; }
+.showcase.is-armed.is-in .showcase__head,
+.showcase.is-armed.is-in .showcase__frame,
+.showcase.is-armed.is-in .showcase__foot { opacity: 1; transform: none; }
 
 @media (max-width: 759px) {
-  .strip { margin-top: 1.5rem; }
-
-  /* Tres laminas apaisadas en fila caben a lo ancho del telefono, pero cada
-     mapa quedaria del ancho de un sello. Aqui se pasan a fila deslizable con
-     anclaje: la lamina ocupa casi toda la pantalla y la siguiente asoma por
-     el borde, que es lo que dice que hay mas a la derecha. */
-  .strip__row {
-    grid-template-columns: none;
-    grid-auto-flow: column;
-    grid-auto-columns: 78%;
-    gap: .625rem;
-    margin-inline: -1rem;
-    padding-inline: 1rem;
-    /* sitio para la sombra de las laminas, que si no se recorta al desplazar */
-    padding-block: .25rem;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-  }
-  .strip__row::-webkit-scrollbar { display: none; }
-  .strip__plate { scroll-snap-align: center; padding: .75rem; }
-  .strip__name { font-size: .875rem; }
+  .showcase { margin-top: 1.5rem; padding: .75rem; gap: .75rem; }
+  /* los mandos bajan a su propio renglon y las capsulas usan el nombre corto,
+     el mismo que la barra del visor en pantallas estrechas */
+  .showcase__controls { flex: 1 1 100%; }
+  .showcase__controls .chip__label { display: none; }
+  .showcase__controls .chip__short { display: inline; }
+  /* de pie el hueco es vertical: la ventana se estrecha y el pais crece */
+  .showcase__field { aspect-ratio: 4 / 5; }
+  .showcase__hint { display: none; }
 }
 
 /* ---------- Accesos ---------- */
-.access { display: grid; gap: .875rem; }
-@media (min-width: 760px) { .access { grid-template-columns: 1fr 1fr; } }
+/* Una sola tarjeta: ENSO no tiene mapa que ensenar -su dato es una serie- y
+   el pronostico estacional ya se ensena solo, arriba. */
+.access { display: grid; gap: .875rem; margin-top: .875rem; }
 
 .access__card {
   display: flex;
