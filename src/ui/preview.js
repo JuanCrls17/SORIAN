@@ -3,11 +3,11 @@ import { load, decodeFrame } from "../data.js";
 import { smoothField } from "../map/interpolate.js";
 
 /**
- * Submuestreo por celda. A este tamano -unos 250 px de ancho- seis muestras
- * ya dejan el paso de color por debajo de lo que se distingue, y cuestan un
- * tercio de lo que costaria el ocho del visor.
+ * Submuestreo por celda. Alto, porque de la grilla entera solo se muestra la
+ * ventana de abajo: lo que aqui se ve ampliado son veinte celdas de ancho, y
+ * con un factor corto el recorte llegaria a pantalla como un mosaico.
  */
-const FACTOR = 6;
+const FACTOR = 10;
 const HOLD = 2600;
 const FADE = 900;
 
@@ -16,18 +16,38 @@ const toMercator = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * DEG) / 2));
 
 const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-/** Proyeccion del dominio de la grilla sobre el lienzo, en Mercator. */
+/**
+ * Ventana que se muestra, en grados. El dominio llega hasta la Patagonia,
+ * pero entero y repartido en tres paneles deja el Peru del tamano de una
+ * unia. Aqui se encuadra el pais con sus vecinos: se reconoce la costa, la
+ * cordillera y la Amazonia, que es donde el pronostico dice algo.
+ */
+const FOCUS = { west: -83, east: -63, south: -20, north: 3 };
+
+/**
+ * Proyeccion de la ventana sobre el lienzo, en Mercator, y el recorte que le
+ * corresponde dentro del campo ya interpolado.
+ */
 function projection(grid) {
   const top = toMercator(grid.lat0 + grid.ny * grid.dlat);
-  const bottom = toMercator(grid.lat0);
+  const span = top - toMercator(grid.lat0);
+  const north = toMercator(FOCUS.north);
+  const south = toMercator(FOCUS.south);
+  const lonSpan = grid.nx * grid.dlon;
+
   return {
-    span: top - bottom,
-    top,
-    // ancho/alto que le corresponde al dominio ya proyectado: el lienzo se
-    // dimensiona con el, asi el campo se dibuja sin deformar y sin recortes
-    ratio: (grid.nx * grid.dlon * DEG) / (top - bottom),
-    x: (lon, width) => ((lon - grid.lon0) / (grid.nx * grid.dlon)) * width,
-    y: (lat, height) => ((top - toMercator(lat)) / (top - bottom)) * height,
+    // ancho/alto de la ventana ya proyectada: el lienzo se dimensiona con el,
+    // asi el campo se dibuja sin deformar y sin sobras a los lados
+    ratio: ((FOCUS.east - FOCUS.west) * DEG) / (north - south),
+    // en fraccion del bitmap, que es como lo quiere drawImage
+    crop: {
+      x: (FOCUS.west - grid.lon0) / lonSpan,
+      y: (top - north) / span,
+      w: (FOCUS.east - FOCUS.west) / lonSpan,
+      h: (north - south) / span,
+    },
+    x: (lon, width) => ((lon - FOCUS.west) / (FOCUS.east - FOCUS.west)) * width,
+    y: (lat, height) => ((north - toMercator(lat)) / (north - south)) * height,
   };
 }
 
@@ -115,15 +135,23 @@ export function forecastStrip(panels, onMonth, model = "ecmwf") {
     const { ctx, canvas } = item;
     const w = canvas.width;
     const h = canvas.height;
+    const { crop } = item.proj;
+    const cut = (bitmap) => ctx.drawImage(
+      bitmap,
+      crop.x * bitmap.width, crop.y * bitmap.height,
+      crop.w * bitmap.width, crop.h * bitmap.height,
+      0, 0, w, h,
+    );
+
     ctx.clearRect(0, 0, w, h);
     ctx.imageSmoothingEnabled = item.continuous;
     ctx.imageSmoothingQuality = "high";
     if (from) {
       ctx.globalAlpha = 1;
-      ctx.drawImage(from, 0, 0, w, h);
+      cut(from);
     }
     ctx.globalAlpha = from ? mix : 1;
-    ctx.drawImage(to, 0, 0, w, h);
+    cut(to);
     ctx.globalAlpha = 1;
     if (item.lines) ctx.drawImage(item.lines, 0, 0);
   }

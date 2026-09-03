@@ -147,7 +147,7 @@
    -de ahi el margen inferior negativo, que se come el respiro del contenedor-
    para que la pagina no acabe en una franja blanca vacia. */
 .strip {
-  margin: 2.5rem calc(50% - 50vw) -2.5rem;
+  margin: 1.5rem calc(50% - 50vw) -2.5rem;
   padding: 3.5rem calc(50vw - 50%) 3rem;
   overflow: hidden;
   color: #fff;
@@ -157,9 +157,7 @@
 .strip__row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.25rem;
-  max-width: 46rem;
-  margin-inline: auto;
+  gap: 1.5rem;
   will-change: transform;
 }
 
@@ -170,7 +168,7 @@
   width: 100%;
   /* provisional: la proporcion definitiva la pone el modulo con el dominio ya
      proyectado, y asi la fila no da un salto de alto al llegar el dato */
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 6 / 7;
   border-radius: .75rem;
   background: rgb(255 255 255 / 4%);
   opacity: 0;
@@ -214,6 +212,7 @@
 @media (max-width: 759px) {
   .strip { margin-inline: -1rem; padding: 2.5rem 1rem 2rem; }
   .strip__row { gap: .5rem; }
+  .strip__field { border-radius: .5rem; }
   .strip__caption { margin-top: .5rem; font-size: .6875rem; }
 }
 
