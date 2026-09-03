@@ -141,6 +141,73 @@
   from { opacity: 0; transform: scale(.93); }
 }
 
+/* ---------- Banda de contexto ---------- */
+/* Llega a los bordes como la portada: dos franjas oscuras dejan en medio la
+   banda clara de las tarjetas, y el conjunto se lee como tres bloques y no
+   como una pagina que se acaba a media pantalla. */
+.panorama {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin: 2.5rem calc(50% - 50vw) 0;
+  padding-block: 4.5rem;
+  padding-inline: calc(50vw - 50%);
+  color: #fff;
+  background: #061027;
+}
+
+/* Alto de sobra por arriba y por abajo: el fondo se desplaza y sin ese margen
+   asomaria el vacio por el borde que va quedando descubierto. */
+.panorama__art {
+  position: absolute;
+  inset: -20% 0;
+  z-index: -2;
+  background: url("../../assets/globo.webp") 64% center / cover no-repeat;
+  opacity: .5;
+  will-change: transform;
+}
+
+.panorama::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(95deg,
+    #061027 0%, rgb(6 16 39 / 82%) 38%, rgb(6 16 39 / 40%) 68%, rgb(6 16 39 / 8%) 100%);
+}
+
+.panorama__body { position: relative; max-width: 36rem; }
+.panorama__title {
+  /* sobre fondo oscuro hay que decirlo: los encabezados van en navy */
+  margin: 0 0 .875rem;
+  color: #fff;
+  font-size: clamp(1.375rem, 3.2vw, 2rem);
+  text-wrap: balance;
+}
+.panorama__text { margin: 0; color: #a9c0da; font-size: 1rem; }
+
+/* La entrada se arma desde JS -.is-armed-, no aqui: si el modulo no llega a
+   correr, la banda se ve entera en vez de quedarse invisible. */
+.panorama.is-armed .panorama__art,
+.panorama.is-armed .panorama__title,
+.panorama.is-armed .panorama__text {
+  opacity: 0;
+  transition: opacity .7s ease, transform .8s cubic-bezier(.2, .75, .3, 1);
+}
+.panorama.is-armed .panorama__title,
+.panorama.is-armed .panorama__text { transform: translateY(18px); }
+.panorama.is-armed .panorama__text { transition-delay: .12s; }
+
+.panorama.is-armed.is-in .panorama__art { opacity: .5; }
+.panorama.is-armed.is-in .panorama__title,
+.panorama.is-armed.is-in .panorama__text { opacity: 1; transform: none; }
+
+@media (max-width: 759px) {
+  .panorama { margin-inline: -1rem; padding-block: 3rem; padding-inline: 1rem; }
+  .panorama__art { background-position: 58% center; opacity: .38; }
+  .panorama.is-armed.is-in .panorama__art { opacity: .38; }
+}
+
 /* ---------- Accesos ---------- */
 .access { display: grid; gap: .875rem; }
 @media (min-width: 760px) { .access { grid-template-columns: 1fr 1fr; } }

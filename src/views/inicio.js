@@ -2,6 +2,7 @@ import { el } from "../ui/dom.js";
 import { navigate } from "../router.js";
 import { wordmark } from "../ui/nav.js";
 import { ICONS } from "../ui/icons.js";
+import { layeredBand } from "../ui/scroll.js";
 
 const ACCESS = [
   {
@@ -44,5 +45,22 @@ export default function inicio(outlet) {
       ]),
     )),
   );
-  return {};
+
+  // El globo, recortado sobre el continente y desplazandose mas despacio que
+  // el texto. Es el mismo archivo de la portada, pero encuadrado en otra
+  // parte: a este tamano no se lee como la misma imagen repetida.
+  const art = el("div", { class: "panorama__art", "aria-hidden": "true" });
+  const band = el("section", { class: "panorama" }, [
+    art,
+    el("div", { class: "panorama__body" }, [
+      el("h2", { class: "panorama__title", text: "Del modelo global al mapa del Perú" }),
+      el("p", {
+        class: "panorama__text",
+        text: "Tres centros mundiales resuelven el mismo mes con criterios distintos. SORIAN los recorta sobre un mismo dominio, los clasifica con una misma escala y los deja enfrentados lado a lado: ahí es donde se ve en qué coinciden y en qué no.",
+      }),
+    ]),
+  ]);
+  outlet.append(band);
+
+  return { destroy: layeredBand(band, art) };
 }
