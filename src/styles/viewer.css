@@ -230,26 +230,25 @@
 .controls--compare { flex-wrap: nowrap; }
 .controls--compare .controls__actions { flex: 0 0 auto; }
 
+/* Cada lado sobre la mitad del mapa que gobierna: el izquierdo a continuacion
+   de las acciones y el derecho pegado al borde derecho. Pegados uno al otro en
+   el centro formaban una pieza bonita pero muda: no se sabia cual mandaba
+   sobre cual. Siguen en la misma caja para que, si falta sitio, bajen juntos
+   en vez de partirse. */
 .controls__pair {
   display: flex;
-  /* estirados, los dos lados miden lo mismo aunque uno parta en dos lineas:
-     de lo contrario el corte del centro dejaria de ser continuo */
+  /* estirados, los dos miden lo mismo aunque uno parta en dos lineas */
   align-items: stretch;
-  flex: 0 1 auto;
+  justify-content: space-between;
+  flex: 1 1 auto;
+  gap: .625rem;
   min-width: 0;
 }
 .controls__pair .side-panel { flex: 0 1 auto; max-width: none; }
 
-/* Las esquinas interiores se cuadran para que la union no se note y el corte
-   queda como un filete tenue: el panel B ya no lleva borde izquierdo, asi que
-   solo hay una linea entre los dos y no dos superpuestas. */
-.controls__pair .side-panel--a {
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-  border-right-color: rgb(10 28 72 / 12%);
-}
-.controls__pair .side-panel--b {
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-}
+/* separado del otro, el panel derecho recupera el borde que habia cedido a la
+   union cuando los dos formaban una sola pastilla */
+.controls__pair .side-panel--b { border-left: 1px solid rgb(255 255 255 / 70%); }
 
 /* Con un solo pronostico los mandos flotan sueltos: una barra continua
    cruzaria el mapa de lado a lado y taparia datos sin necesidad. */
