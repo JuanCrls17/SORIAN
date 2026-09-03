@@ -4,11 +4,11 @@ import { smoothField } from "../map/interpolate.js";
 import { buildLegend } from "../map/legend.js";
 
 /**
- * Submuestreo por celda. Alto, porque de la grilla solo se muestra una
- * ventana y ampliada: con un factor corto el recorte llegaria a pantalla
- * como un mosaico. Solo vive en memoria la variable que se esta viendo.
+ * Submuestreo por celda. El campo va de fondo y difuminado, asi que no hace
+ * falta el detalle del visor: lo que se busca es la forma de las manchas.
+ * Solo vive en memoria la variable que se esta viendo.
  */
-const FACTOR = 14;
+const FACTOR = 8;
 const HOLD = 3200;
 const FADE = 900;
 
@@ -61,6 +61,21 @@ function windowFor(ratio, grid) {
   [west, east] = slide(west, east, limit.west, limit.east);
   [south, north] = slide(south, north, limit.south, limit.north);
 
+  // Si al toparse con el borde del dominio la ventana perdio la proporcion
+  // -pasa en bandas muy apaisadas, donde no hay tanto mundo a los lados-, se
+  // recorta el eje que sobra en vez de deformar el campo: el mapa hace de
+  // fondo y se comporta como un "cover".
+  const wide = ((east - west) * DEG) / (north - south);
+  if (wide > ratio) {
+    const cut = ((east - west) - ((north - south) * ratio) / DEG) / 2;
+    west += cut;
+    east -= cut;
+  } else if (wide < ratio) {
+    const cut = ((north - south) - ((east - west) * DEG) / ratio) / 2;
+    north -= cut;
+    south += cut;
+  }
+
   return { west, east, north, south };
 }
 
@@ -82,12 +97,16 @@ function framing(grid, win) {
   };
 }
 
-/** Limites politicos sobre el campo: sin ellos son manchas sin pais. */
-function borderLayer(geo, proj, width, height, dpr) {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
+/**
+ * Limites politicos: sin ellos el campo es una mancha sin pais. Van en su
+ * propio lienzo, por encima del velo y sin desenfocar, de modo que el dato
+ * queda de fondo y el pais, nitido.
+ */
+function drawBorders(canvas, geo, proj) {
+  const width = canvas.width;
+  const height = canvas.height;
   const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, width, height);
   ctx.lineJoin = "round";
 
   ctx.beginPath();
@@ -100,18 +119,14 @@ function borderLayer(geo, proj, width, height, dpr) {
     });
   }
 
-  // Trazo con funda, como en cartografia: el campo va del beige palido al
-  // granate, y una linea de un solo color se pierde en la mitad de la escala.
-  // El halo claro la despega de los tonos oscuros y el trazo oscuro, de los
-  // claros, asi que se ve sobre cualquier clase.
-  const weight = Math.max(0.7, 0.6 * dpr);
-  ctx.strokeStyle = "rgb(255 255 255 / 45%)";
-  ctx.lineWidth = weight + 1.6;
+  // Trazo con funda, como en cartografia: sobre el velo oscuro manda la linea
+  // clara, y el reborde oscuro la despega de las manchas palidas.
+  ctx.strokeStyle = "rgb(8 18 40 / 45%)";
+  ctx.lineWidth = 2.6;
   ctx.stroke();
-  ctx.strokeStyle = "rgb(12 28 56 / 55%)";
-  ctx.lineWidth = weight;
+  ctx.strokeStyle = "rgb(226 238 250 / 62%)";
+  ctx.lineWidth = 1.1;
   ctx.stroke();
-  return canvas;
 }
 
 /**
@@ -126,7 +141,7 @@ function borderLayer(geo, proj, width, height, dpr) {
  * de variable se suelta lo de la anterior, de modo que en memoria solo esta
  * la serie que se esta viendo.
  */
-export function forecastPanel({ canvas, legend, onState }, model = "ecmwf") {
+export function forecastPanel({ canvas, outline, legend, onState }, model = "ecmwf") {
   const ctx = canvas.getContext("2d");
   const sets = new Map();
   const cache = new Map();
@@ -135,7 +150,6 @@ export function forecastPanel({ canvas, legend, onState }, model = "ecmwf") {
   let month = 0;
   let sticky = false;
   let geo = null;
-  let lines = null;
   let win = null;
   let proj = null;
   let timer = null;
@@ -149,12 +163,15 @@ export function forecastPanel({ canvas, legend, onState }, model = "ecmwf") {
   function measure() {
     const box = canvas.getBoundingClientRect();
     const scale = dpr();
-    canvas.width = Math.max(1, Math.round(box.width * scale));
-    canvas.height = Math.max(1, Math.round(box.height * scale));
+    for (const node of [canvas, outline]) {
+      if (!node) continue;
+      node.width = Math.max(1, Math.round(box.width * scale));
+      node.height = Math.max(1, Math.round(box.height * scale));
+    }
 
     win = windowFor(box.width / box.height, data().grid);
     proj = framing(data().grid, win);
-    lines = geo ? borderLayer(geo, proj, canvas.width, canvas.height, scale) : null;
+    if (geo && outline) drawBorders(outline, geo, proj);
   }
 
   /** Devuelve el mes ya interpolado, calculandolo la primera vez. */
@@ -196,7 +213,6 @@ export function forecastPanel({ canvas, legend, onState }, model = "ecmwf") {
     ctx.globalAlpha = from ? mix : 1;
     cut(to);
     ctx.globalAlpha = 1;
-    if (lines) ctx.drawImage(lines, 0, 0);
   }
 
   function announce() {
@@ -275,8 +291,7 @@ export function forecastPanel({ canvas, legend, onState }, model = "ecmwf") {
       return load(PATHS.borders).then((shape) => {
         if (!alive) return;
         geo = shape;
-        lines = borderLayer(geo, proj, canvas.width, canvas.height, dpr());
-        paint(null, frameOf(month), 1);
+        if (outline) drawBorders(outline, geo, proj);
       });
     })
     .catch(() => { /* la lamina es prescindible: sin ella el bloque sigue entero */ });
