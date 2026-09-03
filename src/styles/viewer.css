@@ -587,6 +587,63 @@
 #app:fullscreen { height: 100%; background: var(--canvas); }
 #app:fullscreen .outlet--app { padding: .5rem; }
 
+/* A pantalla completa la cabecera deja de ser una barra de navegacion y pasa a
+   ser la firma de lo que se esta proyectando, que suele mirarse de lejos: la
+   marca crece y de las cinco secciones quedan las dos que tienen visor. Las
+   otras tres son texto corrido, que a esa distancia no se lee. */
+#app:fullscreen { --header-h: 96px; }
+
+#app:fullscreen .nav__link:not([data-route="estacional"]):not([data-route="enso"]) {
+  display: none;
+}
+#app:fullscreen .nav { gap: .5rem; }
+#app:fullscreen .nav__link { padding: .625rem 1.5rem; font-size: 1.125rem; }
+
+#app:fullscreen .brand { gap: 1rem; }
+#app:fullscreen .brand__mark { width: 52px; height: 52px; }
+#app:fullscreen .brand__logo { height: 46px; }
+#app:fullscreen .brand__logo--senamhi { height: 52px; }
+#app:fullscreen .brand__divider { height: 54px; }
+#app:fullscreen .brand__name strong {
+  font-size: 2.5rem;
+  letter-spacing: .3em;
+  margin-right: -.3em;
+}
+#app:fullscreen .brand__name small { font-size: .9375rem; }
+#app:fullscreen .brand__full-long { display: inline; }
+#app:fullscreen .brand__full-short { display: none; }
+
+/* la firma de la escala se engrosa y toma algo de luz, que es lo unico de la
+   cabecera que no es ni texto ni logotipo */
+#app:fullscreen .masthead__scale {
+  height: 5px;
+  box-shadow: 0 0 18px rgb(53 151 143 / 45%);
+}
+
+/* El cambio se hace ver: al entrar y al salir, la marca crece y se recoge en
+   vez de aparecer ya hecha. Sin esto el salto de tamano parece un fallo. */
+.masthead__bar,
+.brand, .brand__mark, .brand__logo, .brand__divider,
+.brand__name strong, .brand__name small,
+.masthead__scale {
+  transition:
+    height .34s cubic-bezier(.2, .75, .3, 1),
+    width .34s cubic-bezier(.2, .75, .3, 1),
+    gap .34s cubic-bezier(.2, .75, .3, 1),
+    font-size .34s cubic-bezier(.2, .75, .3, 1),
+    letter-spacing .34s cubic-bezier(.2, .75, .3, 1),
+    margin .34s cubic-bezier(.2, .75, .3, 1),
+    box-shadow .34s ease;
+}
+@media (min-width: 900px) {
+  #app:fullscreen .nav__link {
+    transition:
+      color .2s ease,
+      padding .34s cubic-bezier(.2, .75, .3, 1),
+      font-size .34s cubic-bezier(.2, .75, .3, 1);
+  }
+}
+
 .leaflet-touch .leaflet-bar,
 .leaflet-bar {
   border: 1px solid rgb(255 255 255 / 70%);
