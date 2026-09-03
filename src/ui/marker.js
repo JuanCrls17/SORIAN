@@ -98,7 +98,11 @@ export function slidingMarker(track, key) {
       width = track.clientWidth;
       const box = boxOf(current);
       lastPlace.set(key, box);
-      for (const running of marker.getAnimations()) running.cancel();
+      // sin cancelar lo que este en vuelo: al cambiar de seccion la pagina
+      // cambia de alto, aparece o se va la barra de desplazamiento y la pista
+      // se estrecha unos pixeles justo cuando la pastilla acaba de salir.
+      // Cancelar ahi mataba el viaje entero y la pastilla saltaba de golpe.
+      // Al soltar la animacion, el elemento vuelve a este reposo ya corregido.
       place(box);
     });
     observer.observe(track);
