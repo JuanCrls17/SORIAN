@@ -3,6 +3,7 @@ import { navigate } from "../router.js";
 import { wordmark } from "../ui/nav.js";
 import { ICONS } from "../ui/icons.js";
 import { layeredBand } from "../ui/scroll.js";
+import { fieldPreview } from "../ui/preview.js";
 
 const ACCESS = [
   {
@@ -46,10 +47,12 @@ export default function inicio(outlet) {
     )),
   );
 
-  // El globo, recortado sobre el continente y desplazandose mas despacio que
-  // el texto. Es el mismo archivo de la portada, pero encuadrado en otra
-  // parte: a este tamano no se lee como la misma imagen repetida.
-  const art = el("div", { class: "panorama__art", "aria-hidden": "true" });
+  // El fondo no es una ilustracion: es el pronostico, dibujado con el mismo
+  // archivo que sirve al visor y recorriendo sus seis meses.
+  const field = el("canvas", { class: "panorama__field", "aria-hidden": "true" });
+  const month = el("strong", { class: "panorama__month" });
+  const art = el("div", { class: "panorama__art", "aria-hidden": "true" }, [field]);
+
   const band = el("section", { class: "panorama" }, [
     art,
     el("div", { class: "panorama__body" }, [
@@ -58,9 +61,19 @@ export default function inicio(outlet) {
         class: "panorama__text",
         text: "Tres centros mundiales resuelven el mismo mes con criterios distintos. SORIAN los recorta sobre un mismo dominio, los clasifica con una misma escala y los deja enfrentados lado a lado: ahí es donde se ve en qué coinciden y en qué no.",
       }),
+      el("p", { class: "panorama__stamp" }, [
+        el("span", { class: "panorama__scale", "aria-hidden": "true" }),
+        el("span", { class: "panorama__label" }, [
+          "Detrás, el pronóstico de verdad · ECMWF · Precipitación · ",
+          month,
+        ]),
+      ]),
     ]),
   ]);
   outlet.append(band);
 
-  return { destroy: layeredBand(band, art) };
+  const stopBand = layeredBand(band, art, 0.1);
+  const stopField = fieldPreview(field, (name) => { month.textContent = name ?? ""; });
+
+  return { destroy: () => { stopBand(); stopField(); } };
 }

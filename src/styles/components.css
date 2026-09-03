@@ -150,6 +150,9 @@
   isolation: isolate;
   overflow: hidden;
   margin: 2.5rem calc(50% - 50vw) 0;
+  min-height: 24rem;
+  display: flex;
+  align-items: center;
   padding-block: 4.5rem;
   padding-inline: calc(50vw - 50%);
   color: #fff;
@@ -160,12 +163,20 @@
    asomaria el vacio por el borde que va quedando descubierto. */
 .panorama__art {
   position: absolute;
-  inset: -20% 0;
+  inset: -14% 0;
   z-index: -2;
-  background: url("../../assets/globo.webp") 64% center / cover no-repeat;
-  opacity: .5;
   will-change: transform;
 }
+.panorama__field {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.1s ease;
+}
+/* la clase la pone el modulo cuando ya hay algo dibujado: asi la banda no
+   parpadea con un lienzo en blanco mientras carga la grilla */
+.panorama__field.is-ready { opacity: .78; }
 
 .panorama::after {
   content: "";
@@ -173,7 +184,7 @@
   inset: 0;
   z-index: -1;
   background: linear-gradient(95deg,
-    #061027 0%, rgb(6 16 39 / 82%) 38%, rgb(6 16 39 / 40%) 68%, rgb(6 16 39 / 8%) 100%);
+    #061027 0%, rgb(6 16 39 / 88%) 32%, rgb(6 16 39 / 46%) 64%, rgb(6 16 39 / 10%) 100%);
 }
 
 .panorama__body { position: relative; max-width: 36rem; }
@@ -186,26 +197,49 @@
 }
 .panorama__text { margin: 0; color: #a9c0da; font-size: 1rem; }
 
+/* Pie del fondo: dice de donde sale lo que se esta viendo detras, porque un
+   campo de anomalias sin procedencia no es mas que una mancha de color. */
+.panorama__stamp {
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  margin: 1.5rem 0 0;
+  font-size: .6875rem;
+  letter-spacing: .04em;
+  color: #8fa8c6;
+}
+.panorama__scale {
+  flex: 0 0 auto;
+  width: 84px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg,
+    #543005 0%, #bf812d 18%, #e7cf94 36%, #f6f1e5 50%,
+    #c7eae5 64%, #67bbb1 82%, #003c30 100%);
+}
+.panorama__month { color: #dce8f5; font-variant-numeric: tabular-nums; }
+
 /* La entrada se arma desde JS -.is-armed-, no aqui: si el modulo no llega a
    correr, la banda se ve entera en vez de quedarse invisible. */
-.panorama.is-armed .panorama__art,
 .panorama.is-armed .panorama__title,
-.panorama.is-armed .panorama__text {
+.panorama.is-armed .panorama__text,
+.panorama.is-armed .panorama__stamp {
   opacity: 0;
   transition: opacity .7s ease, transform .8s cubic-bezier(.2, .75, .3, 1);
 }
 .panorama.is-armed .panorama__title,
-.panorama.is-armed .panorama__text { transform: translateY(18px); }
+.panorama.is-armed .panorama__text,
+.panorama.is-armed .panorama__stamp { transform: translateY(18px); }
 .panorama.is-armed .panorama__text { transition-delay: .12s; }
+.panorama.is-armed .panorama__stamp { transition-delay: .24s; }
 
-.panorama.is-armed.is-in .panorama__art { opacity: .5; }
 .panorama.is-armed.is-in .panorama__title,
-.panorama.is-armed.is-in .panorama__text { opacity: 1; transform: none; }
+.panorama.is-armed.is-in .panorama__text,
+.panorama.is-armed.is-in .panorama__stamp { opacity: 1; transform: none; }
 
 @media (max-width: 759px) {
   .panorama { margin-inline: -1rem; padding-block: 3rem; padding-inline: 1rem; }
-  .panorama__art { background-position: 58% center; opacity: .38; }
-  .panorama.is-armed.is-in .panorama__art { opacity: .38; }
+  .panorama__field.is-ready { opacity: .4; }
 }
 
 /* ---------- Accesos ---------- */
