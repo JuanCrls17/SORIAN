@@ -20,10 +20,16 @@ const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)");
 /**
  * Ventana que se muestra, en grados. El dominio llega hasta la Patagonia,
  * pero entero y repartido en tres paneles deja el Peru del tamano de una
- * unia. Aqui se encuadra el pais con sus vecinos: se reconoce la costa, la
- * cordillera y la Amazonia, que es donde el pronostico dice algo.
+ * unia.
+ *
+ * El encuadre es apaisado a proposito. El pais es mas alto que ancho, asi que
+ * ajustarse a el daba laminas verticales: tres en fila levantaban una banda
+ * mas alta que muchas pantallas, con el mapa arriba y la escala fuera de
+ * vista. Alargando la ventana a lo ancho el Peru sigue llenando el alto del
+ * cuadro -de la frontera norte a Tacna- y entran a los lados las dos cosas
+ * que explican su clima: el Pacifico, donde se mide El Nino, y la Amazonia.
  */
-const FOCUS = { west: -83, east: -63, south: -20, north: 3 };
+const FOCUS = { west: -88, east: -59, south: -19, north: 2 };
 
 /**
  * Proyeccion de la ventana sobre el lienzo, en Mercator, y el recorte que le

@@ -61,12 +61,7 @@ export default function inicio(outlet) {
   const row = el("div", { class: "strip__row" }, panels.map((panel, i) =>
     el("figure", { class: "strip__plate" }, [
       el("figcaption", { class: "strip__name" }, [
-        // en columnas estrechas el nombre largo parte en dos y descuadra la
-        // lamina; el corto es el que ya usa la barra del visor
-        el("span", { class: "strip__label" }, [
-          el("span", { class: "strip__label--long", text: VARIABLES[i].label }),
-          el("span", { class: "strip__label--short", text: VARIABLES[i].short }),
-        ]),
+        VARIABLES[i].label,
         el("span", { class: "strip__units", text: VARIABLES[i].units }),
       ]),
       panel.canvas,

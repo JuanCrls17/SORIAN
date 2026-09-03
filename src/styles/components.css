@@ -148,7 +148,7 @@
    blanca vacia. */
 .strip {
   margin: 1.5rem calc(50% - 50vw) -2.5rem;
-  padding: 2.75rem calc(50vw - 50%) 3rem;
+  padding: 2rem calc(50vw - 50%) 2.25rem;
   overflow: hidden;
   color: #fff;
   background: #061027;
@@ -161,8 +161,8 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  padding-bottom: .875rem;
-  margin-bottom: 1.5rem;
+  padding-bottom: .75rem;
+  margin-bottom: 1rem;
   border-bottom: 1px solid rgb(255 255 255 / 12%);
 }
 .strip__heading {
@@ -178,7 +178,7 @@
 .strip__row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.25rem;
+  gap: 1rem;
   will-change: transform;
 }
 
@@ -186,14 +186,14 @@
    la misma altura aunque un rotulo ocupe dos lineas. */
 @supports (grid-template-rows: subgrid) {
   .strip__row { grid-template-rows: auto auto auto; }
-  .strip__plate { grid-template-rows: subgrid; grid-row: span 3; row-gap: .625rem; }
+  .strip__plate { grid-template-rows: subgrid; grid-row: span 3; row-gap: .5rem; }
 }
 
 .strip__plate {
   display: grid;
-  gap: .625rem;
+  gap: .5rem;
   margin: 0;
-  padding: .875rem;
+  padding: .75rem;
   border: 1px solid rgb(255 255 255 / 10%);
   border-radius: 1rem;
   background: rgb(255 255 255 / 4%);
@@ -209,14 +209,13 @@
   color: #fff;
 }
 .strip__units { font-weight: 500; font-size: .6875rem; color: #8fa8c4; }
-.strip__label--short { display: none; }
 
 .strip__field {
   display: block;
   width: 100%;
   /* provisional: la proporcion definitiva la pone el modulo con la ventana ya
      proyectada, y asi la fila no da un salto de alto al llegar el dato */
-  aspect-ratio: 6 / 7;
+  aspect-ratio: 7 / 5;
   border-radius: .5rem;
   background: rgb(255 255 255 / 4%);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 8%);
@@ -248,18 +247,28 @@
 .strip.is-armed.is-in .strip__plate { opacity: 1; transform: none; }
 
 @media (max-width: 759px) {
-  .strip { margin-inline: -1rem; padding: 2rem 1rem 2.25rem; }
-  .strip__head { margin-bottom: 1rem; }
-  .strip__row { gap: .5rem; }
-  .strip__plate { padding: .5rem; gap: .4375rem; border-radius: .625rem; }
-  .strip__name { display: grid; gap: 0; font-size: .75rem; }
-  .strip__label--long { display: none; }
-  .strip__label--short { display: inline; }
-  .strip__units { font-size: .625rem; }
-  .strip__field { border-radius: .375rem; }
-  /* a este ancho las cifras de la escala se pisan: queda la barra, que es
-     la que dice que la escala es divergente y donde cae el cero */
-  .strip .legend__ticks { display: none; }
+  .strip { margin-inline: -1rem; padding: 1.75rem 1rem 2rem; }
+  .strip__head { margin-bottom: .875rem; }
+
+  /* Tres laminas apaisadas en fila caben a lo ancho del telefono, pero cada
+     mapa quedaria del ancho de un sello. Aqui se pasan a fila deslizable con
+     anclaje: la lamina ocupa casi toda la pantalla y la siguiente asoma por
+     el borde, que es lo que dice que hay mas a la derecha. */
+  .strip__row {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 78%;
+    gap: .625rem;
+    margin-inline: -1rem;
+    padding-inline: 1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .strip__row::-webkit-scrollbar { display: none; }
+  .strip__plate { scroll-snap-align: center; padding: .625rem; border-radius: .75rem; }
+  .strip__name { font-size: .875rem; }
 }
 
 /* ---------- Accesos ---------- */
