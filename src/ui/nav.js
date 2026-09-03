@@ -83,7 +83,13 @@ export function buildHeader() {
 
   return el("header", { class: "masthead" }, [
     el("div", { class: "masthead__bar" }, [
-      el("a", { class: "brand", href: "#inicio", onClick: () => navigate("inicio") }, [
+      el("a", { class: "brand", href: "#inicio", onClick: (event) => {
+        // En pantalla completa la cabecera es rotulo, no navegacion: solo
+        // quedan Estacional y ENSO, y picar la marca sacaria de la proyeccion
+        // a una portada que ahi no pinta nada.
+        if (document.fullscreenElement) return event.preventDefault();
+        navigate("inicio");
+      } }, [
         el("img", { class: "brand__mark", src: "assets/icon-192.png", alt: "", width: "192", height: "192" }),
         el("span", { class: "brand__logos" }, [
           el("img", { class: "brand__logo", src: "assets/logo-minam.png", alt: "Ministerio del Ambiente", width: "728", height: "150" }),

@@ -599,7 +599,9 @@
 #app:fullscreen .nav { gap: .5rem; }
 #app:fullscreen .nav__link { padding: .625rem 1.5rem; font-size: 1.125rem; }
 
-#app:fullscreen .brand { gap: 1rem; }
+/* En pantalla completa la marca es rotulo, no enlace: solo navegan Estacional
+   y ENSO. El clic lo detiene el manejador; esto quita la mano del cursor. */
+#app:fullscreen .brand { gap: 1rem; cursor: default; }
 #app:fullscreen .brand__mark { width: 52px; height: 52px; }
 #app:fullscreen .brand__logo { height: 46px; }
 #app:fullscreen .brand__logo--senamhi { height: 52px; }
