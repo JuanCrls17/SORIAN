@@ -30,10 +30,6 @@
   cursor: pointer;
   transition: background .15s, border-color .15s;
 }
-.btn--primary { background: var(--blue); color: #fff; }
-.btn--primary:hover { background: var(--blue-600); }
-.btn--ghost { background: transparent; border-color: currentColor; color: inherit; }
-.btn--ghost:hover { background: rgb(255 255 255 / 12%); }
 
 /* ---------- Portada ---------- */
 /* La ilustracion no es una columna al lado del texto: es el fondo de toda la
@@ -99,14 +95,7 @@
   text-indent: .18em;
 }
 
-.hero__subtitle {
-  font-size: clamp(.9375rem, 2.4vw, 1.1875rem);
-  color: #dce8f5;
-  margin-bottom: 1rem;
-  text-wrap: balance;
-}
-.hero__text { color: #a9c0da; font-size: .9375rem; margin-bottom: 1.75rem; }
-.hero__actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.hero__text { color: #a9c0da; font-size: 1rem; margin-bottom: 0; max-width: 40ch; }
 
 .hero__art {
   position: absolute;
@@ -135,15 +124,12 @@
 @media (prefers-reduced-motion: no-preference) {
   .hero__eyebrow,
   .hero__title,
-  .hero__subtitle,
-  .hero__text,
-  .hero__actions { animation: hero-rise .55s cubic-bezier(.2, .75, .3, 1) backwards; }
+  .hero__text { animation: hero-rise .55s cubic-bezier(.2, .75, .3, 1) backwards; }
+
 
   .hero__eyebrow { animation-delay: .05s; }
   .hero__title { animation-delay: .13s; }
-  .hero__subtitle { animation-delay: .21s; }
-  .hero__text { animation-delay: .28s; }
-  .hero__actions { animation-delay: .35s; }
+  .hero__text { animation-delay: .21s; }
 
   .hero__art { animation: hero-reveal .9s cubic-bezier(.2, .7, .3, 1) .18s backwards; }
 }

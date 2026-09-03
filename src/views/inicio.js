@@ -26,12 +26,9 @@ export default function inicio(outlet) {
         el("h1", { class: "hero__title" }, [
           wordmark("span", "wordmark"),
         ]),
-        el("p", { class: "hero__subtitle", text: "Sistema Operacional de Resolución Integrada para la Predicción del Clima" }),
+        // el nombre desplegado ya esta en la cabecera, y los dos botones
+        // llevaban a las mismas dos secciones que las tarjetas de aqui debajo
         el("p", { class: "hero__text", text: "Información climática mensual y estacional para el Perú y Sudamérica, integrada desde los principales modelos globales de predicción." }),
-        el("div", { class: "hero__actions" }, [
-          el("button", { class: "btn btn--primary", type: "button", onClick: () => navigate("estacional"), text: "Ver pronóstico estacional" }),
-          el("button", { class: "btn btn--ghost", type: "button", onClick: () => navigate("descripcion"), text: "Conocer SORIAN" }),
-        ]),
       ]),
       el("div", { class: "hero__art", "aria-hidden": "true" }),
     ]),
