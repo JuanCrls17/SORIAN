@@ -2,8 +2,9 @@ import { el } from "../ui/dom.js";
 import { navigate } from "../router.js";
 import { wordmark } from "../ui/nav.js";
 import { ICONS } from "../ui/icons.js";
+import { VARIABLES } from "../config.js";
 import { layeredBand } from "../ui/scroll.js";
-import { fieldPreview } from "../ui/preview.js";
+import { forecastStrip } from "../ui/preview.js";
 
 const ACCESS = [
   {
@@ -47,33 +48,30 @@ export default function inicio(outlet) {
     )),
   );
 
-  // El fondo no es una ilustracion: es el pronostico, dibujado con el mismo
-  // archivo que sirve al visor y recorriendo sus seis meses.
-  const field = el("canvas", { class: "panorama__field", "aria-hidden": "true" });
-  const month = el("strong", { class: "panorama__month" });
-  const art = el("div", { class: "panorama__art", "aria-hidden": "true" }, [field]);
+  // Aqui abajo no va un fondo decorativo: van los tres campos tal como los
+  // dibuja el visor, a plena vista y recorriendo los mismos meses. Es la
+  // pagina diciendo que tiene dentro, sin prometerlo con adjetivos.
+  const month = el("strong", { class: "strip__month" });
+  const panels = VARIABLES.map((variable) => ({
+    variable: variable.id,
+    canvas: el("canvas", { class: "strip__field", "aria-hidden": "true" }),
+  }));
 
-  const band = el("section", { class: "panorama" }, [
-    art,
-    el("div", { class: "panorama__body" }, [
-      el("h2", { class: "panorama__title", text: "Del modelo global al mapa del Perú" }),
-      el("p", {
-        class: "panorama__text",
-        text: "Tres centros mundiales resuelven el mismo mes con criterios distintos. SORIAN los recorta sobre un mismo dominio, los clasifica con una misma escala y los deja enfrentados lado a lado: ahí es donde se ve en qué coinciden y en qué no.",
-      }),
-      el("p", { class: "panorama__stamp" }, [
-        el("span", { class: "panorama__scale", "aria-hidden": "true" }),
-        el("span", { class: "panorama__label" }, [
-          "Detrás, el pronóstico de verdad · ECMWF · Precipitación · ",
-          month,
-        ]),
-      ]),
+  const row = el("div", { class: "strip__row" }, panels.map((panel, i) =>
+    el("figure", { class: "strip__panel" }, [
+      panel.canvas,
+      el("figcaption", { class: "strip__caption", text: VARIABLES[i].label }),
     ]),
+  ));
+
+  const band = el("section", { class: "strip" }, [
+    row,
+    el("p", { class: "strip__stamp" }, ["Anomalías previstas · ECMWF · ", month]),
   ]);
   outlet.append(band);
 
-  const stopBand = layeredBand(band, art, 0.1);
-  const stopField = fieldPreview(field, (name) => { month.textContent = name ?? ""; });
+  const stopBand = layeredBand(band, row, 0.05);
+  const stopStrip = forecastStrip(panels, (name) => { month.textContent = name ?? ""; });
 
-  return { destroy: () => { stopBand(); stopField(); } };
+  return { destroy: () => { stopBand(); stopStrip(); } };
 }
