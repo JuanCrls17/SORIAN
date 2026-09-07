@@ -48,8 +48,14 @@ export default function inicio(outlet) {
     el("div", { class: "showcase__body" }, [
       el("header", { class: "showcase__head" }, [
         el("div", { class: "showcase__intro" }, [
+          el("span", { class: "showcase__rule", "aria-hidden": "true" }),
           el("h2", { class: "showcase__title", text: "Predicción estacional" }),
-          el("p", { class: "showcase__text", text: "Anomalías mensuales de precipitación y temperatura. Tres modelos globales, seis meses de horizonte y comparación lado a lado." }),
+          // la misma frase, en dos alturas: lo que se ve y, mas apagado, de
+          // donde sale. De un tiron era un bloque de texto sobre el mapa
+          el("p", { class: "showcase__text" }, [
+            el("b", { class: "showcase__lead", text: "Anomalías mensuales de precipitación y temperatura." }),
+            "Tres modelos globales, seis meses de horizonte y comparación lado a lado.",
+          ]),
         ]),
         controls,
       ]),
@@ -79,9 +85,11 @@ export default function inicio(outlet) {
   });
 
   function renderControls(active) {
-    clear(controls).append(
-      selectorGroup("Variable", VARIABLES, active, (id) => panel.select(id), "portada-variable"),
-    );
+    const group = selectorGroup("Variable", VARIABLES, active, (id) => panel.select(id), "portada-variable");
+    // el rotulo se queda solo al oido: tres capsulas con su pictograma dicen
+    // por si solas de que se elige, y la palabra encima del mapa era ruido
+    group.querySelector(".selector__label")?.classList.add("sr-only");
+    clear(controls).append(group);
   }
 
   // sin desplazamiento de fondo: la lamina va dentro de una tarjeta y moverla

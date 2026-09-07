@@ -10,7 +10,7 @@
   min-width: 0;
   max-width: var(--wrap);
   margin-inline: auto;
-  padding: 1rem 1rem 2.5rem;
+  padding: 1rem 1rem var(--outlet-end);
 }
 .outlet--wide { max-width: 1600px; }
 @media (min-width: 1100px) { .outlet--wide { padding-inline: 2rem; } }
@@ -50,13 +50,7 @@ body.is-app .footer { display: none; }
 }
 
 /* La escala de anomalias de SORIAN, reducida a una firma de 3 px */
-.masthead__scale {
-  height: 3px;
-  background: linear-gradient(90deg,
-    #543005 0%, #9d6115 9%, #bf812d 18%, #d5ad62 27%, #e7cf94 36%,
-    #f6e8c3 44%, #f6f1e5 50%, #e6f2f0 56%,
-    #c7eae5 64%, #98d7cd 73%, #67bbb1 82%, #35978f 91%, #003c30 100%);
-}
+.masthead__scale { height: 3px; background: var(--scale-line); }
 @media (max-width: 899px) { .masthead { position: sticky; } .masthead__bar { position: relative; } }
 
 .masthead__bar {
@@ -270,13 +264,7 @@ body.is-app .footer { display: none; }
 .footer { background: var(--navy); color: #a9c0da; font-size: .8125rem; }
 
 /* La misma firma de 3 px que abre la pagina, ahora cerrandola */
-.footer__scale {
-  height: 3px;
-  background: linear-gradient(90deg,
-    #543005 0%, #9d6115 9%, #bf812d 18%, #d5ad62 27%, #e7cf94 36%,
-    #f6e8c3 44%, #f6f1e5 50%, #e6f2f0 56%,
-    #c7eae5 64%, #98d7cd 73%, #67bbb1 82%, #35978f 91%, #003c30 100%);
-}
+.footer__scale { height: 3px; background: var(--scale-line); }
 
 /* Un solo renglon: marca, aviso, PEGASO y copyright. */
 .footer__inner {

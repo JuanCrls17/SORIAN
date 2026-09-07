@@ -15,6 +15,17 @@
   --shadow: 0 2px 10px rgb(10 28 72 / 8%);
   --shadow-lg: 0 8px 28px rgb(10 28 72 / 14%);
 
+  /* La escala de anomalias de SORIAN reducida a una firma de 3 px: abre la
+     cabecera, encabeza la lamina de la portada y cierra el pie */
+  --scale-line: linear-gradient(90deg,
+    #543005 0%, #9d6115 9%, #bf812d 18%, #d5ad62 27%, #e7cf94 36%,
+    #f6e8c3 44%, #f6f1e5 50%, #e6f2f0 56%,
+    #c7eae5 64%, #98d7cd 73%, #67bbb1 82%, #35978f 91%, #003c30 100%);
+
+  /* Aire que el contenedor deja antes del pie. Lo declara el token porque la
+     lamina de la portada, que llega a sangre hasta el pie, lo recorta. */
+  --outlet-end: 2.5rem;
+
   --header-h: 56px;
   --chrome-h: 57px;
   --wrap: 1120px;

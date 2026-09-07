@@ -39,7 +39,7 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  margin: -1rem -1rem 1rem;
+  margin: -1rem -1rem 0;
   padding: 3rem 1rem 3.25rem;
   color: #fff;
   background: #061027;
@@ -54,6 +54,19 @@
   z-index: -1;
   background: linear-gradient(180deg,
     rgb(6 16 39 / 88%) 0%, rgb(6 16 39 / 80%) 50%, rgb(6 16 39 / 93%) 100%);
+}
+
+/* Costura con la lamina de abajo. Las dos capas comparten el mismo navy, asi
+   que en vez de separarlas con una franja clara se encadenan: la portada
+   apaga la ilustracion contra su fondo antes de terminar y la lamina enciende
+   el mapa desde ese mismo fondo. El corte deja de verse. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  z-index: -1;
+  height: clamp(4rem, 9vw, 7rem);
+  background: linear-gradient(180deg, rgb(6 16 39 / 0%) 0%, #061027 100%);
 }
 
 @media (min-width: 760px) {
@@ -153,12 +166,17 @@
   isolation: isolate;
   overflow: hidden;
   display: flex;
-  margin: 2rem calc(50% - 50vw) 0;
-  padding: 2.5rem calc(50vw - 50%);
+  margin: 0 calc(50% - 50vw);
+  padding: 3rem calc(50vw - 50%) 2.5rem;
   min-height: clamp(23rem, 31vw, 36rem);
   color: #fff;
   background: #061027;
 }
+
+/* Cierra la portada pegada al pie: el aire que el contenedor reserva se
+   recorta a una linea, que separa las dos franjas oscuras sin abrir un hueco
+   claro entre ellas. */
+.showcase:last-child { margin-bottom: calc(.375rem - var(--outlet-end)); }
 
 .showcase__field,
 .showcase__outline {
@@ -182,6 +200,20 @@
 .showcase__field.is-ready { opacity: .72; }
 
 .showcase__outline { z-index: -1; }
+
+/* Continuacion del fundido: arriba la lamina es navy solido -el mismo con que
+   acaba la portada- y el mapa va apareciendo. Por encima de los limites, para
+   que tampoco ellos asomen de golpe, y por debajo del texto. */
+.showcase::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 0;
+  height: clamp(5rem, 11vw, 8.5rem);
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    #061027 0%, rgb(6 16 39 / 62%) 42%, rgb(6 16 39 / 0%) 100%);
+}
 
 /* Velo entre el campo y las lineas: el texto va sobre el lado cerrado y el
    mapa se abre hacia la derecha, que es donde no hay nada escrito. */
@@ -212,30 +244,93 @@
   flex-wrap: wrap;
 }
 .showcase__intro { flex: 1 1 24rem; min-width: 0; }
+
+/* La firma cromatica de la cabecera y el pie, encabezando tambien la lamina:
+   dice de que escala habla lo que hay debajo antes de leer una palabra. */
+.showcase__rule {
+  display: block;
+  width: 72px;
+  height: 3px;
+  margin-bottom: 1.25rem;
+  border-radius: 2px;
+  background: var(--scale-line);
+  box-shadow: 0 0 18px rgb(214 233 255 / 30%);
+}
+
 .showcase__title {
   margin: 0;
   /* los encabezados van en navy: sobre este fondo hay que decirlo */
   color: #fff;
   font-size: clamp(1.75rem, 3.4vw, 2.875rem);
-  letter-spacing: -.01em;
-  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -.018em;
+  line-height: 1.12;
   text-wrap: balance;
+  /* halo, no recuadro: separa el titulo del mapa sin dibujarle una caja */
+  text-shadow: 0 1px 2px rgb(2 8 22 / 45%), 0 14px 40px rgb(2 8 22 / 60%);
 }
+
+/* Dos alturas de voz en el mismo parrafo: primero que es lo que se ve, y
+   detras, mas apagado, de donde sale. Leerlo de un tiron era un bloque. */
 .showcase__text {
-  margin: .625rem 0 0;
-  max-width: 42rem;
-  color: #c3d5ea;
-  font-size: clamp(1rem, 1.2vw, 1.1875rem);
-  line-height: 1.55;
+  margin: .875rem 0 0;
+  max-width: 44ch;
+  color: #a4bdd8;
+  font-size: clamp(.9375rem, 1.05vw, 1.0625rem);
+  line-height: 1.6;
+  text-shadow: 0 1px 14px rgb(2 8 22 / 65%);
+}
+.showcase__lead {
+  display: block;
+  margin-bottom: .1875rem;
+  color: #e8f1fb;
+  font-weight: 500;
+  font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+  letter-spacing: -.005em;
 }
 
 /* puede encogerse: si no, las capsulas empujan la banda fuera de la pagina */
 .showcase__controls { flex: 0 1 auto; min-width: 0; }
-.showcase__controls .selector__label { color: #9db6d2; font-size: .6875rem; }
-/* Los mandos son los del visor, a la escala de esta banda. */
+/* Los mandos son los del visor, a la escala de esta banda. El rotulo del grupo
+   se queda solo al oido: aqui las tres capsulas con su pictograma se explican
+   solas y la palabra "Variable" solo anadia ruido sobre el mapa. */
 .showcase__controls .selector { gap: .625rem; }
 .showcase__controls .selector__options { gap: .375rem; }
-.showcase__controls .chip { min-height: 44px; padding: .5rem 1.0625rem; font-size: .9375rem; }
+
+/* Capsulas de vidrio. Blancas y opacas se leian como parches pegados encima
+   del mapa; asi dejan pasar el fondo desenfocado y solo la elegida se vuelve
+   solida, que es justo la jerarquia que hace falta. */
+.showcase__controls .chip {
+  min-height: 44px;
+  padding: .5rem 1.0625rem;
+  font-size: .9375rem;
+  color: #d7e5f5;
+  border-color: rgb(255 255 255 / 18%);
+  background: rgb(255 255 255 / 8%);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%);
+  transition: background .18s, border-color .16s, color .2s;
+}
+.showcase__controls .chip:hover {
+  background: rgb(255 255 255 / 16%);
+  border-color: rgb(255 255 255 / 34%);
+  color: #fff;
+}
+/* el fondo de la activa lo pone la pastilla que se desliza por detras: si el
+   vidrio siguiera puesto, le desdibujaria el canto en pleno viaje */
+.showcase__controls .chip.is-active {
+  color: #071229;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.showcase__controls .selector__options .marker {
+  background: rgb(255 255 255 / 90%);
+  box-shadow: 0 6px 18px rgb(3 10 26 / 35%);
+}
 .showcase__controls .chip__glyph { width: 20px; height: 20px; }
 
 .showcase__foot {
@@ -287,11 +382,11 @@
 
 @media (max-width: 759px) {
   .showcase {
-    margin-top: 1.5rem;
     margin-inline: -1rem;
-    padding: 1.5rem 1rem;
+    padding: 2rem 1rem 1.5rem;
     min-height: 28rem;
   }
+  .showcase__rule { margin-bottom: 1rem; }
   .showcase__body { gap: 1.25rem; }
   /* de pie el velo cierra por abajo, que es donde cae el texto */
   .showcase::after {
