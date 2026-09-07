@@ -178,8 +178,17 @@
    una franja clara justo donde la firma cromatica del pie ya hace de remate. */
 .showcase:last-child { margin-bottom: calc(-1 * var(--outlet-end)); }
 
-.showcase__field,
-.showcase__outline {
+/* Diptico: dos mitades con el mismo mes resuelto por dos centros distintos.
+   Van en dos capas paralelas -campo y limites- porque el velo se mete entre
+   ellas: el dato queda de fondo y el pais, nitido. */
+.showcase__stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: 10px;
+}
+.showcase__cell { position: relative; flex: 1; min-width: 0; }
+.showcase__layer {
   position: absolute;
   inset: 0;
   display: block;
@@ -187,19 +196,54 @@
   height: 100%;
 }
 
-.showcase__field {
+.showcase__stage--field {
   z-index: -3;
   filter: blur(3px);
   /* el desenfoque descubre los bordes del lienzo: se agranda un pelo */
   transform: scale(1.03);
-  opacity: 0;
-  transition: opacity 1.2s ease;
 }
+.showcase__stage--field .showcase__layer { opacity: 0; transition: opacity 1.2s ease; }
 /* la clase la pone el modulo cuando ya hay campo: sin ella se veria el
    rectangulo vacio mientras carga la grilla */
-.showcase__field.is-ready { opacity: .72; }
+.showcase__stage--field .showcase__layer.is-ready { opacity: .72; }
 
-.showcase__outline { z-index: -1; }
+.showcase__stage--lines { z-index: -1; }
+
+/* La junta entre los dos paneles: se apaga por los extremos para que no
+   parezca que corta la banda en dos. */
+.showcase__split {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    rgb(226 238 250 / 0%) 0%, rgb(226 238 250 / 20%) 24%,
+    rgb(226 238 250 / 20%) 76%, rgb(226 238 250 / 0%) 100%);
+}
+
+/* Quien firma cada mitad. A media altura, flanqueando la junta: es el unico
+   sitio de la banda que no se pelea con el texto, los mandos, la escala ni
+   el boton. Sin nombre no se puede ensenar el campo de un modelo. */
+.showcase__stage--models {
+  z-index: 0;
+  align-items: center;
+  pointer-events: none;
+}
+.showcase__stage--models .showcase__cell { display: flex; padding-left: 1rem; }
+.showcase__stage--models .showcase__cell:first-child {
+  justify-content: flex-end;
+  padding: 0 1rem 0 0;
+}
+.showcase__model {
+  font-size: .6875rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  color: rgb(233 243 255 / 76%);
+  text-shadow: 0 1px 12px rgb(2 8 22 / 85%);
+}
 
 /* La costura entre la portada y la lamina es la escala de anomalias de
    SORIAN: la misma firma de 3 px que abre la cabecera y cierra el pie. No es
@@ -230,7 +274,7 @@
   inset: 0;
   z-index: -2;
   background: linear-gradient(100deg,
-    rgb(6 16 39 / 88%) 0%, rgb(6 16 39 / 70%) 42%, rgb(6 16 39 / 28%) 100%);
+    rgb(6 16 39 / 80%) 0%, rgb(6 16 39 / 56%) 42%, rgb(6 16 39 / 24%) 100%);
 }
 
 .showcase__body {
@@ -338,6 +382,8 @@
 }
 .showcase__scale { flex: 1 1 20rem; max-width: 27rem; min-width: 0; }
 .showcase__stamp { margin: 0 0 .5rem; font-size: .875rem; color: #9db6d2; letter-spacing: .03em; }
+/* el modelo solo se nombra aqui cuando no hay dos paneles que lo firmen */
+.showcase__solo { display: none; }
 .showcase__month { color: #fff; font-variant-numeric: tabular-nums; }
 
 /* La leyenda es la del visor; sobre el velo cambian los tonos del texto. */
@@ -377,6 +423,13 @@
 .showcase.is-armed.is-in .showcase__foot { opacity: 1; transform: none; }
 
 @media (max-width: 759px) {
+  /* De pie no caben dos paneles: media banda por cabeza serian dos tiras. */
+  .showcase__stage { gap: 0; }
+  .showcase__stage .showcase__cell:last-child { display: none; }
+  .showcase__split,
+  .showcase__stage--models { display: none; }
+  .showcase__solo { display: inline; }
+
   .showcase {
     margin-inline: -1rem;
     padding: 2rem var(--rail) 1.5rem;

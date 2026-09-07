@@ -1,4 +1,4 @@
-import { PATHS, VARIABLES } from "../config.js";
+import { MODELS, PATHS, VARIABLES } from "../config.js";
 import { load, decodeFrame } from "../data.js";
 import { smoothField } from "../map/interpolate.js";
 import { buildLegend } from "../map/legend.js";
@@ -6,11 +6,23 @@ import { buildLegend } from "../map/legend.js";
 /**
  * Submuestreo por celda. El campo va de fondo y difuminado, asi que no hace
  * falta el detalle del visor: lo que se busca es la forma de las manchas.
- * Solo vive en memoria la variable que se esta viendo.
+ * Solo vive en memoria la serie que se esta viendo, y son dos paneles.
  */
-const FACTOR = 8;
-const HOLD = 3200;
-const FADE = 900;
+const FACTOR = 6;
+const HOLD = 3400;
+/** Lo que tarda un panel en desfragmentarse hacia el mes siguiente. */
+const SWAP = 1200;
+/** Lado del cuadrito, en pixeles de pantalla. */
+const TILE = 54;
+/** Desfase entre paneles: si arrancan juntos parece un solo mapa partido. */
+const STAGGER = 220;
+
+/**
+ * Parejas de modelos que se van turnando. Los dos paneles ensenan el mismo
+ * mes y la misma variable resueltos por dos centros distintos, que es de lo
+ * que trata el visor; al dar la vuelta a la serie cambia la pareja.
+ */
+const PAIRS = [[0, 1], [1, 2], [2, 0]];
 
 const DEG = Math.PI / 180;
 const toMercator = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * DEG) / 2));
@@ -130,207 +142,295 @@ function drawBorders(canvas, geo, proj) {
 }
 
 /**
- * Lamina unica y grande con el pronostico, recorriendo sus meses y sus
- * variables como un fondo que se renueva.
- *
- * No es una ilustracion: es el mismo archivo que sirve al visor, con su misma
- * escala y su misma reconstruccion, asi que la precipitacion sale en celdas
- * -campo discontinuo- y las temperaturas continuas.
- *
- * Cada mes se interpola la primera vez que hace falta y se guarda; al cambiar
- * de variable se suelta lo de la anterior, de modo que en memoria solo esta
- * la serie que se esta viendo.
+ * Orden en que se encienden los cuadritos. Cada panel lleva el suyo para que
+ * no se muevan a la vez ni igual: el primero los reparte al azar -eso es la
+ * desfragmentacion- y el segundo barre en diagonal con un temblor, de modo
+ * que el frente no se lea como una regla bajando.
  */
-export function forecastPanel({ canvas, outline, legend, onState }, model = "ecmwf") {
+function tileOrder(cols, rows, kind) {
+  const list = [];
+  for (let y = 0; y < rows; y += 1) {
+    for (let x = 0; x < cols; x += 1) list.push({ x, y });
+  }
+
+  if (kind % 2 === 0) {
+    for (let i = list.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+  } else {
+    list.sort((a, b) => (a.x + a.y + Math.random() * 1.7) - (b.x + b.y + Math.random() * 1.7));
+  }
+  return list;
+}
+
+/**
+ * Un panel del diptico: su lienzo de campo, su lienzo de limites y su propia
+ * desfragmentacion. No decide que ensena -eso lo lleva el modulo de abajo-,
+ * solo sabe traerlo, encuadrarlo y voltearlo.
+ */
+function createPanel({ canvas, outline }, index) {
   const ctx = canvas.getContext("2d");
-  const sets = new Map();
   const cache = new Map();
 
-  let variable = 0;
-  let month = 0;
-  let sticky = false;
-  let geo = null;
+  let grid = null;
   let win = null;
   let proj = null;
-  let timer = null;
+  let geo = null;
+  let current = null;
+  let order = null;
+  let tile = 0;
   let raf = null;
-  let visible = false;
-  let alive = false;
+  let alive = true;
 
-  const data = () => sets.get(VARIABLES[variable].id);
-  const dpr = () => Math.min(window.devicePixelRatio || 1, 2);
+  /** En el telefono el segundo panel esta oculto: ni mide, ni carga, ni pinta. */
+  const onScreen = () => canvas.getBoundingClientRect().width > 0;
 
   function measure() {
     const box = canvas.getBoundingClientRect();
-    const scale = dpr();
+    if (!box.width || !grid) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     for (const node of [canvas, outline]) {
       if (!node) continue;
-      node.width = Math.max(1, Math.round(box.width * scale));
-      node.height = Math.max(1, Math.round(box.height * scale));
+      node.width = Math.max(1, Math.round(box.width * dpr));
+      node.height = Math.max(1, Math.round(box.height * dpr));
     }
 
-    win = windowFor(box.width / box.height, data().grid);
-    proj = framing(data().grid, win);
+    win = windowFor(box.width / box.height, grid);
+    proj = framing(grid, win);
+    tile = Math.max(24, Math.round(TILE * dpr));
+    order = tileOrder(Math.ceil(canvas.width / tile), Math.ceil(canvas.height / tile), index);
     if (geo && outline) drawBorders(outline, geo, proj);
   }
 
-  /** Devuelve el mes ya interpolado, calculandolo la primera vez. */
-  function frameOf(index) {
-    const key = `${variable}:${index}`;
-    if (cache.has(key)) return cache.get(key);
-
-    const set = data();
-    // Aqui el campo va suavizado siempre, tambien la precipitacion. En el
-    // visor se dibuja por celdas porque lo publicado son clases y hay que
-    // poder leer la clase; esta lamina es un fondo desenfocado bajo un velo,
-    // donde el escalonado solo se lee como pixelado. La clase sigue estando
-    // a un clic, en el visor, con su leyenda.
-    const image = smoothField(decodeFrame(set.frames[index]), set.grid, set.scale, FACTOR);
-    const buffer = document.createElement("canvas");
-    buffer.width = image.width;
-    buffer.height = image.height;
-    buffer.getContext("2d").putImageData(image, 0, 0);
-    cache.set(key, buffer);
-    return buffer;
+  /** Trozo del campo que cae en un rectangulo del lienzo. */
+  function blit(bitmap, dx, dy, dw, dh) {
+    const { crop } = proj;
+    ctx.drawImage(
+      bitmap,
+      (crop.x + (dx / canvas.width) * crop.w) * bitmap.width,
+      (crop.y + (dy / canvas.height) * crop.h) * bitmap.height,
+      (dw / canvas.width) * crop.w * bitmap.width,
+      (dh / canvas.height) * crop.h * bitmap.height,
+      dx, dy, dw, dh,
+    );
   }
 
-  function paint(from, to, mix) {
+  function draw(from, to, progress) {
     const w = canvas.width;
     const h = canvas.height;
-    const { crop } = proj;
-    const cut = (bitmap) => ctx.drawImage(
-      bitmap,
-      crop.x * bitmap.width, crop.y * bitmap.height,
-      crop.w * bitmap.width, crop.h * bitmap.height,
-      0, 0, w, h,
-    );
-
     ctx.clearRect(0, 0, w, h);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
-    if (from) {
-      ctx.globalAlpha = 1;
-      cut(from);
+    if (!from || progress >= 1) return blit(to, 0, 0, w, h);
+
+    blit(from, 0, 0, w, h);
+
+    // cada cuadrito tarda SPAN del total en encenderse, y los turnos se
+    // reparten en lo que queda: asi siempre hay un frente a medio voltear
+    const SPAN = 0.45;
+    const turn = (1 - SPAN) / order.length;
+    for (let k = 0; k < order.length; k += 1) {
+      const mix = (progress - k * turn) / SPAN;
+      // el orden es creciente: en cuanto uno no ha empezado, ninguno detras
+      if (mix <= 0) break;
+
+      const dx = order[k].x * tile;
+      const dy = order[k].y * tile;
+      const dw = Math.min(tile, w - dx);
+      const dh = Math.min(tile, h - dy);
+      if (dw <= 0 || dh <= 0) continue;
+
+      ctx.globalAlpha = Math.min(1, mix);
+      blit(to, dx, dy, dw, dh);
+      if (mix < 1) {
+        // destello al voltear: es lo que hace que el cambio se lea
+        ctx.globalAlpha = (1 - mix) * 0.16;
+        ctx.fillStyle = "#dbeaff";
+        ctx.fillRect(dx, dy, dw, dh);
+      }
     }
-    ctx.globalAlpha = from ? mix : 1;
-    cut(to);
     ctx.globalAlpha = 1;
   }
 
-  function announce() {
-    onState?.({ variable: VARIABLES[variable].id, month: data().months[month] });
+  return {
+    /** Trae la serie y deja el mes listo, sin tocar lo que se ve. */
+    ready(model, variable, month) {
+      if (!onScreen()) return Promise.resolve(null);
+      return load(PATHS.grid(model, VARIABLES[variable].id)).then((set) => {
+        if (!alive) return null;
+        if (!grid) { grid = set.grid; measure(); }
+
+        const key = `${model}:${variable}:${month}`;
+        if (!cache.has(key)) {
+          // solo vive en memoria la serie puesta: al cambiar de modelo o de
+          // variable se suelta la anterior
+          for (const old of [...cache.keys()]) {
+            if (!old.startsWith(`${model}:${variable}:`)) cache.delete(old);
+          }
+          // Aqui el campo va suavizado siempre, tambien la precipitacion. En
+          // el visor se dibuja por celdas porque lo publicado son clases y hay
+          // que poder leerlas; esta lamina es un fondo desenfocado bajo un
+          // velo, donde el escalonado solo se lee como pixelado.
+          const image = smoothField(decodeFrame(set.frames[month]), set.grid, set.scale, FACTOR);
+          const buffer = document.createElement("canvas");
+          buffer.width = image.width;
+          buffer.height = image.height;
+          buffer.getContext("2d").putImageData(image, 0, 0);
+          cache.set(key, buffer);
+        }
+        return { set, bitmap: cache.get(key) };
+      }).catch(() => null);
+    },
+
+    /** Voltea el panel hacia el mes ya preparado. */
+    run(bitmap, delay) {
+      cancelAnimationFrame(raf);
+      if (!proj) measure();
+      if (!proj) return;
+
+      const from = current;
+      current = bitmap;
+      canvas.classList.add("is-ready");
+      if (!from || REDUCED.matches) return draw(null, bitmap, 1);
+
+      const start = performance.now() + delay;
+      const step = (now) => {
+        if (!alive) return;
+        const progress = Math.min(1, Math.max(0, (now - start) / SWAP));
+        draw(from, bitmap, progress);
+        if (progress < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    },
+
+    borders(shape) {
+      geo = shape;
+      if (proj && outline) drawBorders(outline, geo, proj);
+    },
+
+    resize() {
+      cancelAnimationFrame(raf);
+      measure();
+      if (current && proj) draw(null, current, 1);
+    },
+
+    stop() {
+      alive = false;
+      cancelAnimationFrame(raf);
+      cache.clear();
+    },
+  };
+}
+
+/**
+ * Diptico de la portada: el mismo mes y la misma variable resueltos por dos
+ * centros mundiales distintos, uno en cada mitad, cambiando solos.
+ *
+ * No es una ilustracion: es el mismo archivo que sirve al visor, con su misma
+ * escala. La serie corre mes a mes y, al dar la vuelta, cambia de variable y
+ * de pareja de modelos, de modo que la portada acaba ensenando todo lo que
+ * hay dentro sin que nadie toque nada.
+ */
+export function forecastPanel({ panels: nodes, legend, onState }) {
+  const panels = nodes.map(createPanel);
+
+  let variable = 0;
+  let month = 0;
+  let pair = 0;
+  let sticky = false;
+  let months = [];
+  let scale = null;
+  let timer = null;
+  let visible = false;
+  let alive = true;
+
+  const modelsOf = (which) => PAIRS[which].map((i) => MODELS[i].id);
+
+  /** Mes siguiente; al terminar la serie, variable y pareja siguientes. */
+  function nextOf() {
+    const wrap = month + 1 >= (months.length || 6);
+    return [
+      wrap && !sticky ? (variable + 1) % VARIABLES.length : variable,
+      wrap ? 0 : month + 1,
+      wrap ? (pair + 1) % PAIRS.length : pair,
+    ];
   }
 
-  /** Cambia de variable: suelta la serie anterior y rehace la leyenda. */
-  function setVariable(next, byHand) {
-    if (next === variable) return;
-    for (const key of [...cache.keys()]) {
-      if (key.startsWith(`${variable}:`)) cache.delete(key);
-    }
-    variable = next;
-    if (byHand) sticky = true;
-    legend?.replaceChildren(buildLegend(data().scale));
-  }
+  /** Prepara el paso en los dos paneles y, cuando ambos lo tienen, lo enciende. */
+  function step(toVariable, toMonth, toPair) {
+    const models = modelsOf(toPair);
+    return Promise.all(panels.map((panel, i) => panel.ready(models[i], toVariable, toMonth)))
+      .then((got) => {
+        if (!alive) return;
+        const first = got.find(Boolean);
+        // ningun panel a la vista, o la carga fallo: la portada sigue entera
+        if (!first) return;
 
-  function show(nextVariable, nextMonth) {
-    const from = cache.get(`${variable}:${month}`);
-    if (nextVariable !== variable) setVariable(nextVariable);
-    month = nextMonth;
-    const to = frameOf(month);
-    announce();
+        variable = toVariable;
+        month = toMonth;
+        pair = toPair;
+        months = first.set.months;
+        if (scale !== first.set.scale) {
+          scale = first.set.scale;
+          legend?.replaceChildren(buildLegend(scale));
+        }
 
-    if (REDUCED.matches || !from) {
-      paint(null, to, 1);
-      return schedule();
-    }
-
-    const start = performance.now();
-    const step = (now) => {
-      if (!alive) return;
-      const mix = Math.min(1, (now - start) / FADE);
-      paint(from, to, mix);
-      if (mix < 1) raf = requestAnimationFrame(step);
-      else schedule();
-    };
-    raf = requestAnimationFrame(step);
-  }
-
-  function next() {
-    const total = data().months.length;
-    const wrap = month + 1 >= total;
-    // la serie avanza mes a mes; al terminarla pasa a la variable siguiente,
-    // salvo que el visitante haya elegido una: entonces se queda en ella
-    const nextVariable = wrap && !sticky ? (variable + 1) % VARIABLES.length : variable;
-    return [nextVariable, wrap ? 0 : month + 1];
+        onState?.({ variable: VARIABLES[variable].id, month: months[month], models });
+        panels.forEach((panel, i) => got[i] && panel.run(got[i].bitmap, i * STAGGER));
+        schedule();
+      });
   }
 
   function schedule() {
     clearTimeout(timer);
-    // el observador avisa de que la lamina se ve en cuanto se le engancha,
-    // que es antes de que haya llegado ninguna grilla
-    if (!sets.size || !visible || REDUCED.matches) return;
-    const [v, m] = next();
-    // el que viene se interpola en la pausa, no al empezar la fusion: ahi
-    // costaria el primer fotograma y se veria el tiron
-    setTimeout(() => { if (alive && v === variable) frameOf(m); }, 0);
-    timer = setTimeout(() => show(v, m), HOLD);
+    if (!visible || REDUCED.matches) return;
+
+    const [v, m, p] = nextOf();
+    // el paso que viene se cocina durante la pausa: interpolarlo justo al
+    // voltear costaria el primer fotograma y se veria el tiron
+    const models = modelsOf(p);
+    setTimeout(() => { if (alive) panels.forEach((panel, i) => panel.ready(models[i], v, m)); }, 60);
+    timer = setTimeout(() => step(v, m, p), SWAP + STAGGER + HOLD);
   }
 
-  alive = true;
-  Promise.all(VARIABLES.map((item) => load(PATHS.grid(model, item.id))))
-    .then((loaded) => {
-      if (!alive) return;
-      VARIABLES.forEach((item, i) => sets.set(item.id, loaded[i]));
-
-      measure();
-      legend?.replaceChildren(buildLegend(data().scale));
-      paint(null, frameOf(0), 1);
-      canvas.classList.add("is-ready");
-      announce();
-      schedule();
-
-      // los limites llegan despues y se pintan encima sin rehacer el campo
-      return load(PATHS.borders).then((shape) => {
-        if (!alive) return;
-        geo = shape;
-        if (outline) drawBorders(outline, geo, proj);
-      });
-    })
-    .catch(() => { /* la lamina es prescindible: sin ella el bloque sigue entero */ });
+  step(0, 0, 0).then(() => {
+    if (!alive) return;
+    // los limites llegan despues y se pintan encima sin rehacer ningun campo
+    return load(PATHS.borders).then((shape) => {
+      if (alive) panels.forEach((panel) => panel.borders(shape));
+    });
+  }).catch(() => { /* la lamina es prescindible: sin ella el bloque sigue entero */ });
 
   const watcher = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
     if (visible) schedule();
     else clearTimeout(timer);
   }, { threshold: 0.1 });
-  watcher.observe(canvas);
+  watcher.observe(nodes[0].canvas);
 
-  // el recorte se recalcula con la forma del hueco: al cambiar de ancho no
-  // hay que rehacer ningun campo, solo volver a encuadrarlo
-  const onResize = () => {
-    if (!sets.size) return;
-    measure();
-    paint(null, frameOf(month), 1);
-  };
+  // el recorte se recalcula con la forma del hueco: al cambiar de ancho no hay
+  // que rehacer ningun campo, solo volver a encuadrarlo. Y si el segundo panel
+  // aparece al ensanchar la ventana, el paso siguiente ya se lo trae.
+  const onResize = () => panels.forEach((panel) => panel.resize());
   window.addEventListener("resize", onResize);
 
   return {
     /** Elige variable a mano: se queda en ella y arranca por su primer mes. */
     select: (id) => {
       const index = VARIABLES.findIndex((item) => item.id === id);
-      if (index < 0 || !sets.size) return;
+      if (index < 0 || index === variable) return;
       clearTimeout(timer);
-      cancelAnimationFrame(raf);
-      setVariable(index, true);
-      show(index, 0);
+      sticky = true;
+      step(index, 0, pair);
     },
     destroy: () => {
       alive = false;
       clearTimeout(timer);
-      cancelAnimationFrame(raf);
       watcher.disconnect();
       window.removeEventListener("resize", onResize);
-      cache.clear();
+      panels.forEach((panel) => panel.stop());
     },
   };
 }
