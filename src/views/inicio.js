@@ -48,7 +48,6 @@ export default function inicio(outlet) {
     el("div", { class: "showcase__body" }, [
       el("header", { class: "showcase__head" }, [
         el("div", { class: "showcase__intro" }, [
-          el("span", { class: "showcase__rule", "aria-hidden": "true" }),
           el("h2", { class: "showcase__title", text: "Predicción estacional" }),
           // la misma frase, en dos alturas: lo que se ve y, mas apagado, de
           // donde sale. De un tiron era un bloque de texto sobre el mapa

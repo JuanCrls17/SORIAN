@@ -56,19 +56,6 @@
     rgb(6 16 39 / 88%) 0%, rgb(6 16 39 / 80%) 50%, rgb(6 16 39 / 93%) 100%);
 }
 
-/* Costura con la lamina de abajo. Las dos capas comparten el mismo navy, asi
-   que en vez de separarlas con una franja clara se encadenan: la portada
-   apaga la ilustracion contra su fondo antes de terminar y la lamina enciende
-   el mapa desde ese mismo fondo. El corte deja de verse. */
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: auto 0 0;
-  z-index: -1;
-  height: clamp(4rem, 9vw, 7rem);
-  background: linear-gradient(180deg, rgb(6 16 39 / 0%) 0%, #061027 100%);
-}
-
 @media (min-width: 760px) {
   /* La portada llega a los bordes de la ventana. Recuadrada dejaba a los lados
      dos franjas del gris de la pagina contra una imagen oscura, y ese corte
@@ -173,10 +160,9 @@
   background: #061027;
 }
 
-/* Cierra la portada pegada al pie: el aire que el contenedor reserva se
-   recorta a una linea, que separa las dos franjas oscuras sin abrir un hueco
-   claro entre ellas. */
-.showcase:last-child { margin-bottom: calc(.375rem - var(--outlet-end)); }
+/* Cierra la portada a ras del pie: el aire que el contenedor reserva abriria
+   una franja clara justo donde la firma cromatica del pie ya hace de remate. */
+.showcase:last-child { margin-bottom: calc(-1 * var(--outlet-end)); }
 
 .showcase__field,
 .showcase__outline {
@@ -201,18 +187,25 @@
 
 .showcase__outline { z-index: -1; }
 
-/* Continuacion del fundido: arriba la lamina es navy solido -el mismo con que
-   acaba la portada- y el mapa va apareciendo. Por encima de los limites, para
-   que tampoco ellos asomen de golpe, y por debajo del texto. */
+/* La costura entre la portada y la lamina es la escala de anomalias de
+   SORIAN: la misma firma de 3 px que abre la cabecera y cierra el pie. No es
+   un adorno -es la leyenda del mapa reducida a una linea-, de modo que marca
+   exactamente donde empiezan los datos y el pie los cierra por abajo con la
+   misma marca. Un difuminado solo emborronaba el corte; una linea lo afirma.
+
+   Debajo, la sombra que la linea proyecta: sin ella el mapa quedaria pegado
+   al canto y la franja se leeria como una calcomania en vez de como un plano
+   por debajo del anterior. */
 .showcase::before {
   content: "";
   position: absolute;
   inset: 0 0 auto;
   z-index: 0;
-  height: clamp(5rem, 11vw, 8.5rem);
+  height: 3.5rem;
   pointer-events: none;
-  background: linear-gradient(180deg,
-    #061027 0%, rgb(6 16 39 / 62%) 42%, rgb(6 16 39 / 0%) 100%);
+  background:
+    var(--scale-line) top center / 100% 3px no-repeat,
+    linear-gradient(180deg, rgb(2 8 22 / 58%) 0%, rgb(2 8 22 / 0%) 100%);
 }
 
 /* Velo entre el campo y las lineas: el texto va sobre el lado cerrado y el
@@ -244,18 +237,6 @@
   flex-wrap: wrap;
 }
 .showcase__intro { flex: 1 1 24rem; min-width: 0; }
-
-/* La firma cromatica de la cabecera y el pie, encabezando tambien la lamina:
-   dice de que escala habla lo que hay debajo antes de leer una palabra. */
-.showcase__rule {
-  display: block;
-  width: 72px;
-  height: 3px;
-  margin-bottom: 1.25rem;
-  border-radius: 2px;
-  background: var(--scale-line);
-  box-shadow: 0 0 18px rgb(214 233 255 / 30%);
-}
 
 .showcase__title {
   margin: 0;
@@ -386,7 +367,6 @@
     padding: 2rem 1rem 1.5rem;
     min-height: 28rem;
   }
-  .showcase__rule { margin-bottom: 1rem; }
   .showcase__body { gap: 1.25rem; }
   /* de pie el velo cierra por abajo, que es donde cae el texto */
   .showcase::after {
