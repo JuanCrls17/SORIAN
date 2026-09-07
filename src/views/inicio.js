@@ -44,6 +44,13 @@ export default function inicio(outlet) {
   const stage = (kind, pick) => el("div", { class: `showcase__stage showcase__stage--${kind}`, "aria-hidden": "true" },
     panes.map((pane) => el("div", { class: "showcase__cell" }, [pick(pane)])));
 
+  // Quien firma cada mitad. Va en el flujo, entre el encabezado y el pie, no
+  // en una capa suelta centrada sobre la banda: el hueco libre cambia de alto
+  // con el ancho de la ventana -al estrecharse, los mandos bajan de renglon-,
+  // y centrado sobre el total el rotulo acababa metido bajo las capsulas.
+  const names = el("div", { class: "showcase__names", "aria-hidden": "true" },
+    panes.map((pane) => el("span", { class: "showcase__half" }, [pane.caption])));
+
   const month = el("strong", { class: "showcase__month" });
   // en el telefono solo hay un panel, asi que el modelo lo dice el sello
   const solo = el("span", { class: "showcase__solo" });
@@ -59,7 +66,6 @@ export default function inicio(outlet) {
     stage("field", (pane) => pane.field),
     stage("lines", (pane) => pane.outline),
     el("span", { class: "showcase__split", "aria-hidden": "true" }),
-    stage("models", (pane) => pane.caption),
     el("div", { class: "showcase__body" }, [
       el("header", { class: "showcase__head" }, [
         el("div", { class: "showcase__intro" }, [
@@ -68,6 +74,7 @@ export default function inicio(outlet) {
         ]),
         controls,
       ]),
+      names,
       el("div", { class: "showcase__foot" }, [
         el("div", { class: "showcase__scale" }, [
           el("p", { class: "showcase__stamp" }, [solo, month]),

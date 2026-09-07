@@ -587,6 +587,12 @@
 #app:fullscreen { height: 100%; background: var(--canvas); }
 #app:fullscreen .outlet--app { padding: .5rem; }
 
+/* Desde el visor se puede saltar a ENSO sin salir de pantalla completa, y ahi
+   el contenido es texto y graficos, mas altos que la pantalla: sin esto se
+   quedaban cortados y no habia forma de bajar. El visor no lo necesita -llena
+   la ventana por diseno- y desplazarlo solo despegaria el mapa de su marco. */
+#app:fullscreen .outlet:not(.outlet--app) { overflow-y: auto; }
+
 /* A pantalla completa la cabecera deja de ser una barra de navegacion y pasa a
    ser la firma de lo que se esta proyectando, que suele mirarse de lejos: la
    marca crece y de las cinco secciones quedan las dos que tienen visor. Las
@@ -805,45 +811,6 @@
   .swipe__grip { width: 52px; height: 52px; }
 }
 
-
-/* ---------- Conmutador de lado ---------- */
-.chip--toggle { display: inline-flex; align-items: center; gap: .375rem; }
-.chip__icon { font-size: .875rem; line-height: 1; }
-
-.sides { display: flex; gap: .25rem; flex: 0 0 auto; }
-.sides__btn {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: .0625rem;
-  min-height: 36px;
-  padding: .1875rem .5rem;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fff;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  max-width: 11rem;
-}
-.sides__btn.is-active { border-color: var(--navy); box-shadow: inset 0 0 0 1px var(--navy); }
-.sides__tag {
-  font-size: .5625rem;
-  font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.sides__btn.is-active .sides__tag { color: var(--navy); }
-.sides__name {
-  font-size: .75rem;
-  font-weight: 600;
-  color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 10rem;
-}
 
 /* Con dos escalas visibles, la leyenda se apila */
 .viewer__panel--legend { display: grid; gap: .5rem; }

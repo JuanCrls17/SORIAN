@@ -46,4 +46,5 @@ export const PATHS = {
   borders: "data/geo/borders.json",
   enso: (chart) => `data/enso/${chart}.json`,
   plotly: "assets/vendor/plotly.min.js",
+  leaflet: "assets/vendor/leaflet.js",
 };

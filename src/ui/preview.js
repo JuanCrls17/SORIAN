@@ -158,10 +158,16 @@ function tileOrder(cols, rows, kind) {
       const j = Math.floor(Math.random() * (i + 1));
       [list[i], list[j]] = [list[j], list[i]];
     }
-  } else {
-    list.sort((a, b) => (a.x + a.y + Math.random() * 1.7) - (b.x + b.y + Math.random() * 1.7));
+    return list;
   }
-  return list;
+
+  // El temblor se sortea una vez por cuadrito y se ordena por el resultado. Si
+  // se sorteara dentro del comparador, dos llamadas con el mismo par darian
+  // respuestas distintas y el orden dejaria de estar definido.
+  return list
+    .map((cell) => ({ cell, at: cell.x + cell.y + Math.random() * 1.7 }))
+    .sort((a, b) => a.at - b.at)
+    .map((item) => item.cell);
 }
 
 /**
@@ -222,7 +228,11 @@ function createPanel({ canvas, outline }, index) {
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
+    // Reescalado bilineal, no el de maxima calidad del visor. Aqui el campo se
+    // amplia -donde el filtro caro no anade nada- y ademas sale difuminado 3 px
+    // bajo un velo, asi que la diferencia no se puede ver; medida, costaba el
+    // 42% del trabajo del hilo principal mientras corre la desfragmentacion.
+    ctx.imageSmoothingQuality = "low";
     if (!from || progress >= 1) return blit(to, 0, 0, w, h);
 
     blit(from, 0, 0, w, h);
@@ -343,6 +353,7 @@ export function forecastPanel({ panels: nodes, legend, onState }) {
   let months = [];
   let scale = null;
   let timer = null;
+  let warmup = null;
   let visible = false;
   let alive = true;
 
@@ -385,13 +396,14 @@ export function forecastPanel({ panels: nodes, legend, onState }) {
 
   function schedule() {
     clearTimeout(timer);
+    clearTimeout(warmup);
     if (!visible || REDUCED.matches) return;
 
     const [v, m, p] = nextOf();
     // el paso que viene se cocina durante la pausa: interpolarlo justo al
     // voltear costaria el primer fotograma y se veria el tiron
     const models = modelsOf(p);
-    setTimeout(() => { if (alive) panels.forEach((panel, i) => panel.ready(models[i], v, m)); }, 60);
+    warmup = setTimeout(() => panels.forEach((panel, i) => panel.ready(models[i], v, m)), 60);
     timer = setTimeout(() => step(v, m, p), SWAP + STAGGER + HOLD);
   }
 
@@ -410,10 +422,22 @@ export function forecastPanel({ panels: nodes, legend, onState }) {
   }, { threshold: 0.1 });
   watcher.observe(nodes[0].canvas);
 
-  // el recorte se recalcula con la forma del hueco: al cambiar de ancho no hay
+  // El recorte se recalcula con la forma del hueco: al cambiar de ancho no hay
   // que rehacer ningun campo, solo volver a encuadrarlo. Y si el segundo panel
   // aparece al ensanchar la ventana, el paso siguiente ya se lo trae.
-  const onResize = () => panels.forEach((panel) => panel.resize());
+  //
+  // Cada medida redimensiona dos lienzos, rehace el orden de los cuadritos y
+  // repinta las fronteras. Arrastrando el borde de la ventana eso llega
+  // decenas de veces por segundo, asi que se agrupa en un fotograma: al final
+  // del arrastre lo que importa es la ultima medida, no todas.
+  let pending = null;
+  const onResize = () => {
+    if (pending) return;
+    pending = requestAnimationFrame(() => {
+      pending = null;
+      if (alive) panels.forEach((panel) => panel.resize());
+    });
+  };
   window.addEventListener("resize", onResize);
 
   return {
@@ -428,6 +452,8 @@ export function forecastPanel({ panels: nodes, legend, onState }) {
     destroy: () => {
       alive = false;
       clearTimeout(timer);
+      clearTimeout(warmup);
+      cancelAnimationFrame(pending);
       watcher.disconnect();
       window.removeEventListener("resize", onResize);
       panels.forEach((panel) => panel.stop());

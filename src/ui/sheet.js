@@ -32,8 +32,10 @@ export function createSheet(host) {
   host.append(root);
 
   let lastFocus = null;
+  let closing = null;
 
   function open(heading, content) {
+    clearTimeout(closing);
     lastFocus = document.activeElement;
     title.textContent = heading;
     clear(body).append(...[].concat(content));
@@ -46,7 +48,8 @@ export function createSheet(host) {
   function close() {
     root.classList.remove("is-open");
     document.removeEventListener("keydown", onKey);
-    setTimeout(() => { root.hidden = true; }, 180);
+    // se espera a que la hoja termine de bajar antes de retirarla del arbol
+    closing = setTimeout(() => { root.hidden = true; }, 180);
     lastFocus?.focus();
   }
 
@@ -54,5 +57,10 @@ export function createSheet(host) {
     if (event.key === "Escape") close();
   }
 
-  return { open, close, isOpen: () => !root.hidden, remove: () => root.remove() };
+  return {
+    open,
+    close,
+    isOpen: () => !root.hidden,
+    remove: () => { clearTimeout(closing); document.removeEventListener("keydown", onKey); root.remove(); },
+  };
 }

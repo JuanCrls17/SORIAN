@@ -199,7 +199,7 @@ body.is-app .footer { display: none; }
 /* En pantallas amplias la cabecera cabe en una sola franja: la marca a la
    izquierda y la navegacion a la derecha, para no gastar alto en el visor. */
 @media (min-width: 900px) {
-  :root { --header-h: 66px; --chrome-h: 67px; }
+  :root { --header-h: 66px; }
 
   .masthead__bar { gap: 2.5rem; }
   .nav__burger { display: none; }

@@ -6,6 +6,7 @@ import { COMPARE_ICON, SIDE_ICONS, SMOOTH_ICON, SUMMARY_ICON } from "../ui/icons
 import { createViewer } from "../map/viewer.js";
 import { createSheet } from "../ui/sheet.js";
 import { watchLayout } from "../ui/media.js";
+import { loadLeaflet } from "../map/leaflet.js";
 
 const valid = (list, value, fallback) =>
   (list.some((item) => item.id === value) ? value : fallback);
@@ -240,3 +241,7 @@ export default function estacional(outlet) {
     },
   };
 }
+
+// El visor no puede dibujar sin Leaflet. El enrutador lo espera con la seccion
+// anterior todavia en pantalla, de modo que la vista sigue siendo sincrona.
+estacional.needs = loadLeaflet;

@@ -58,7 +58,7 @@ export function createViewer(container, controls) {
     maxZoom: MAP.maxZoom,
   }).addTo(map);
   L.control.zoom({ position: "topright" }).addTo(map);
-  addFullscreen();
+  const dropFullscreen = addFullscreen();
 
   // Las etiquetas van por encima de la grilla para que sigan legibles.
   const labels = L.tileLayer(MAP.labels, {
@@ -97,7 +97,7 @@ export function createViewer(container, controls) {
    * y para volver habria que salir de pantalla completa primero.
    */
   function addFullscreen() {
-    if (!document.fullscreenEnabled) return;
+    if (!document.fullscreenEnabled) return null;
 
     const button = el("button", {
       class: "map-btn", type: "button",
@@ -117,13 +117,18 @@ export function createViewer(container, controls) {
     };
     control.addTo(map);
 
-    document.addEventListener("fullscreenchange", () => {
+    const onChange = () => {
       const on = Boolean(document.fullscreenElement);
       button.innerHTML = on ? COLLAPSE_ICON : EXPAND_ICON;
       button.title = on ? "Salir de pantalla completa" : "Pantalla completa";
       button.setAttribute("aria-label", button.title);
       requestAnimationFrame(() => map.invalidateSize());
-    });
+    };
+
+    // el oyente vive en document, no en el mapa: si no se suelta al cerrar la
+    // vista, cada visita a Estacional deja uno mas apuntando a un mapa muerto
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
   }
 
   function applyClip() {
@@ -340,6 +345,10 @@ export function createViewer(container, controls) {
       }
       applyClip();
     },
-    destroy: () => { stop(); map.remove(); },
+    destroy: () => {
+      stop();
+      dropFullscreen?.();
+      map.remove();
+    },
   };
 }

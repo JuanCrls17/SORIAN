@@ -263,19 +263,16 @@
     rgb(226 238 250 / 20%) 76%, rgb(226 238 250 / 0%) 100%);
 }
 
-/* Quien firma cada mitad. A media altura, flanqueando la junta: es el unico
-   sitio de la banda que no se pelea con el texto, los mandos, la escala ni
-   el boton. Sin nombre no se puede ensenar el campo de un modelo. */
-.showcase__stage--models {
-  z-index: 0;
-  align-items: center;
-  pointer-events: none;
-}
-.showcase__stage--models .showcase__cell { display: flex; padding-left: 1rem; }
-.showcase__stage--models .showcase__cell:first-child {
-  justify-content: flex-end;
-  padding: 0 1rem 0 0;
-}
+/* Quien firma cada mitad, flanqueando la junta: es el unico sitio de la banda
+   que no se pelea con el texto, los mandos, la escala ni el boton. Sin nombre
+   no se puede ensenar el campo de un modelo.
+
+   Va en el flujo, entre el encabezado y el pie, de modo que se reparte el
+   hueco que ellos dejan libre. Centrado sobre la banda entera se metia bajo
+   las capsulas en cuanto los mandos bajaban a su propio renglon. */
+.showcase__names { display: flex; flex: 1; align-items: center; pointer-events: none; }
+.showcase__half { display: flex; flex: 1; min-width: 0; padding-left: 1rem; }
+.showcase__half:first-child { justify-content: flex-end; padding: 0 1rem 0 0; }
 .showcase__model {
   font-size: .6875rem;
   font-weight: 700;
@@ -401,16 +398,28 @@
 .showcase__controls .chip.is-active {
   color: #fff;
   background: transparent;
-  border-color: rgb(255 255 255 / 52%);
+  border-color: rgb(122 178 236 / 62%);
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
+/* El navy de la casa -el mismo que pinta la opcion activa del menu- rebajado
+   lo justo para que el mapa siga asomando por debajo. Antes era el fondo de
+   la banda oscurecido, que no es un color del sistema: sobre la lamina se
+   leia como un agujero negro en vez de como la marca de lo elegido. */
 .showcase__controls .selector__options .marker {
-  background: rgb(4 12 30 / 76%);
-  box-shadow: 0 8px 22px rgb(2 8 22 / 45%), inset 0 1px 0 rgb(255 255 255 / 12%);
+  background: rgb(10 28 72 / 82%);
+  box-shadow: 0 8px 22px rgb(2 8 22 / 45%), inset 0 1px 0 rgb(255 255 255 / 14%);
 }
 .showcase__controls .chip__glyph { width: 20px; height: 20px; }
+
+/* Centrada en el hueco la firma caia justo en mitad de la lamina, lejos de
+   todo. Se sube algo menos de un tercio del propio hueco: al ser proporcion y
+   no medida fija, en pantalla amplia sube mucho -que es donde sobra sitio- y
+   al estrecharse la banda se queda quieta sin llegar a tocar las capsulas. */
+@media (min-width: 1120px) {
+  .showcase__names { transform: translateY(-30%); }
+}
 
 .showcase__foot {
   display: flex;
@@ -474,7 +483,7 @@
   .showcase__stage { gap: 0; }
   .showcase__stage .showcase__cell:last-child { display: none; }
   .showcase__split,
-  .showcase__stage--models { display: none; }
+  .showcase__names { display: none; }
   .showcase__solo { display: inline; }
 
   .showcase {
@@ -609,24 +618,6 @@
   border: 1px solid #f3c9c9;
   border-radius: var(--radius-sm);
   color: #8a2020;
-}
-
-.notice {
-  display: grid; gap: .75rem; justify-items: start;
-  padding: 1.5rem;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--blue);
-  border-radius: var(--radius);
-}
-.notice__badge {
-  margin: 0;
-  padding: .25rem .625rem;
-  background: var(--accent);
-  border-radius: 999px;
-  font-size: .75rem; font-weight: 700;
-  letter-spacing: .05em; text-transform: uppercase;
-  color: var(--blue-600);
 }
 
 /* ---------- Contenido ---------- */
