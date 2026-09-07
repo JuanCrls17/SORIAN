@@ -59,9 +59,7 @@ body.is-app .footer { display: none; }
   justify-content: space-between;
   gap: 1rem;
   height: var(--header-h);
-  max-width: var(--wrap);
-  margin-inline: auto;
-  padding-inline: 1rem;
+  padding-inline: var(--rail);
 }
 @media (min-width: 900px) { .masthead { display: block; } }
 
@@ -200,11 +198,7 @@ body.is-app .footer { display: none; }
 @media (min-width: 900px) {
   :root { --header-h: 66px; --chrome-h: 67px; }
 
-  .masthead__bar {
-    max-width: 1600px;
-    gap: 2.5rem;
-    padding-inline: 2rem;
-  }
+  .masthead__bar { gap: 2.5rem; }
   .nav__burger { display: none; }
 
   .nav {
@@ -271,9 +265,7 @@ body.is-app .footer { display: none; }
   display: flex;
   align-items: center;
   gap: .75rem 1.25rem;
-  max-width: 1600px;
-  margin-inline: auto;
-  padding: .5rem 2rem;
+  padding: .5rem var(--rail);
 }
 
 .footer__wordmark {
@@ -332,7 +324,7 @@ body.is-app .footer { display: none; }
 .footer__sibling:hover .footer__sibling-name { color: #fff; }
 
 @media (max-width: 860px) {
-  .footer__inner { padding: .5rem 1rem; gap: .75rem; }
+  .footer__inner { gap: .75rem; }
   /* en el telefono el renglon solo da para la marca y el enlace hermano */
   .footer__note, .footer__meta { display: none; }
   .footer__sibling { margin-left: auto; }

@@ -40,7 +40,7 @@
   isolation: isolate;
   overflow: hidden;
   margin: -1rem -1rem 0;
-  padding: 3.5rem 1rem 3.75rem;
+  padding: 3.5rem var(--rail) 3.75rem;
   color: #fff;
   background: #061027;
 }
@@ -64,7 +64,6 @@
   .hero {
     margin-inline: calc(50% - 50vw);
     padding-block: 6.5rem;
-    padding-inline: calc(50vw - 50%);
     border-radius: 0;
   }
   .hero::after {
@@ -92,7 +91,9 @@
   font-weight: 600;
   letter-spacing: .15em;
   line-height: 1;
-  text-indent: .18em;
+  /* el interletrado tambien va detras de la ultima letra: se descuenta, como
+     en la cabecera y en el pie, para que la caja termine donde termina la N */
+  margin-right: -.15em;
 }
 
 .hero__text {
@@ -160,7 +161,7 @@
   overflow: hidden;
   display: flex;
   margin: 0 calc(50% - 50vw);
-  padding: 3rem calc(50vw - 50%) 2.5rem;
+  padding: 3rem var(--rail) 2.5rem;
   min-height: clamp(23rem, 31vw, 36rem);
   color: #fff;
   background: #061027;
@@ -370,7 +371,7 @@
 @media (max-width: 759px) {
   .showcase {
     margin-inline: -1rem;
-    padding: 2rem 1rem 1.5rem;
+    padding: 2rem var(--rail) 1.5rem;
     min-height: 28rem;
   }
   .showcase__body { gap: 1.25rem; }

@@ -26,11 +26,20 @@
      lamina de la portada, que llega a sangre hasta el pie, lo recorta. */
   --outlet-end: 2.5rem;
 
+  /* Riel izquierdo de la pagina. Cabecera, portada, lamina y pie arrancan
+     todos de esta misma vertical: hasta 1120/1600 px es el margen fijo y a
+     partir de ahi, lo que sobra al centrar la columna. */
+  --rail: calc(max(0px, 50vw - 560px) + 1rem);
+
   --header-h: 56px;
   --chrome-h: 57px;
   --wrap: 1120px;
 
   --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (min-width: 900px) {
+  :root { --rail: calc(max(0px, 50vw - 800px) + 2rem); }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
