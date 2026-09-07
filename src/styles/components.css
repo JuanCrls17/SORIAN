@@ -462,6 +462,14 @@
 .showcase.is-armed.is-in .showcase__foot { opacity: 1; transform: none; }
 
 @media (max-width: 759px) {
+  /* La cejilla es la linea mas larga de la portada: a 13 px se comia tres
+     renglones del telefono antes de llegar al nombre. */
+  .hero__eyebrow {
+    font-size: .6875rem;
+    letter-spacing: .08em;
+    margin-bottom: .875rem;
+  }
+
   /* De pie no caben dos paneles: media banda por cabeza serian dos tiras. */
   .showcase__stage { gap: 0; }
   .showcase__stage .showcase__cell:last-child { display: none; }

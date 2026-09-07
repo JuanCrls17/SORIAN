@@ -87,6 +87,9 @@ body.is-app .footer { display: none; }
   margin-right: -.24em;
   line-height: 1.1;
   color: var(--navy);
+  /* seis letras muy abiertas: en cuanto la barra se aprieta -telefono estrecho
+     o ventana a medio ancho- se partia en "SORIA / N" */
+  white-space: nowrap;
 }
 .brand__name small { font-size: .625rem; color: var(--muted); white-space: nowrap; }
 .brand__full-long { display: none; }
@@ -341,4 +344,10 @@ body.is-app .footer { display: none; }
   /* en el telefono el renglon solo da para la marca y el enlace hermano */
   .footer__note, .footer__meta { display: none; }
   .footer__sibling { margin-left: auto; }
+}
+
+/* Por debajo de 400 px ni eso cabe: la pastilla no encoge y empujaba el pie
+   fuera de la pantalla. Se queda con el nombre, que es lo que se pica. */
+@media (max-width: 400px) {
+  .footer__sibling-lead { display: none; }
 }
