@@ -94,6 +94,13 @@
   /* el interletrado tambien va detras de la ultima letra: se descuenta, como
      en la cabecera y en el pie, para que la caja termine donde termina la N */
   margin-right: -.15em;
+  /* luz escondida detras del nombre: un filo claro en el canto, un halo azul
+     que apenas se ve y una sombra que lo asienta sobre la ilustracion */
+  text-shadow:
+    0 0 1px rgb(226 240 255 / 45%),
+    0 0 26px rgb(122 178 236 / 34%),
+    0 0 68px rgb(58 122 200 / 24%),
+    0 16px 38px rgb(2 8 22 / 55%);
 }
 
 .hero__text {
@@ -243,7 +250,10 @@
   gap: .75rem 1.5rem;
   flex-wrap: wrap;
 }
-.showcase__intro { flex: 1 1 24rem; min-width: 0; }
+/* La base es lo que mide la frase de un tiron: en cuanto no cabe junto a los
+   mandos, son ellos los que bajan de renglon y el subtitulo se queda entero
+   en uno solo, que es como tiene que leerse. */
+.showcase__intro { flex: 1 1 30rem; min-width: 0; }
 
 .showcase__title {
   margin: 0;
@@ -258,23 +268,17 @@
   text-shadow: 0 1px 2px rgb(2 8 22 / 45%), 0 14px 40px rgb(2 8 22 / 60%);
 }
 
-/* Dos alturas de voz en el mismo parrafo: primero que es lo que se ve, y
-   detras, mas apagado, de donde sale. Leerlo de un tiron era un bloque. */
+/* Una sola frase, y en un solo renglon donde quepa: el subtitulo dice que se
+   esta viendo, no cuenta la seccion entera. */
 .showcase__text {
   margin: .875rem 0 0;
-  max-width: 44ch;
-  color: #a4bdd8;
-  font-size: clamp(.9375rem, 1.05vw, 1.0625rem);
-  line-height: 1.6;
-  text-shadow: 0 1px 14px rgb(2 8 22 / 65%);
-}
-.showcase__lead {
-  display: block;
-  margin-bottom: .1875rem;
-  color: #e8f1fb;
+  max-width: 56ch;
+  color: #dfeaf8;
   font-weight: 500;
   font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+  line-height: 1.45;
   letter-spacing: -.005em;
+  text-shadow: 0 1px 14px rgb(2 8 22 / 65%);
 }
 
 /* puede encogerse: si no, las capsulas empujan la banda fuera de la pagina */
@@ -305,19 +309,23 @@
   border-color: rgb(255 255 255 / 34%);
   color: #fff;
 }
-/* el fondo de la activa lo pone la pastilla que se desliza por detras: si el
-   vidrio siguiera puesto, le desdibujaria el canto en pleno viaje */
+/* La elegida no se pinta de blanco -sobre el mapa era un parche-: se hunde.
+   Vidrio mas oscuro que el fondo, canto encendido y letra en blanco; queda
+   claro cual esta puesta sin sacar una pastilla opaca de la nada.
+
+   El fondo lo pone la pastilla que se desliza por detras: si el vidrio del
+   boton siguiera puesto, le desdibujaria el canto en pleno viaje. */
 .showcase__controls .chip.is-active {
-  color: #071229;
+  color: #fff;
   background: transparent;
-  border-color: transparent;
+  border-color: rgb(255 255 255 / 52%);
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 .showcase__controls .selector__options .marker {
-  background: rgb(255 255 255 / 90%);
-  box-shadow: 0 6px 18px rgb(3 10 26 / 35%);
+  background: rgb(4 12 30 / 76%);
+  box-shadow: 0 8px 22px rgb(2 8 22 / 45%), inset 0 1px 0 rgb(255 255 255 / 12%);
 }
 .showcase__controls .chip__glyph { width: 20px; height: 20px; }
 

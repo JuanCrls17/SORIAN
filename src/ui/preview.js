@@ -180,10 +180,12 @@ export function forecastPanel({ canvas, outline, legend, onState }, model = "ecm
     if (cache.has(key)) return cache.get(key);
 
     const set = data();
-    // a factor 1 la reconstruccion cae justo sobre los centros de celda: sale
-    // la clase tal cual, que es lo que hay que ver en un campo discontinuo
-    const factor = VARIABLES[variable].continuous ? FACTOR : 1;
-    const image = smoothField(decodeFrame(set.frames[index]), set.grid, set.scale, factor);
+    // Aqui el campo va suavizado siempre, tambien la precipitacion. En el
+    // visor se dibuja por celdas porque lo publicado son clases y hay que
+    // poder leer la clase; esta lamina es un fondo desenfocado bajo un velo,
+    // donde el escalonado solo se lee como pixelado. La clase sigue estando
+    // a un clic, en el visor, con su leyenda.
+    const image = smoothField(decodeFrame(set.frames[index]), set.grid, set.scale, FACTOR);
     const buffer = document.createElement("canvas");
     buffer.width = image.width;
     buffer.height = image.height;
@@ -204,7 +206,7 @@ export function forecastPanel({ canvas, outline, legend, onState }, model = "ecm
     );
 
     ctx.clearRect(0, 0, w, h);
-    ctx.imageSmoothingEnabled = VARIABLES[variable].continuous;
+    ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
     if (from) {
       ctx.globalAlpha = 1;

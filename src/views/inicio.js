@@ -49,12 +49,7 @@ export default function inicio(outlet) {
       el("header", { class: "showcase__head" }, [
         el("div", { class: "showcase__intro" }, [
           el("h2", { class: "showcase__title", text: "Predicción estacional" }),
-          // la misma frase, en dos alturas: lo que se ve y, mas apagado, de
-          // donde sale. De un tiron era un bloque de texto sobre el mapa
-          el("p", { class: "showcase__text" }, [
-            el("b", { class: "showcase__lead", text: "Anomalías mensuales de precipitación y temperatura." }),
-            "Tres modelos globales, seis meses de horizonte y comparación lado a lado.",
-          ]),
+          el("p", { class: "showcase__text", text: "Anomalías mensuales de precipitación y temperatura." }),
         ]),
         controls,
       ]),
