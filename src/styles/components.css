@@ -40,7 +40,7 @@
   isolation: isolate;
   overflow: hidden;
   margin: -1rem -1rem 0;
-  padding: 3rem 1rem 3.25rem;
+  padding: 3.5rem 1rem 3.75rem;
   color: #fff;
   background: #061027;
 }
@@ -63,7 +63,7 @@
      relleno devuelve el texto a la misma columna que las tarjetas de abajo. */
   .hero {
     margin-inline: calc(50% - 50vw);
-    padding-block: 5rem;
+    padding-block: 6.5rem;
     padding-inline: calc(50vw - 50%);
     border-radius: 0;
   }
@@ -74,28 +74,33 @@
   }
 }
 
-.hero__content { position: relative; z-index: 1; max-width: 34rem; }
+.hero__content { position: relative; z-index: 1; max-width: 38rem; }
 
 .hero__eyebrow {
-  font-size: .6875rem;
-  letter-spacing: .1em;
+  font-size: .75rem;
+  letter-spacing: .11em;
   text-transform: uppercase;
   color: #8fb7e0;
-  margin-bottom: 1rem;
+  margin-bottom: 1.125rem;
 }
 
-.hero__title { margin: 0 0 .75rem; }
+.hero__title { margin: 0 0 .875rem; }
 .wordmark {
   display: block;
   color: #fff;
-  font-size: clamp(2.75rem, 11vw, 4.75rem);
+  font-size: clamp(3rem, 12vw, 5.25rem);
   font-weight: 600;
   letter-spacing: .15em;
   line-height: 1;
   text-indent: .18em;
 }
 
-.hero__text { color: #a9c0da; font-size: 1rem; margin-bottom: 0; max-width: 40ch; }
+.hero__text {
+  color: #a9c0da;
+  font-size: clamp(1.0625rem, 1.25vw, 1.1875rem);
+  margin-bottom: 0;
+  max-width: 42ch;
+}
 
 .hero__art {
   position: absolute;
@@ -106,10 +111,11 @@
 @media (min-width: 760px) {
   .hero__art {
     background-image: url("../../assets/globo.webp");
-    /* mas alto que la portada: el globo se sale por arriba y por abajo, que
-       es lo que hace que se lea como fondo y no como una figura pegada */
+    /* algo mas alto que la portada: el globo asoma por arriba y por abajo, lo
+       justo para leerse como fondo y no como una figura pegada, pero sin
+       comerse un tercio de la esfera */
     background-position: 74% center;
-    background-size: auto 132%;
+    background-size: auto 116%;
   }
 }
 
