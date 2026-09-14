@@ -6,7 +6,7 @@ import { buildLegend } from "../map/legend.js";
 /**
  * Submuestreo por celda. El campo va de fondo y difuminado, asi que no hace
  * falta el detalle del visor: lo que se busca es la forma de las manchas.
- * Solo vive en memoria la serie que se esta viendo, y son dos paneles.
+ * Solo vive en memoria la serie que se esta viendo.
  */
 const FACTOR = 6;
 const HOLD = 3400;
@@ -14,15 +14,17 @@ const HOLD = 3400;
 const SWAP = 1200;
 /** Lado del cuadrito, en pixeles de pantalla. */
 const TILE = 54;
-/** Desfase entre paneles: si arrancan juntos parece un solo mapa partido. */
+/** Desfase entre paneles, si algun dia vuelven a ser mas de uno. */
 const STAGGER = 220;
 
 /**
- * Parejas de modelos que se van turnando. Los dos paneles ensenan el mismo
- * mes y la misma variable resueltos por dos centros distintos, que es de lo
- * que trata el visor; al dar la vuelta a la serie cambia la pareja.
+ * Modelos que se van turnando: cada vuelta de la serie pasa al centro
+ * siguiente, de modo que la lamina acaba ensenando los tres sin que nadie
+ * toque nada. Se reparten tantos como paneles haya, consecutivos, asi que con
+ * un panel es un modelo por vuelta y con dos, dos centros del mismo mes.
  */
-const PAIRS = [[0, 1], [1, 2], [2, 0]];
+const modelsFrom = (turn, count) =>
+  Array.from({ length: count }, (_, i) => MODELS[(turn + i) % MODELS.length].id);
 
 const DEG = Math.PI / 180;
 const toMercator = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * DEG) / 2));
@@ -171,7 +173,7 @@ function tileOrder(cols, rows, kind) {
 }
 
 /**
- * Un panel del diptico: su lienzo de campo, su lienzo de limites y su propia
+ * Un panel: su lienzo de campo, su lienzo de limites y su propia
  * desfragmentacion. No decide que ensena -eso lo lleva el modulo de abajo-,
  * solo sabe traerlo, encuadrarlo y voltearlo.
  */
@@ -189,7 +191,7 @@ function createPanel({ canvas, outline }, index) {
   let raf = null;
   let alive = true;
 
-  /** En el telefono el segundo panel esta oculto: ni mide, ni carga, ni pinta. */
+  /** Un panel sin sitio en pantalla ni mide, ni carga, ni pinta. */
   const onScreen = () => canvas.getBoundingClientRect().width > 0;
 
   function measure() {
@@ -335,20 +337,20 @@ function createPanel({ canvas, outline }, index) {
 }
 
 /**
- * Diptico de la portada: el mismo mes y la misma variable resueltos por dos
- * centros mundiales distintos, uno en cada mitad, cambiando solos.
+ * Campo de pronostico de la portada, desfragmentandose de un mes al siguiente.
  *
  * No es una ilustracion: es el mismo archivo que sirve al visor, con su misma
  * escala. La serie corre mes a mes y, al dar la vuelta, cambia de variable y
- * de pareja de modelos, de modo que la portada acaba ensenando todo lo que
- * hay dentro sin que nadie toque nada.
+ * de modelo, de modo que la portada acaba ensenando todo lo que hay dentro sin
+ * que nadie toque nada. Admite varios paneles a la vez, cada uno con un centro
+ * distinto del mismo mes.
  */
 export function forecastPanel({ panels: nodes, legend, onState }) {
   const panels = nodes.map(createPanel);
 
   let variable = 0;
   let month = 0;
-  let pair = 0;
+  let turn = 0;
   let sticky = false;
   let months = [];
   let scale = null;
@@ -357,21 +359,21 @@ export function forecastPanel({ panels: nodes, legend, onState }) {
   let visible = false;
   let alive = true;
 
-  const modelsOf = (which) => PAIRS[which].map((i) => MODELS[i].id);
+  const modelsOf = (which) => modelsFrom(which, panels.length);
 
-  /** Mes siguiente; al terminar la serie, variable y pareja siguientes. */
+  /** Mes siguiente; al terminar la serie, variable y modelo siguientes. */
   function nextOf() {
     const wrap = month + 1 >= (months.length || 6);
     return [
       wrap && !sticky ? (variable + 1) % VARIABLES.length : variable,
       wrap ? 0 : month + 1,
-      wrap ? (pair + 1) % PAIRS.length : pair,
+      wrap ? (turn + 1) % MODELS.length : turn,
     ];
   }
 
   /** Prepara el paso en los dos paneles y, cuando ambos lo tienen, lo enciende. */
-  function step(toVariable, toMonth, toPair) {
-    const models = modelsOf(toPair);
+  function step(toVariable, toMonth, toTurn) {
+    const models = modelsOf(toTurn);
     return Promise.all(panels.map((panel, i) => panel.ready(models[i], toVariable, toMonth)))
       .then((got) => {
         if (!alive) return;
@@ -381,7 +383,7 @@ export function forecastPanel({ panels: nodes, legend, onState }) {
 
         variable = toVariable;
         month = toMonth;
-        pair = toPair;
+        turn = toTurn;
         months = first.set.months;
         if (scale !== first.set.scale) {
           scale = first.set.scale;
@@ -423,8 +425,8 @@ export function forecastPanel({ panels: nodes, legend, onState }) {
   watcher.observe(nodes[0].canvas);
 
   // El recorte se recalcula con la forma del hueco: al cambiar de ancho no hay
-  // que rehacer ningun campo, solo volver a encuadrarlo. Y si el segundo panel
-  // aparece al ensanchar la ventana, el paso siguiente ya se lo trae.
+  // que rehacer ningun campo, solo volver a encuadrarlo. Y si un panel aparece
+  // al ensanchar la ventana, el paso siguiente ya se lo trae.
   //
   // Cada medida redimensiona dos lienzos, rehace el orden de los cuadritos y
   // repinta las fronteras. Arrastrando el borde de la ventana eso llega
@@ -447,7 +449,7 @@ export function forecastPanel({ panels: nodes, legend, onState }) {
       if (index < 0 || index === variable) return;
       clearTimeout(timer);
       sticky = true;
-      step(index, 0, pair);
+      step(index, 0, turn);
     },
     destroy: () => {
       alive = false;

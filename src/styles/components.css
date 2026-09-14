@@ -194,21 +194,20 @@
   from { opacity: 0; transform: scale(.93); }
 }
 
-/* ---------- Lamina de pronostico ---------- */
-/* La puerta al visor es el pronostico mismo, a sangre y renovandose: una
-   tarjeta que repitiera "Pronostico estacional" con una flecha ya lo dice el
-   menu. El campo va de fondo, desenfocado y bajo un velo -para leerlo esta el
-   visor, a un clic-, y encima van el texto, los mandos del propio visor y la
-   escala. Los limites politicos, nitidos, en su propio lienzo: sin ellos el
-   fondo seria una mancha abstracta. */
+/* ---------- Lamina de dos puertas ---------- */
+/* Las dos maneras de mirar el clima que ofrece la plataforma, a la par: un
+   campo sobre el mapa y una serie de tiempo. No son tarjetas que anuncien las
+   secciones -eso ya lo hace el menu-: son las secciones asomando, con su dato
+   en marcha. A la izquierda el pronostico estacional, desenfocado y bajo un
+   velo porque ahi el mapa hace de fondo; a la derecha la serie del ENSO sobre
+   el navy limpio, que una linea necesita fondo quieto para poder leerse. */
 .showcase {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   margin: 0 calc(50% - 50vw);
-  padding: 3rem var(--rail) 2.5rem;
-  min-height: clamp(23rem, 31vw, 36rem);
   color: #fff;
   background: #061027;
 }
@@ -217,19 +216,46 @@
    una franja clara justo donde la firma cromatica del pie ya hace de remate. */
 .showcase:last-child { margin-bottom: calc(-1 * var(--outlet-end)); }
 
-/* Diptico: dos mitades con el mismo mes resuelto por dos centros distintos.
-   Van en dos capas paralelas -campo y limites- porque el velo se mete entre
-   ellas: el dato queda de fondo y el pais, nitido. */
-/* Los paneles se tocan. Con una franja de por medio se veia el fondo de la
-   banda entre los dos campos, y esa raya negra de canto a canto no era una
-   junta: partia la lamina en dos laminas. Pegados, el propio desenfoque hace
-   la transicion y la unica marca del reparto es la linea de abajo. */
-.showcase__stage {
-  position: absolute;
-  inset: 0;
+.showcase__panel {
+  position: relative;
+  isolation: isolate;
   display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+  /* El campo va agrandado un 3 % para tapar lo que le descubre el desenfoque,
+     asi que asoma por los cantos del panel: aqui se recorta. Sin esto el
+     sobrante caia sobre el panel vecino, donde no llega el velo, y dejaba una
+     tira de mapa a plena luz justo en la junta. */
+  overflow: hidden;
+  padding: 3rem 2rem 2.5rem;
+  min-height: clamp(24rem, 33vw, 38rem);
 }
-.showcase__cell { position: relative; flex: 1; min-width: 0; }
+
+/* Cada panel arranca del riel de su lado. La lamina va a sangre, pero su texto
+   tiene que caer en la misma vertical en la que arrancan la cabecera y el pie. */
+.showcase__panel--map { padding-left: var(--rail); }
+.showcase__panel--enso { padding-right: var(--rail); }
+
+/* La junta: un hilo que se apaga bastante antes de los cantos. No tiene que
+   partir la banda -el cambio de fondo entre los dos paneles ya dice donde
+   acaba uno-, solo afirmar el reparto. */
+.showcase__panel--enso::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 1px;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    rgb(226 238 250 / 0%) 10%, rgb(226 238 250 / 14%) 34%,
+    rgb(226 238 250 / 14%) 66%, rgb(226 238 250 / 0%) 90%);
+}
+
+/* Campo y limites en dos capas, porque el velo se mete entre ellas: el dato
+   queda de fondo y el pais, nitido. Sin los limites el campo es una mancha
+   sin pais; con ellos, un mapa. */
+.showcase__field { position: absolute; inset: 0; pointer-events: none; }
 .showcase__layer {
   position: absolute;
   inset: 0;
@@ -237,53 +263,51 @@
   width: 100%;
   height: 100%;
 }
-
-.showcase__stage--field {
+.showcase__layer--field {
   z-index: -3;
   filter: blur(3px);
   /* el desenfoque descubre los bordes del lienzo: se agranda un pelo */
   transform: scale(1.03);
+  opacity: 0;
+  transition: opacity 1.2s ease;
 }
-.showcase__stage--field .showcase__layer { opacity: 0; transition: opacity 1.2s ease; }
 /* la clase la pone el modulo cuando ya hay campo: sin ella se veria el
    rectangulo vacio mientras carga la grilla */
-.showcase__stage--field .showcase__layer.is-ready { opacity: .72; }
+.showcase__layer--field.is-ready { opacity: .72; }
+.showcase__layer--lines { z-index: -1; }
 
-.showcase__stage--lines { z-index: -1; }
+/* Velo entre el campo y los limites. Cierra arriba y abajo -donde caen el
+   titulo y el pie- y se abre por el medio, que es donde no hay nada escrito.
 
-/* La junta entre los dos paneles: un hilo que solo se enciende en el tramo
-   donde firman los modelos y se apaga mucho antes de los cantos. No tiene que
-   dividir la banda -eso ya lo hace el propio salto entre los dos campos-,
-   solo decir donde acaba uno y empieza el otro. */
-.showcase__split {
+   Y cierra tambien hacia la junta, hasta el navy de la banda: el mapa llega a
+   sangre y cortarlo a cuchillo contra el panel del grafico dejaba un canto
+   duro de canto a canto. Disuelto, los dos paneles comparten fondo y el unico
+   que marca el reparto es el hilo. */
+.showcase__panel--map::after {
+  content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 1px;
-  z-index: 0;
+  inset: 0;
+  z-index: -2;
   pointer-events: none;
-  background: linear-gradient(180deg,
-    rgb(226 238 250 / 0%) 18%, rgb(226 238 250 / 13%) 42%,
-    rgb(226 238 250 / 13%) 58%, rgb(226 238 250 / 0%) 82%);
+  background:
+    linear-gradient(90deg, rgb(6 16 39 / 0%) 58%, rgb(6 16 39 / 94%) 100%),
+    linear-gradient(172deg,
+      rgb(6 16 39 / 84%) 0%, rgb(6 16 39 / 44%) 44%, rgb(6 16 39 / 78%) 100%);
 }
 
-/* Quien firma cada mitad, flanqueando la junta: es el unico sitio de la banda
-   que no se pelea con el texto, los mandos, la escala ni el boton. Sin nombre
-   no se puede ensenar el campo de un modelo.
-
-   Va en el flujo, entre el encabezado y el pie, de modo que se reparte el
-   hueco que ellos dejan libre. Centrado sobre la banda entera se metia bajo
-   las capsulas en cuanto los mandos bajaban a su propio renglon. */
-.showcase__names { display: flex; flex: 1; align-items: center; pointer-events: none; }
-.showcase__half { display: flex; flex: 1; min-width: 0; padding-left: 1rem; }
-.showcase__half:first-child { justify-content: flex-end; padding: 0 1rem 0 0; }
-.showcase__model {
-  font-size: .6875rem;
-  font-weight: 700;
-  letter-spacing: .18em;
-  color: rgb(233 243 255 / 76%);
-  text-shadow: 0 1px 12px rgb(2 8 22 / 85%);
+/* Un rescoldo detras del grafico: medio panel de navy plano al lado de un mapa
+   se lee como un hueco, no como el otro miembro de la pareja. El color sale
+   del propio dato -el granate del ensamble y el azul de lo observado-, muy
+   rebajado, de modo que no compite con las lineas que lleva encima. */
+.showcase__panel--enso::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(118% 88% at 76% 44%, rgb(169 68 85 / 13%) 0%, rgb(169 68 85 / 0%) 64%),
+    radial-gradient(92% 72% at 8% 102%, rgb(11 107 184 / 10%) 0%, rgb(11 107 184 / 0%) 72%);
 }
 
 /* La costura entre la portada y la lamina es la escala de anomalias de
@@ -299,7 +323,7 @@
   content: "";
   position: absolute;
   inset: 0 0 auto;
-  z-index: 0;
+  z-index: 3;
   height: 3.5rem;
   pointer-events: none;
   background:
@@ -307,67 +331,36 @@
     linear-gradient(180deg, rgb(2 8 22 / 58%) 0%, rgb(2 8 22 / 0%) 100%);
 }
 
-/* Velo entre el campo y las lineas: el texto va sobre el lado cerrado y el
-   mapa se abre hacia la derecha, que es donde no hay nada escrito. */
-.showcase::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  background: linear-gradient(100deg,
-    rgb(6 16 39 / 80%) 0%, rgb(6 16 39 / 56%) 42%, rgb(6 16 39 / 24%) 100%);
-}
-
-.showcase__body {
-  position: relative;
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 1.5rem;
-}
-
-.showcase__head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: .75rem 1.5rem;
-  flex-wrap: wrap;
-}
-/* La base es lo que mide la frase de un tiron: en cuanto no cabe junto a los
-   mandos, son ellos los que bajan de renglon y el subtitulo se queda entero
-   en uno solo, que es como tiene que leerse. */
-.showcase__intro { flex: 1 1 30rem; min-width: 0; }
+.showcase__head { min-width: 0; }
 
 .showcase__title {
   margin: 0;
   /* los encabezados van en navy: sobre este fondo hay que decirlo */
   color: #fff;
-  font-size: clamp(1.75rem, 3.4vw, 2.875rem);
+  font-size: clamp(1.375rem, 2.1vw, 2rem);
   font-weight: 600;
   letter-spacing: -.018em;
-  line-height: 1.12;
+  line-height: 1.14;
   text-wrap: balance;
   /* halo, no recuadro: separa el titulo del mapa sin dibujarle una caja */
   text-shadow: 0 1px 2px rgb(2 8 22 / 45%), 0 14px 40px rgb(2 8 22 / 60%);
 }
 
-/* Una sola frase, y en un solo renglon donde quepa: el subtitulo dice que se
-   esta viendo, no cuenta la seccion entera. */
+/* Una sola frase: el subtitulo dice que se esta viendo, no cuenta la seccion
+   entera. Repartida la banda en dos, la medida baja a la de una columna. */
 .showcase__text {
-  margin: .875rem 0 0;
-  max-width: 56ch;
+  margin: .625rem 0 0;
+  max-width: 44ch;
   color: #dfeaf8;
   font-weight: 500;
-  font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
+  font-size: clamp(.9375rem, 1.05vw, 1.0625rem);
   line-height: 1.45;
   letter-spacing: -.005em;
   text-shadow: 0 1px 14px rgb(2 8 22 / 65%);
 }
 
 /* puede encogerse: si no, las capsulas empujan la banda fuera de la pagina */
-.showcase__controls { flex: 0 1 auto; min-width: 0; }
+.showcase__controls { flex: 0 0 auto; min-width: 0; }
 /* Los mandos son los del visor, a la escala de esta banda. El rotulo del grupo
    se queda solo al oido: aqui las tres capsulas con su pictograma se explican
    solas y la palabra "Variable" solo anadia ruido sobre el mapa. */
@@ -376,7 +369,7 @@
 
 /* Capsulas al oido, no al grito. Esta banda es una previsualizacion: los
    mandos estan para que se note que el mapa responde -y de paso para elegir
-   que se ensena-, no para disputarle el sitio al titulo ni al boton que
+   que se ensena-, no para disputarle el sitio al titulo ni a la puerta que
    lleva al visor. Ese era el problema de antes: tres pastillas de vidrio
    grueso, una de ellas navy solido, pesaban mas que la propia lamina.
 
@@ -424,62 +417,138 @@
 .showcase__controls .chip__glyph { width: 17px; height: 17px; opacity: .85; }
 .showcase__controls .chip.is-active .chip__glyph { opacity: 1; }
 
-/* Centrada en el hueco la firma caia justo en mitad de la lamina, lejos de
-   todo. Se sube algo menos de un tercio del propio hueco: al ser proporcion y
-   no medida fija, en pantalla amplia sube mucho -que es donde sobra sitio- y
-   al estrecharse la banda se queda quieta sin llegar a tocar las capsulas. */
-@media (min-width: 1120px) {
-  .showcase__names { transform: translateY(-30%); }
+/* El hueco del grafico se come lo que sobra del panel, que es como queda a la
+   misma altura que el mapa de al lado sin fijarle una medida. */
+.showcase__chart {
+  position: relative;
+  flex: 1 1 auto;
+  /* Suelo propio: el hueco que sobra entre el encabezado y el pie depende de
+     cuantos renglones ocupe cada uno, y por debajo de esto la serie deja de
+     ser un grafico para ser un garabato. Si no cabe, crece la banda. */
+  min-height: 11rem;
+  margin-top: -.25rem;
 }
+.showcase__plot {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity .9s ease;
+}
+/* la clase la pone el modulo cuando ya tiene la serie: sin ella se veria el
+   rectangulo vacio mientras carga el JSON */
+.showcase__plot.is-ready { opacity: 1; }
 
+/* El pie de cada panel se pega al fondo, de modo que los dos sellos, las dos
+   leyendas y las dos puertas queden a la misma altura aunque el texto de
+   arriba ocupe renglones distintos. */
 .showcase__foot {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1rem 1.5rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .875rem;
+  margin-top: auto;
 }
-.showcase__scale { flex: 1 1 20rem; max-width: 27rem; min-width: 0; }
-.showcase__stamp { margin: 0 0 .5rem; font-size: .875rem; color: #9db6d2; letter-spacing: .03em; }
-/* el modelo solo se nombra aqui cuando no hay dos paneles que lo firmen */
-.showcase__solo { display: none; }
+.showcase__stamp {
+  margin: 0;
+  font-size: .8125rem;
+  color: #9db6d2;
+  letter-spacing: .03em;
+}
+.showcase__model { color: #9db6d2; }
 .showcase__month { color: #fff; font-variant-numeric: tabular-nums; }
 
-/* La leyenda es la del visor; sobre el velo cambian los tonos del texto. */
+/* La leyenda del mapa es la del visor; sobre el velo cambian los tonos. */
+.showcase__legend { width: 100%; max-width: 24rem; }
 .showcase .legend__bar { height: 11px; border-radius: 3px; box-shadow: 0 0 0 1px rgb(255 255 255 / 20%); }
 .showcase .legend__ticks { color: #c3d5ea; font-size: .75rem; margin-top: .3125rem; }
 
-.showcase__open {
+/* La del grafico va en linea, con la muestra de la dispersion hecha del mismo
+   granate anidado que las bandas: tres alfas apiladas dicen que son bandas
+   dentro de bandas mejor que tres muestras separadas. */
+.showcase__legend--key {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .375rem 1rem;
+  max-width: none;
+  font-size: .75rem;
+  color: #a9c0d8;
+}
+.showcase__legend--key .key__swatch--area {
+  width: 14px;
+  height: 14px;
+  border-color: rgb(255 255 255 / 16%);
+}
+
+/* Puerta a una seccion: pastilla blanca con la flecha en su propio disco. El
+   rotulo y el disco se reparten el peso, de modo que el enlace se lee como un
+   mando y no como una frase con una flecha detras; al apuntarlo el disco se
+   llena de navy y la flecha avanza. */
+.gateway {
   display: inline-flex;
   align-items: center;
-  gap: .5rem;
+  gap: .625rem;
   flex: 0 0 auto;
-  padding: .8125rem 1.5rem;
+  max-width: 100%;
+  padding: .3125rem .3125rem .3125rem 1.125rem;
   border-radius: 999px;
   background: #fff;
   color: var(--navy);
-  font-size: 1rem;
+  font-size: .9375rem;
   font-weight: 700;
   text-decoration: none;
-  box-shadow: 0 6px 18px rgb(3 10 26 / 35%);
+  box-shadow: 0 6px 18px rgb(3 10 26 / 32%);
   transition: transform .16s ease, box-shadow .16s ease;
 }
-.showcase__open:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgb(3 10 26 / 45%); }
-.showcase__arrow { transition: transform .16s ease; }
-.showcase__open:hover .showcase__arrow { transform: translateX(3px); }
+.gateway__label { min-width: 0; }
+.gateway__arrow {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: rgb(10 28 72 / 8%);
+  color: var(--navy);
+  transition: background .18s, color .18s, transform .18s ease;
+}
+.gateway__arrow svg { width: 17px; height: 17px; display: block; }
+.gateway:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgb(3 10 26 / 42%); }
+.gateway:hover .gateway__arrow { background: var(--navy); color: #fff; transform: translateX(2px); }
 
 /* La entrada se arma desde JS -.is-armed-, no aqui: si el modulo no llega a
-   correr, la banda se ve entera en vez de quedarse invisible. */
+   correr, la banda se ve entera en vez de quedarse invisible. Los tramos de
+   cada panel suben escalonados, y el de la derecha va detras del de la
+   izquierda para que la pareja se lea en orden de lectura. */
 .showcase.is-armed .showcase__head,
+.showcase.is-armed .showcase__controls,
+.showcase.is-armed .showcase__chart,
 .showcase.is-armed .showcase__foot {
   opacity: 0;
   transform: translateY(14px);
   transition: opacity .7s ease, transform .8s cubic-bezier(.2, .75, .3, 1);
 }
-.showcase.is-armed .showcase__foot { transition-delay: .12s; }
+.showcase.is-armed .showcase__controls { transition-delay: .08s; }
+.showcase.is-armed .showcase__chart { transition-delay: .1s; }
+.showcase.is-armed .showcase__foot { transition-delay: .16s; }
+.showcase.is-armed .showcase__panel--enso .showcase__head { transition-delay: .1s; }
+.showcase.is-armed .showcase__panel--enso .showcase__foot { transition-delay: .24s; }
 
 .showcase.is-armed.is-in .showcase__head,
+.showcase.is-armed.is-in .showcase__controls,
+.showcase.is-armed.is-in .showcase__chart,
 .showcase.is-armed.is-in .showcase__foot { opacity: 1; transform: none; }
+
+/* Con la banda repartida en dos, el rotulo entero de las variables solo cabe
+   a partir de aqui; por debajo se usa el nombre corto, el mismo que emplea la
+   barra del visor cuando se le estrecha el sitio. */
+@media (max-width: 1179px) {
+  .showcase__controls .chip__label { display: none; }
+  .showcase__controls .chip__short { display: inline; }
+}
 
 @media (max-width: 759px) {
   /* La cejilla es la linea mas larga de la portada: a 13 px se comia tres
@@ -490,34 +559,44 @@
     margin-bottom: .875rem;
   }
 
-  /* De pie no caben dos paneles: media banda por cabeza serian dos tiras. */
-  .showcase__stage { gap: 0; }
-  .showcase__stage .showcase__cell:last-child { display: none; }
-  .showcase__split,
-  .showcase__names { display: none; }
-  .showcase__solo { display: inline; }
+  /* De pie los paneles se apilan. Media banda por cabeza serian dos tiras de
+     160 px en las que no cabe ni el titulo, asi que se reparte el alto en vez
+     del ancho: el mapa primero, la serie debajo. */
+  .showcase { grid-template-columns: 1fr; margin-inline: -1rem; }
+  .showcase__panel {
+    gap: 1rem;
+    padding: 2.25rem var(--rail) 1.75rem;
+    min-height: 0;
+  }
+  .showcase__panel--map { min-height: 27rem; }
+  .showcase__panel--enso { min-height: 25rem; }
 
-  .showcase {
-    margin-inline: -1rem;
-    padding: 2rem var(--rail) 1.5rem;
-    min-height: 28rem;
+  /* la junta gira con el reparto: ahora separa arriba de abajo */
+  .showcase__panel--enso::before {
+    inset: 0 0 auto;
+    width: auto;
+    height: 1px;
+    background: linear-gradient(90deg,
+      rgb(226 238 250 / 0%) 4%, rgb(226 238 250 / 14%) 26%,
+      rgb(226 238 250 / 14%) 74%, rgb(226 238 250 / 0%) 96%);
   }
-  .showcase__body { gap: 1.25rem; }
-  /* de pie el velo cierra por abajo, que es donde cae el texto */
-  .showcase::after {
+
+  /* De pie el velo cierra por abajo, que es donde cae el texto y donde ahora
+     esta la junta: el mapa se disuelve hacia el panel de abajo, no hacia el
+     costado. */
+  .showcase__panel--map::after {
     background: linear-gradient(185deg,
-      rgb(6 16 39 / 84%) 0%, rgb(6 16 39 / 50%) 40%, rgb(6 16 39 / 88%) 100%);
+      rgb(6 16 39 / 84%) 0%, rgb(6 16 39 / 48%) 38%,
+      rgb(6 16 39 / 86%) 88%, rgb(6 16 39 / 96%) 100%);
   }
-  /* los mandos bajan a su propio renglon y las capsulas usan el nombre corto,
-     el mismo que la barra del visor en pantallas estrechas */
-  .showcase__controls { flex: 1 1 100%; }
-  .showcase__controls .chip__label { display: none; }
-  .showcase__controls .chip__short { display: inline; }
+
   /* apretadas lo justo para que las tres quepan en un renglon de telefono,
      pero sin bajar del pulgar: 36 px de alto con el nombre corto */
   .showcase__controls .chip { min-height: 36px; padding: .3125rem .6875rem; font-size: .8125rem; gap: .25rem; }
   .showcase__controls .chip__glyph { width: 16px; height: 16px; }
-  .showcase__open { width: 100%; justify-content: center; }
+
+  /* la puerta a lo ancho, con la flecha anclada al canto opuesto del rotulo */
+  .gateway { width: 100%; justify-content: space-between; }
 }
 
 /* ---------- Barra de vista ---------- */

@@ -3,7 +3,8 @@ const FALLBACK = ["Niño 1+2", "Niño 3.4"];
 
 const plain = (html) => String(html ?? "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 
-const nameIn = (text) => {
+/** Nombre de region Niño que aparezca en un texto de la figura, si hay uno. */
+export const regionIn = (text) => {
   const found = plain(text).match(REGION);
   return found ? `Niño ${found[1].replace(/\s+/g, "")}` : null;
 };
@@ -51,10 +52,10 @@ export function splitRegions(figure) {
 
 function regionName(layout, position) {
   const legend = layout[position ? "legend2" : "legend"];
-  const fromLegend = nameIn(legend?.title?.text);
+  const fromLegend = regionIn(legend?.title?.text);
   if (fromLegend) return fromLegend;
 
-  const titles = (layout.annotations ?? []).map((note) => nameIn(note.text)).filter(Boolean);
+  const titles = (layout.annotations ?? []).map((note) => regionIn(note.text)).filter(Boolean);
   return titles[position] ?? null;
 }
 
@@ -74,7 +75,7 @@ function extract(figure, suffix) {
   next.yaxis = { ...(layout[`yaxis${suffix}`] ?? {}), domain: [0, 1], anchor: "x" };
 
   next.shapes = keep(layout.shapes, suffix);
-  next.annotations = keep(layout.annotations, suffix).filter((note) => !nameIn(note.text));
+  next.annotations = keep(layout.annotations, suffix).filter((note) => !regionIn(note.text));
 
   return { data, layout: next };
 }
@@ -99,7 +100,7 @@ export function categoryKey(layout) {
 
   const swatches = (layout.shapes ?? []).filter((s) => isPaper(s) && s.type === "rect").sort(order);
   const labels = (layout.annotations ?? [])
-    .filter((note) => isPaper(note) && !nameIn(note.text))
+    .filter((note) => isPaper(note) && !regionIn(note.text))
     .sort(order);
 
   if (!swatches.length || swatches.length !== labels.length) return [];

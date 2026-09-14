@@ -4,6 +4,16 @@ import { MODELS, VARIABLES } from "../config.js";
 import { selectorGroup } from "../ui/selector.js";
 import { layeredBand } from "../ui/scroll.js";
 import { forecastPanel } from "../ui/preview.js";
+import { ensemblePlume, PLUME_KEY } from "../ui/plume.js";
+import { ARROW_ICON } from "../ui/icons.js";
+
+/** Enlace a una seccion: rotulo y flecha en su propio disco. */
+function gateway(label, href) {
+  return el("a", { class: "gateway", href }, [
+    el("span", { class: "gateway__label", text: label }),
+    el("span", { class: "gateway__arrow", "aria-hidden": "true", html: ARROW_ICON }),
+  ]);
+}
 
 export default function inicio(outlet) {
   outlet.append(
@@ -22,65 +32,68 @@ export default function inicio(outlet) {
   );
 
   /**
-   * La puerta al visor estacional no es un rotulo con una flecha: es el
-   * pronostico mismo, a sangre y renovandose, con el texto encima. El menu ya
-   * dice a donde se puede ir; una tarjeta que repita "Prediccion estacional"
-   * solo lo dice otra vez. Esta lo ensena.
+   * Las dos puertas de la plataforma, una al lado de la otra y cada una
+   * ensenando su propio dato en marcha: no son rotulos con una flecha, son las
+   * dos cosas que hay dentro. El menu ya dice a donde se puede ir; una tarjeta
+   * que repita "Prediccion estacional" solo lo dice otra vez.
    *
-   * Y lo ensena como se usa: dos paneles con el mismo mes resuelto por dos
-   * centros distintos, que es de lo que trata el visor. Cada uno se
-   * desfragmenta por su cuenta hacia el mes siguiente.
-   *
-   * El campo va desenfocado y bajo un velo porque aqui hace de fondo -para
-   * leerlo esta el visor, a un clic-, pero los limites politicos van nitidos
-   * en su propio lienzo, que es lo que evita que quede en mancha abstracta.
+   * A la izquierda, el campo del pronostico estacional desfragmentandose de un
+   * mes al siguiente. A la derecha, la serie del ENSO escribiendose y abriendose
+   * en abanico hacia la dispersion del ensamble. Son las dos maneras de mirar
+   * el clima que ofrece la plataforma -un mapa y una serie de tiempo-, asi que
+   * la portada las pone a la par en vez de jerarquizarlas.
    */
-  const panes = [0, 1].map(() => ({
-    field: el("canvas", { class: "showcase__layer" }),
-    outline: el("canvas", { class: "showcase__layer" }),
-    caption: el("span", { class: "showcase__model" }),
-  }));
-
-  const stage = (kind, pick) => el("div", { class: `showcase__stage showcase__stage--${kind}`, "aria-hidden": "true" },
-    panes.map((pane) => el("div", { class: "showcase__cell" }, [pick(pane)])));
-
-  // Quien firma cada mitad. Va en el flujo, entre el encabezado y el pie, no
-  // en una capa suelta centrada sobre la banda: el hueco libre cambia de alto
-  // con el ancho de la ventana -al estrecharse, los mandos bajan de renglon-,
-  // y centrado sobre el total el rotulo acababa metido bajo las capsulas.
-  const names = el("div", { class: "showcase__names", "aria-hidden": "true" },
-    panes.map((pane) => el("span", { class: "showcase__half" }, [pane.caption])));
+  const field = el("canvas", { class: "showcase__layer showcase__layer--field" });
+  const outline = el("canvas", { class: "showcase__layer showcase__layer--lines" });
 
   const month = el("strong", { class: "showcase__month" });
-  // en el telefono solo hay un panel, asi que el modelo lo dice el sello
-  const solo = el("span", { class: "showcase__solo" });
+  const model = el("span", { class: "showcase__model" });
   const legend = el("div", { class: "showcase__legend" });
   const controls = el("div", { class: "showcase__controls" });
+  const openMap = gateway("Abrir en el visor", "#estacional");
 
-  const open = el("a", { class: "showcase__open", href: "#estacional" }, [
-    "Abrir en el visor",
-    el("span", { class: "showcase__arrow", "aria-hidden": "true", text: "→" }),
+  const plot = el("canvas", { class: "showcase__plot" });
+  const region = el("span", { class: "showcase__model" });
+  const initial = el("strong", { class: "showcase__month" });
+  const openEnso = gateway("Abrir el monitoreo", "#enso");
+
+  const panel = (kind, children) =>
+    el("article", { class: `showcase__panel showcase__panel--${kind}` }, children);
+
+  const head = (title, text) => el("header", { class: "showcase__head" }, [
+    el("h2", { class: "showcase__title", text: title }),
+    el("p", { class: "showcase__text", text }),
   ]);
 
   const band = el("section", { class: "showcase" }, [
-    stage("field", (pane) => pane.field),
-    stage("lines", (pane) => pane.outline),
-    el("span", { class: "showcase__split", "aria-hidden": "true" }),
-    el("div", { class: "showcase__body" }, [
-      el("header", { class: "showcase__head" }, [
-        el("div", { class: "showcase__intro" }, [
-          el("h2", { class: "showcase__title", text: "Predicción estacional" }),
-          el("p", { class: "showcase__text", text: "Anomalías mensuales de precipitación y temperatura." }),
-        ]),
-        controls,
-      ]),
-      names,
+    panel("map", [
+      // El campo va en dos capas: desenfocado y bajo un velo porque aqui hace
+      // de fondo -para leerlo esta el visor, a un clic-, y los limites
+      // politicos nitidos encima, que es lo que evita que quede en mancha
+      // abstracta.
+      el("div", { class: "showcase__field", "aria-hidden": "true" }, [field, outline]),
+      head("Predicción estacional", "Anomalías mensuales de precipitación y temperatura, resueltas por tres modelos globales."),
+      controls,
       el("div", { class: "showcase__foot" }, [
-        el("div", { class: "showcase__scale" }, [
-          el("p", { class: "showcase__stamp" }, [solo, month]),
-          legend,
-        ]),
-        open,
+        el("p", { class: "showcase__stamp" }, [model, month]),
+        legend,
+        openMap,
+      ]),
+    ]),
+    panel("enso", [
+      head("Monitoreo ENSO", "Anomalía de la temperatura superficial del mar frente a la costa peruana, y su predicción multimodelo."),
+      el("div", { class: "showcase__chart" }, [plot]),
+      el("div", { class: "showcase__foot" }, [
+        el("p", { class: "showcase__stamp" }, [region, initial]),
+        el("div", { class: "showcase__legend showcase__legend--key" },
+          PLUME_KEY.map((item) => el("span", { class: "key__item" }, [
+            el("span", {
+              class: `key__swatch${item.area ? " key__swatch--area" : ""}`,
+              style: `background:${item.color}`,
+            }),
+            el("span", { text: item.label }),
+          ]))),
+        openEnso,
       ]),
     ]),
   ]);
@@ -89,24 +102,31 @@ export default function inicio(outlet) {
 
   const nameOf = (id) => MODELS.find((item) => item.id === id)?.label ?? id;
 
-  const panel = forecastPanel({
-    panels: panes.map((pane) => ({ canvas: pane.field, outline: pane.outline })),
+  const forecast = forecastPanel({
+    panels: [{ canvas: field, outline }],
     legend,
     onState: ({ variable, month: name, models }) => {
       month.textContent = name ?? "";
-      solo.textContent = `${nameOf(models[0])} · `;
-      panes.forEach((pane, i) => { pane.caption.textContent = nameOf(models[i]); });
+      model.textContent = `${nameOf(models[0])} · `;
       // El enlace lleva al visor con lo que se esta viendo, pero de una sola
-      // prediccion: el diptico de aqui cuenta de que trata el visor, no pide
-      // entrar comparando. Quien quiera partir el mapa tiene el boton dentro,
-      // y llegar ya dividido esconde la vista normal antes de haberla visto.
-      open.setAttribute("href", `#estacional?modelo=${models[0]}&variable=${variable}`);
+      // prediccion: la lamina cuenta de que trata el visor, no pide entrar
+      // comparando. Quien quiera partir el mapa tiene el boton dentro, y
+      // llegar ya dividido esconde la vista normal antes de haberla visto.
+      openMap.setAttribute("href", `#estacional?modelo=${models[0]}&variable=${variable}`);
       renderControls(variable);
     },
   });
 
+  const plume = ensemblePlume({
+    canvas: plot,
+    onState: ({ region: name, initial: from }) => {
+      region.textContent = `${name} · `;
+      initial.textContent = from ? `Condición inicial ${from}` : "";
+    },
+  });
+
   function renderControls(active) {
-    const group = selectorGroup("Variable", VARIABLES, active, (id) => panel.select(id), "portada-variable");
+    const group = selectorGroup("Variable", VARIABLES, active, (id) => forecast.select(id), "portada-variable");
     // el rotulo se queda solo al oido: tres capsulas con su pictograma dicen
     // por si solas de que se elige, y la palabra encima del mapa era ruido
     group.querySelector(".selector__label")?.classList.add("sr-only");
@@ -117,5 +137,5 @@ export default function inicio(outlet) {
   // por dentro la descuadraria de su propio marco
   const stopBand = layeredBand(band);
 
-  return { destroy: () => { stopBand(); panel.destroy(); } };
+  return { destroy: () => { stopBand(); forecast.destroy(); plume.destroy(); } };
 }

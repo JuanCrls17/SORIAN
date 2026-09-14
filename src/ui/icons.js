@@ -87,3 +87,9 @@ export const COLLAPSE_ICON = `
           fill="none" stroke="currentColor" stroke-width="1.8"
           stroke-linecap="round" stroke-linejoin="round"/>
   </svg>`;
+
+/** Flecha de los enlaces que llevan a una seccion. */
+export const ARROW_ICON = `
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    <path d="M5 12h13M12.5 6.5 19 12l-6.5 5.5"/></svg>`;
