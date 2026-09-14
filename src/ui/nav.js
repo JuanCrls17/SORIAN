@@ -2,13 +2,15 @@ import { el } from "./dom.js";
 import { navigate } from "../router.js";
 import { slidingMarker } from "./marker.js";
 
-// Los visores van delante por ser el trabajo diario; detras la descripcion,
-// que los explica. Consultas cierra: es a donde se va cuando lo anterior no
-// resolvio, no por donde se empieza.
+// Los visores van delante por ser el trabajo diario, y entre ellos manda el
+// orden en que se lee el clima: primero el ENSO, que dice en que estado esta
+// el Pacifico, y despues la prediccion estacional, que es lo que de ese estado
+// se sigue. Detras la descripcion, que los explica. Consultas cierra: es a
+// donde se va cuando lo anterior no resolvio, no por donde se empieza.
 export const SECTIONS = [
   { id: "inicio", label: "Inicio" },
-  { id: "estacional", label: "Estacional" },
   { id: "enso", label: "ENSO" },
+  { id: "estacional", label: "Estacional" },
   { id: "descripcion", label: "Descripción" },
   { id: "consultas", label: "Consultas" },
 ];
@@ -85,7 +87,7 @@ export function buildHeader() {
     el("div", { class: "masthead__bar" }, [
       el("a", { class: "brand", href: "#inicio", onClick: (event) => {
         // En pantalla completa la cabecera es rotulo, no navegacion: solo
-        // quedan Estacional y ENSO, y picar la marca sacaria de la proyeccion
+        // quedan ENSO y Estacional, y picar la marca sacaria de la proyeccion
         // a una portada que ahi no pinta nada.
         if (document.fullscreenElement) return event.preventDefault();
         navigate("inicio");
