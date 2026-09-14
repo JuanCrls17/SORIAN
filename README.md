@@ -12,7 +12,7 @@ Perú y Sudamérica.
 | Sección | Descripción |
 |---|---|
 | Estacional | Anomalías mensuales de precipitación y temperatura. 3 modelos × 3 variables × 6 meses, con comparación de cortina entre dos pronósticos. |
-| ENSO | Predicción multimodelo de la anomalía de TSM en las regiones Niño 1+2 y 3.4, con selección libre de los 22 modelos. |
+| ENSO | Predicción multimodelo de la anomalía de TSM en las regiones Niño 1+2 y 3.4: 20 modelos globales, promedio multimodelo y serie observada, en percentiles o boxplot. |
 | Descripción | Modelos integrados, configuración WRF y referencias científicas. |
 | Consultas | Formulario de sugerencias y observaciones. |
 
@@ -41,6 +41,8 @@ src/
     regions.js          reparto de la figura ENSO en regiones Niño
     series.js           selección de series del gráfico
   ui/                   nav, selectores, pictogramas, hoja y helpers de DOM
+    preview.js          campo del pronóstico animado en la portada
+    plume.js            serie del ENSO animada en la portada, dibujada sin Plotly
   styles/               base, layout, componentes, visor
 data/
   grids/                9 grillas de pronóstico (~35 KB c/u)
@@ -71,60 +73,68 @@ visor.** El renderizado ocurre en un único canvas (`grid-layer.js`), no en 26.1
 nodos SVG. Comparar dos pronósticos solo recorta el canvas de cada capa, así que
 la cortina se arrastra sin volver a dibujar la grilla.
 
-## Dos disposiciones
+## Base científica
 
-La interfaz no se adapta: se resuelve dos veces.
+### Predicción estacional
 
-- **Amplia** (≥ 860 px) — los mandos flotan sobre el mapa en una sola franja:
-  a la izquierda tres acciones recogidas en una pastilla de iconos y, a su
-  derecha, la selección de modelo y variable. Comparando, los dos lados forman
-  una barra continua partida por el centro, cada mitad sobre el lado que
-  gobierna. El **Reparto** del dominio por clase de anomalía —qué porcentaje
-  cae bajo y sobre lo normal, y cuál es el rango dominante— se abre a petición
-  en un panel lateral, no por ancho de ventana: quita sitio al mapa y no
-  siempre se necesita.
-- **Compacta** (< 860 px) — el mapa queda despejado y los mandos bajan a una
-  barra al alcance del pulgar; las opciones se eligen en una hoja inferior.
+| | |
+|---|---|
+| Dominio | 89,5° O – 30,5° O, 59,5° S – 14,5° N (Sudamérica y océanos adyacentes) |
+| Resolución | 1° × 1°, grilla regular de 59 × 74 = 4366 celdas |
+| Horizonte | 6 meses consecutivos desde la condición inicial |
+| Modelos | ECMWF (SEAS5/S2S), BOM y NCEP–CFSv2 |
+| Variables | Anomalía de precipitación (mm/mes), de temperatura máxima y de temperatura mínima (°C) |
 
-## Representación del campo
+Cada campo es una **anomalía**: la desviación del valor pronosticado respecto de
+la climatología del propio modelo, no un valor absoluto. La fuente la publica
+**clasificada en 16 rangos** de una escala divergente y simétrica (tipo BrBG),
+de modo que una celda entrega su clase y no una cifra puntual; la lectura del
+punto da primero la interpretación de esa clase y el intervalo detrás. Las dos
+clases extremas no tienen tope físico —su límite exterior es donde la escala
+deja de dividir—, y se rotulan «80,4 o más» en lugar de presentar como medida
+un valor que no lo es.
 
-El visor ofrece dos lecturas de la misma grilla:
+El visor ofrece dos representaciones de la misma grilla. **Celdas** entrega el
+dato sin interpolar. **Continuo** reconstruye el campo entre centros de celda
+con interpolación bicúbica (Catmull-Rom), que mantiene continua la primera
+derivada al cruzar un nodo; junto a la costa, donde el núcleo de 4 × 4 queda
+incompleto, degrada a bilineal. La interpolación se aplica al valor y solo
+después el color, porque interpolar en RGB produciría tonos que no corresponden
+a ninguna clase de la escala. La reconstrucción continua se ofrece por defecto
+solo en temperatura: la precipitación es un campo espacialmente discontinuo y
+suavizarlo sugiere transiciones que el modelo no resuelve. **En ningún caso el
+suavizado añade resolución ni información que el modelo no haya producido.**
 
-- **Celdas** — el dato tal como lo entrega el modelo, sin interpolar.
-- **Continuo** — reconstrucción del campo entre centros de celda, con
-  interpolación bicúbica (Catmull-Rom). Frente a la bilineal, la pendiente no
-  cambia de golpe al cruzar un nodo, que es lo que dibujaba rombos sobre los
-  centros de celda. Junto a la costa, donde falta vecindario para el núcleo de
-  4×4, cae a bilineal.
+### Monitoreo ENSO
 
-El suavizado interpola el **valor** y solo después aplica el color; interpolar
-en RGB mezclaría tonos de la paleta divergente y produciría colores que no
-corresponden a ningún valor. El color se toma de una rampa continua entre las
-dos clases contiguas, de modo que un valor a medio camino recibe el tono a
-medio camino: encajarlo en su clase devolvía el campo a colores planos con un
-salto seco en cada frontera. La mezcla es siempre entre vecinos de una escala
-ordenada, así que nunca aparece un tono ajeno a la paleta.
+Anomalía de la temperatura superficial del mar (TSM) en las dos regiones Niño
+de referencia para el Pacífico oriental y central:
 
-La opción continua se ofrece por defecto solo en temperatura. La precipitación
-es un campo espacialmente discontinuo y suavizarlo sugiere transiciones
-graduales que el modelo no resuelve, por lo que el control avisa al activarlo.
-En ningún caso el suavizado añade resolución: no aporta información que el
-modelo no haya producido.
+| Región | Dominio | Relevancia |
+|---|---|---|
+| Niño 1+2 | 0°–10° S, 90° O – 80° O | Pacífico oriental frente a la costa peruana; controla la respuesta pluviométrica del norte del país |
+| Niño 3.4 | 5° N – 5° S, 170° O – 120° O | Índice convencional de la señal ENSO a escala global |
 
-### Lectura del punto
+La serie observada procede del reanálisis **ERA5**. La predicción integra
+**20 modelos globales con 949 miembros de ensamble** en total (de 10 a 155 por
+modelo), resumidos en el promedio multimodelo (MME) y en la dispersión por
+percentiles: P25–P75, P10–P90 y Pmin–Pmax. Cada intervalo describe la
+incertidumbre entre miembros, no un margen de error del pronóstico.
 
-La fuente publica el campo **clasificado por rangos**, no por valor: una celda
-da su clase de la escala y no una cifra puntual. Por eso la franja bajo el mapa
-dice primero qué significa —«Algo más lluvia de lo normal»— y deja el intervalo
-detrás, como respaldo de quien quiera la cifra.
+Los umbrales de categoría son **específicos de cada región** y no
+intercambiables. Niño 3.4 emplea los convencionales de ±0,5 / ±1,0 / ±1,5 /
+±2,0 °C; Niño 1+2, de mayor variabilidad interanual, emplea −1,3 / −1,1 / −0,7
+/ +0,5 / +1,3 / +2,1 °C. Por eso las dos regiones conservan sus propias marcas
+de eje aunque se muestren con escala vertical común, que es lo que permite
+compararlas visualmente sin falsear la magnitud.
 
-La frase sale del propio índice de la clase, sin dato nuevo: la escala es
-divergente y simétrica, así que el lado dice hacia dónde se desvía la celda y
-la distancia al centro, cuánto. El vocabulario cambia con la variable, que una
-anomalía de temperatura no se lee como una de lluvia. Las dos clases de los
-extremos no tienen tope real —su límite exterior es solo donde la escala deja
-de dividir—, y se leen «80.4 o más» en vez de dar como medida una cifra que no
-lo es.
+### Alcance
+
+Los productos son resultados de modelos numéricos y conservan la incertidumbre
+propia de la predicción climática a escala mensual y estacional. La habilidad
+predictiva decrece con el plazo y varía por región, variable y época del año.
+La información es de carácter referencial y no constituye un pronóstico oficial
+del SENAMHI.
 
 ## Enlaces directos
 
