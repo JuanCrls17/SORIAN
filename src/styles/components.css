@@ -220,11 +220,14 @@
 /* Diptico: dos mitades con el mismo mes resuelto por dos centros distintos.
    Van en dos capas paralelas -campo y limites- porque el velo se mete entre
    ellas: el dato queda de fondo y el pais, nitido. */
+/* Los paneles se tocan. Con una franja de por medio se veia el fondo de la
+   banda entre los dos campos, y esa raya negra de canto a canto no era una
+   junta: partia la lamina en dos laminas. Pegados, el propio desenfoque hace
+   la transicion y la unica marca del reparto es la linea de abajo. */
 .showcase__stage {
   position: absolute;
   inset: 0;
   display: flex;
-  gap: 10px;
 }
 .showcase__cell { position: relative; flex: 1; min-width: 0; }
 .showcase__layer {
@@ -248,8 +251,10 @@
 
 .showcase__stage--lines { z-index: -1; }
 
-/* La junta entre los dos paneles: se apaga por los extremos para que no
-   parezca que corta la banda en dos. */
+/* La junta entre los dos paneles: un hilo que solo se enciende en el tramo
+   donde firman los modelos y se apaga mucho antes de los cantos. No tiene que
+   dividir la banda -eso ya lo hace el propio salto entre los dos campos-,
+   solo decir donde acaba uno y empieza el otro. */
 .showcase__split {
   position: absolute;
   top: 0;
@@ -259,8 +264,8 @@
   z-index: 0;
   pointer-events: none;
   background: linear-gradient(180deg,
-    rgb(226 238 250 / 0%) 0%, rgb(226 238 250 / 20%) 24%,
-    rgb(226 238 250 / 20%) 76%, rgb(226 238 250 / 0%) 100%);
+    rgb(226 238 250 / 0%) 18%, rgb(226 238 250 / 13%) 42%,
+    rgb(226 238 250 / 13%) 58%, rgb(226 238 250 / 0%) 82%);
 }
 
 /* Quien firma cada mitad, flanqueando la junta: es el unico sitio de la banda
@@ -369,49 +374,55 @@
 .showcase__controls .selector { gap: .625rem; }
 .showcase__controls .selector__options { gap: .375rem; }
 
-/* Capsulas de vidrio. Blancas y opacas se leian como parches pegados encima
-   del mapa; asi dejan pasar el fondo desenfocado y solo la elegida se vuelve
-   solida, que es justo la jerarquia que hace falta. */
+/* Capsulas al oido, no al grito. Esta banda es una previsualizacion: los
+   mandos estan para que se note que el mapa responde -y de paso para elegir
+   que se ensena-, no para disputarle el sitio al titulo ni al boton que
+   lleva al visor. Ese era el problema de antes: tres pastillas de vidrio
+   grueso, una de ellas navy solido, pesaban mas que la propia lamina.
+
+   Asi que van a un solo hilo de contorno sobre el mapa, apenas veladas, y el
+   tamano baja un punto respecto al del visor. Lo unico que sube de tono es lo
+   elegido. */
 .showcase__controls .chip {
-  min-height: 44px;
-  padding: .5rem 1.0625rem;
-  font-size: .9375rem;
-  color: #d7e5f5;
-  border-color: rgb(255 255 255 / 18%);
-  background: rgb(255 255 255 / 8%);
-  backdrop-filter: blur(14px) saturate(130%);
-  -webkit-backdrop-filter: blur(14px) saturate(130%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 14%);
+  min-height: 34px;
+  padding: .3125rem .8125rem;
+  font-size: .8125rem;
+  color: rgb(226 238 250 / 74%);
+  border-color: rgb(255 255 255 / 14%);
+  background: rgb(255 255 255 / 4%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: none;
   transition: background .18s, border-color .16s, color .2s;
 }
 .showcase__controls .chip:hover {
-  background: rgb(255 255 255 / 16%);
-  border-color: rgb(255 255 255 / 34%);
+  background: rgb(255 255 255 / 10%);
+  border-color: rgb(255 255 255 / 26%);
   color: #fff;
 }
-/* La elegida no se pinta de blanco -sobre el mapa era un parche-: se hunde.
-   Vidrio mas oscuro que el fondo, canto encendido y letra en blanco; queda
-   claro cual esta puesta sin sacar una pastilla opaca de la nada.
+/* La elegida no se pinta de blanco ni de navy -sobre el mapa era un parche-:
+   se aclara. Un velo un poco mas espeso que el de sus companeras, el canto
+   encendido y la letra en blanco bastan para decir cual esta puesta.
 
    El fondo lo pone la pastilla que se desliza por detras: si el vidrio del
    boton siguiera puesto, le desdibujaria el canto en pleno viaje. */
 .showcase__controls .chip.is-active {
   color: #fff;
   background: transparent;
-  border-color: rgb(122 178 236 / 62%);
-  box-shadow: none;
+  border-color: rgb(255 255 255 / 30%);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
-/* El navy de la casa -el mismo que pinta la opcion activa del menu- rebajado
-   lo justo para que el mapa siga asomando por debajo. Antes era el fondo de
-   la banda oscurecido, que no es un color del sistema: sobre la lamina se
-   leia como un agujero negro en vez de como la marca de lo elegido. */
+/* La marca de lo elegido es el mismo velo del resto, subido de espesor. El
+   navy solido de antes sacaba una pastilla opaca de la nada en mitad de la
+   lamina; este se lee como que el vidrio se ha empanado un poco mas. */
 .showcase__controls .selector__options .marker {
-  background: rgb(10 28 72 / 82%);
-  box-shadow: 0 8px 22px rgb(2 8 22 / 45%), inset 0 1px 0 rgb(255 255 255 / 14%);
+  background: rgb(255 255 255 / 15%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 6%);
 }
-.showcase__controls .chip__glyph { width: 20px; height: 20px; }
+/* el pictograma acompana al rotulo, no lo encabeza: mismo tono que la letra */
+.showcase__controls .chip__glyph { width: 17px; height: 17px; opacity: .85; }
+.showcase__controls .chip.is-active .chip__glyph { opacity: 1; }
 
 /* Centrada en el hueco la firma caia justo en mitad de la lamina, lejos de
    todo. Se sube algo menos de un tercio del propio hueco: al ser proporcion y
@@ -502,8 +513,10 @@
   .showcase__controls { flex: 1 1 100%; }
   .showcase__controls .chip__label { display: none; }
   .showcase__controls .chip__short { display: inline; }
-  /* apretadas lo justo para que las tres quepan en un renglon de telefono */
-  .showcase__controls .chip { min-height: 40px; padding: .375rem .8125rem; font-size: .875rem; }
+  /* apretadas lo justo para que las tres quepan en un renglon de telefono,
+     pero sin bajar del pulgar: 36 px de alto con el nombre corto */
+  .showcase__controls .chip { min-height: 36px; padding: .3125rem .6875rem; font-size: .8125rem; gap: .25rem; }
+  .showcase__controls .chip__glyph { width: 16px; height: 16px; }
   .showcase__open { width: 100%; justify-content: center; }
 }
 

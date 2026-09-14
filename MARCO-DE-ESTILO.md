@@ -58,18 +58,16 @@ el canto de la cápsula activa y la luz del nombre.
 | Texto corrido | `--ink` sobre claro, `--on-deep` sobre oscuro. |
 | Enlace | `--blue-600`, subrayado. |
 | Borde en reposo | `--line`. Al enfocar o activar, `--blue`. |
-| Lo elegido | Fondo `--navy` y letra `#fff`. **Siempre el mismo par**, en el menú, en las cápsulas y sobre el mapa. |
+| Lo elegido | Fondo `--navy` y letra `#fff`. **Siempre el mismo par** en el menú y en las cápsulas sobre claro. Sobre imagen, un velo del mismo vidrio subido de espesor (§7). |
 | Negro | Nunca. Ni `#000` ni un fondo propio oscurecido: sobre una imagen se lee como un agujero, no como una selección. |
 
 Esa última fila es la lección más cara del proyecto. La cápsula activa sobre el
 mapa se pintó al principio con el fondo de la banda al 76 %; no era un color del
-sistema y desentonaba con todo lo demás. Sobre imagen, lo elegido se marca con
-el navy de la casa rebajado, no con oscuridad genérica:
-
-```css
-.marker { background: rgb(10 28 72 / 82%); }   /* --navy con el fondo asomando */
-.chip.is-active { border-color: rgb(122 178 236 / 62%); color: #fff; }
-```
+sistema y desentonaba con todo lo demás. El navy de la casa rebajado lo arregló,
+pero trajo el problema de al lado: una pastilla sólida en mitad de una lámina
+pesa más que la lámina. Sobre imagen, lo elegido se marca aclarando, no
+oscureciendo —el detalle está en §7—; lo que la fila prohíbe sigue en pie, que
+es inventar un oscuro que no pertenece a la paleta.
 
 ### La escala como firma
 
@@ -538,6 +536,30 @@ elegida se vuelve sólida, que es justo la jerarquía que hace falta.
 
 El `saturate(130%)` es lo que separa esto de un simple desenfoque: devuelve al
 fondo el color que el blur le quita.
+
+**El vidrio pesa según el papel que tenga.** Los valores de arriba son los de un
+control de verdad: el que manda sobre el mapa del visor. Cuando las mismas
+cápsulas van sobre una lámina de previsualización —la portada, donde están para
+que se note que el mapa responde, no para gobernarlo—, ese mismo vidrio se
+convierte en tres parches que le disputan el sitio al titular y al botón. Ahí
+bajan a un hilo de contorno, sin filo de luz y un punto más pequeñas, y lo
+elegido se marca **aclarando**: un velo blanco algo más espeso que el de sus
+compañeras. Una pastilla sólida —blanca o navy— saca de la nada una forma opaca
+en mitad del mapa; el velo se lee como que el vidrio se ha empañado un poco más.
+
+```css
+.showcase__controls .chip {
+  min-height: 34px;                             /* 44 en el visor */
+  font-size: .8125rem;
+  color: rgb(226 238 250 / 74%);
+  border-color: rgb(255 255 255 / 14%);         /* 18 % en el visor */
+  background: rgb(255 255 255 / 4%);            /*  8 % en el visor */
+  backdrop-filter: blur(10px);                  /* sin saturate: no manda */
+  box-shadow: none;                             /* sin filo de luz */
+}
+.showcase__controls .chip.is-active { color: #fff; border-color: rgb(255 255 255 / 30%); }
+.showcase__controls .selector__options .marker { background: rgb(255 255 255 / 15%); }
+```
 
 **Velo antes que recuadro.** Para que un texto se lea sobre una imagen, un
 degradado que se abre hacia donde no hay texto funciona mejor que una caja: la

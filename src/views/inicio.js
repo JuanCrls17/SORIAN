@@ -96,9 +96,11 @@ export default function inicio(outlet) {
       month.textContent = name ?? "";
       solo.textContent = `${nameOf(models[0])} · `;
       panes.forEach((pane, i) => { pane.caption.textContent = nameOf(models[i]); });
-      // el enlace lleva al visor con lo que se esta viendo, los dos modelos
-      // incluidos: lo que se pica es lo que se abre
-      open.setAttribute("href", `#estacional?modelo=${models[0]}&modelo2=${models[1]}&variable=${variable}`);
+      // El enlace lleva al visor con lo que se esta viendo, pero de una sola
+      // prediccion: el diptico de aqui cuenta de que trata el visor, no pide
+      // entrar comparando. Quien quiera partir el mapa tiene el boton dentro,
+      // y llegar ya dividido esconde la vista normal antes de haberla visto.
+      open.setAttribute("href", `#estacional?modelo=${models[0]}&variable=${variable}`);
       renderControls(variable);
     },
   });
