@@ -351,7 +351,6 @@ export function forecastPanel({ panels: nodes, legend, onState }) {
   let variable = 0;
   let month = 0;
   let turn = 0;
-  let sticky = false;
   let months = [];
   let scale = null;
   let timer = null;
@@ -365,7 +364,7 @@ export function forecastPanel({ panels: nodes, legend, onState }) {
   function nextOf() {
     const wrap = month + 1 >= (months.length || 6);
     return [
-      wrap && !sticky ? (variable + 1) % VARIABLES.length : variable,
+      wrap ? (variable + 1) % VARIABLES.length : variable,
       wrap ? 0 : month + 1,
       wrap ? (turn + 1) % MODELS.length : turn,
     ];
@@ -443,14 +442,6 @@ export function forecastPanel({ panels: nodes, legend, onState }) {
   window.addEventListener("resize", onResize);
 
   return {
-    /** Elige variable a mano: se queda en ella y arranca por su primer mes. */
-    select: (id) => {
-      const index = VARIABLES.findIndex((item) => item.id === id);
-      if (index < 0 || index === variable) return;
-      clearTimeout(timer);
-      sticky = true;
-      step(index, 0, turn);
-    },
     destroy: () => {
       alive = false;
       clearTimeout(timer);

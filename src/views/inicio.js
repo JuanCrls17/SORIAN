@@ -1,7 +1,6 @@
-import { el, clear } from "../ui/dom.js";
+import { el } from "../ui/dom.js";
 import { wordmark } from "../ui/nav.js";
-import { MODELS, VARIABLES } from "../config.js";
-import { selectorGroup } from "../ui/selector.js";
+import { MODELS } from "../config.js";
 import { layeredBand } from "../ui/scroll.js";
 import { forecastPanel } from "../ui/preview.js";
 import { ensemblePlume, PLUME_KEY } from "../ui/plume.js";
@@ -42,6 +41,11 @@ export default function inicio(outlet) {
    * en abanico hacia la dispersion del ensamble. Son las dos maneras de mirar
    * el clima que ofrece la plataforma -un mapa y una serie de tiempo-, asi que
    * la portada las pone a la par en vez de jerarquizarlas.
+   *
+   * Ninguno de los dos paneles lleva mandos: la lamina ensena y va sola -el
+   * campo cambia de variable y de modelo al dar la vuelta a la serie-, y para
+   * manejarla esta el visor, a un clic. Tres capsulas para elegir variable
+   * pedian una decision antes de haber contado de que trata la seccion.
    */
   const field = el("canvas", { class: "showcase__layer showcase__layer--field" });
   const outline = el("canvas", { class: "showcase__layer showcase__layer--lines" });
@@ -49,7 +53,6 @@ export default function inicio(outlet) {
   const month = el("strong", { class: "showcase__month" });
   const model = el("span", { class: "showcase__model" });
   const legend = el("div", { class: "showcase__legend" });
-  const controls = el("div", { class: "showcase__controls" });
   const openMap = gateway("Abrir en el visor", "#estacional");
 
   const plot = el("canvas", { class: "showcase__plot" });
@@ -73,7 +76,6 @@ export default function inicio(outlet) {
       // abstracta.
       el("div", { class: "showcase__field", "aria-hidden": "true" }, [field, outline]),
       head("Predicción estacional", "Anomalías mensuales de precipitación y temperatura, resueltas por tres modelos globales."),
-      controls,
       el("div", { class: "showcase__foot" }, [
         el("p", { class: "showcase__stamp" }, [model, month]),
         legend,
@@ -113,7 +115,6 @@ export default function inicio(outlet) {
       // comparando. Quien quiera partir el mapa tiene el boton dentro, y
       // llegar ya dividido esconde la vista normal antes de haberla visto.
       openMap.setAttribute("href", `#estacional?modelo=${models[0]}&variable=${variable}`);
-      renderControls(variable);
     },
   });
 
@@ -124,14 +125,6 @@ export default function inicio(outlet) {
       initial.textContent = from ? `Condición inicial ${from}` : "";
     },
   });
-
-  function renderControls(active) {
-    const group = selectorGroup("Variable", VARIABLES, active, (id) => forecast.select(id), "portada-variable");
-    // el rotulo se queda solo al oido: tres capsulas con su pictograma dicen
-    // por si solas de que se elige, y la palabra encima del mapa era ruido
-    group.querySelector(".selector__label")?.classList.add("sr-only");
-    clear(controls).append(group);
-  }
 
   // sin desplazamiento de fondo: la lamina va dentro de una tarjeta y moverla
   // por dentro la descuadraria de su propio marco

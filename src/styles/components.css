@@ -365,64 +365,6 @@
   text-shadow: 0 1px 14px rgb(2 8 22 / 65%);
 }
 
-/* puede encogerse: si no, las capsulas empujan la banda fuera de la pagina */
-.showcase__controls { flex: 0 0 auto; min-width: 0; }
-/* Los mandos son los del visor, a la escala de esta banda. El rotulo del grupo
-   se queda solo al oido: aqui las tres capsulas con su pictograma se explican
-   solas y la palabra "Variable" solo anadia ruido sobre el mapa. */
-.showcase__controls .selector { gap: .625rem; }
-.showcase__controls .selector__options { gap: .375rem; }
-
-/* Capsulas al oido, no al grito. Esta banda es una previsualizacion: los
-   mandos estan para que se note que el mapa responde -y de paso para elegir
-   que se ensena-, no para disputarle el sitio al titulo ni a la puerta que
-   lleva al visor. Ese era el problema de antes: tres pastillas de vidrio
-   grueso, una de ellas navy solido, pesaban mas que la propia lamina.
-
-   Asi que van a un solo hilo de contorno sobre el mapa, apenas veladas, y el
-   tamano baja un punto respecto al del visor. Lo unico que sube de tono es lo
-   elegido. */
-.showcase__controls .chip {
-  min-height: 34px;
-  padding: .3125rem .8125rem;
-  font-size: .8125rem;
-  color: rgb(226 238 250 / 74%);
-  border-color: rgb(255 255 255 / 14%);
-  background: rgb(255 255 255 / 4%);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: none;
-  transition: background .18s, border-color .16s, color .2s;
-}
-.showcase__controls .chip:hover {
-  background: rgb(255 255 255 / 10%);
-  border-color: rgb(255 255 255 / 26%);
-  color: #fff;
-}
-/* La elegida no se pinta de blanco ni de navy -sobre el mapa era un parche-:
-   se aclara. Un velo un poco mas espeso que el de sus companeras, el canto
-   encendido y la letra en blanco bastan para decir cual esta puesta.
-
-   El fondo lo pone la pastilla que se desliza por detras: si el vidrio del
-   boton siguiera puesto, le desdibujaria el canto en pleno viaje. */
-.showcase__controls .chip.is-active {
-  color: #fff;
-  background: transparent;
-  border-color: rgb(255 255 255 / 30%);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-/* La marca de lo elegido es el mismo velo del resto, subido de espesor. El
-   navy solido de antes sacaba una pastilla opaca de la nada en mitad de la
-   lamina; este se lee como que el vidrio se ha empanado un poco mas. */
-.showcase__controls .selector__options .marker {
-  background: rgb(255 255 255 / 15%);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 6%);
-}
-/* el pictograma acompana al rotulo, no lo encabeza: mismo tono que la letra */
-.showcase__controls .chip__glyph { width: 17px; height: 17px; opacity: .85; }
-.showcase__controls .chip.is-active .chip__glyph { opacity: 1; }
-
 /* El hueco del grafico se come lo que sobra del panel, que es como queda a la
    misma altura que el mapa de al lado sin fijarle una medida. */
 .showcase__chart {
@@ -530,31 +472,20 @@
    cada panel suben escalonados, y el de la derecha va detras del de la
    izquierda para que la pareja se lea en orden de lectura. */
 .showcase.is-armed .showcase__head,
-.showcase.is-armed .showcase__controls,
 .showcase.is-armed .showcase__chart,
 .showcase.is-armed .showcase__foot {
   opacity: 0;
   transform: translateY(14px);
   transition: opacity .7s ease, transform .8s cubic-bezier(.2, .75, .3, 1);
 }
-.showcase.is-armed .showcase__controls { transition-delay: .08s; }
 .showcase.is-armed .showcase__chart { transition-delay: .1s; }
 .showcase.is-armed .showcase__foot { transition-delay: .16s; }
 .showcase.is-armed .showcase__panel--enso .showcase__head { transition-delay: .1s; }
 .showcase.is-armed .showcase__panel--enso .showcase__foot { transition-delay: .24s; }
 
 .showcase.is-armed.is-in .showcase__head,
-.showcase.is-armed.is-in .showcase__controls,
 .showcase.is-armed.is-in .showcase__chart,
 .showcase.is-armed.is-in .showcase__foot { opacity: 1; transform: none; }
-
-/* Con la banda repartida en dos, el rotulo entero de las variables solo cabe
-   a partir de aqui; por debajo se usa el nombre corto, el mismo que emplea la
-   barra del visor cuando se le estrecha el sitio. */
-@media (max-width: 1179px) {
-  .showcase__controls .chip__label { display: none; }
-  .showcase__controls .chip__short { display: inline; }
-}
 
 @media (max-width: 759px) {
   /* La cejilla es la linea mas larga de la portada: a 13 px se comia tres
@@ -574,7 +505,8 @@
     padding: 2.25rem var(--rail) 1.75rem;
     min-height: 0;
   }
-  .showcase__panel--map { min-height: 27rem; }
+  /* tres rem menos: es lo que ocupaban las capsulas de variable */
+  .showcase__panel--map { min-height: 24rem; }
   .showcase__panel--enso { min-height: 25rem; }
 
   /* la junta gira con el reparto: ahora separa arriba de abajo */
@@ -595,11 +527,6 @@
       rgb(6 16 39 / 84%) 0%, rgb(6 16 39 / 48%) 38%,
       rgb(6 16 39 / 86%) 88%, rgb(6 16 39 / 96%) 100%);
   }
-
-  /* apretadas lo justo para que las tres quepan en un renglon de telefono,
-     pero sin bajar del pulgar: 36 px de alto con el nombre corto */
-  .showcase__controls .chip { min-height: 36px; padding: .3125rem .6875rem; font-size: .8125rem; gap: .25rem; }
-  .showcase__controls .chip__glyph { width: 16px; height: 16px; }
 
   /* la puerta a lo ancho, con la flecha anclada al canto opuesto del rotulo */
   .gateway { width: 100%; justify-content: space-between; }
