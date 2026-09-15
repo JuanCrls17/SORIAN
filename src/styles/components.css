@@ -40,7 +40,10 @@
   isolation: isolate;
   overflow: hidden;
   margin: -1rem -1rem 0;
-  padding: 3.75rem var(--rail) 4rem;
+  /* De pie el relleno de abajo no es aire: es la franja donde se ve el
+     planeta. Sin ella la ilustracion vivia entera debajo del texto y no se
+     leia como un planeta, sino como una mancha azul. */
+  padding: 3.75rem var(--rail) 9rem;
   color: #fff;
   background: #061027;
 }
@@ -160,7 +163,22 @@
   position: absolute;
   inset: 0;
   z-index: -2;
-  background: url("../../assets/globo-sm.webp") 72% center / cover no-repeat;
+  /* Un cuarto mas grande que el encuadre y bajado casi hasta el pie de la
+     portada: de pie no cabe el planeta entero al lado del texto, asi que se
+     ensena el casquete sur -Sudamerica, la costa y el arco del limbo- por
+     debajo de lo que hay que leer. En vertical el alto manda sobre el ancho,
+     de modo que el 118% del alto es el "cover" de siempre agrandado. Tumbado
+     el telefono manda el ancho, y ahi 118% del alto ya no llega a cubrir el
+     hueco: el max() lo devuelve al cover justo. */
+  background: url("../../assets/globo-sm.webp") 50% 62% / auto max(118%, 100vw) no-repeat;
+}
+
+/* En pantalla densa el recorte pequeno se queda corto: ahora el planeta es el
+   motivo de la portada y no una veladura, y a 2x sus 440 px se estiran dos
+   veces y media. Los 880 px solo los descarga quien pueda verlos. */
+@media (max-width: 759px) and (-webkit-min-device-pixel-ratio: 2),
+       (max-width: 759px) and (min-resolution: 2dppx) {
+  .hero__art { background-image: url("../../assets/globo.webp"); }
 }
 @media (min-width: 760px) {
   .hero__art {
