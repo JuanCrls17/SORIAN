@@ -40,10 +40,7 @@
   isolation: isolate;
   overflow: hidden;
   margin: -1rem -1rem 0;
-  /* De pie el relleno de abajo no es aire: es la franja donde se ve el
-     planeta. Sin ella la ilustracion vivia entera debajo del texto y no se
-     leia como un planeta, sino como una mancha azul. */
-  padding: 3.75rem var(--rail) 9rem;
+  padding: 3.75rem var(--rail) 4rem;
   color: #fff;
   background: #061027;
 }
@@ -55,11 +52,14 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  /* La esfera nueva es casi toda navy oscuro: con el velo de antes no se
-     distinguia del fondo. Cede seis puntos en el centro, donde cae el limbo
-     encendido, y mantiene los cantos para que la letra no pierda apoyo. */
+  /* De pie el planeta va detras del texto, y el velo se afloja hasta dejarlo
+     ver entero: la esfera con su anillo, el penacho calido y la costa. Cede
+     menos en los cantos -arriba cae la cejilla, abajo empieza la lamina- y se
+     abre en el centro, que es donde la esfera tiene su dibujo. Lo que pierde
+     de apoyo la letra no lo devuelve el velo: lo pone su propio tono, un
+     punto mas claro, mas abajo. */
   background: linear-gradient(180deg,
-    rgb(6 16 39 / 87%) 0%, rgb(6 16 39 / 74%) 50%, rgb(6 16 39 / 92%) 100%);
+    rgb(6 16 39 / 78%) 0%, rgb(6 16 39 / 58%) 45%, rgb(6 16 39 / 68%) 100%);
 }
 
 @media (min-width: 760px) {
@@ -163,14 +163,13 @@
   position: absolute;
   inset: 0;
   z-index: -2;
-  /* Un cuarto mas grande que el encuadre y bajado casi hasta el pie de la
-     portada: de pie no cabe el planeta entero al lado del texto, asi que se
-     ensena el casquete sur -Sudamerica, la costa y el arco del limbo- por
-     debajo de lo que hay que leer. En vertical el alto manda sobre el ancho,
-     de modo que el 118% del alto es el "cover" de siempre agrandado. Tumbado
-     el telefono manda el ancho, y ahi 118% del alto ya no llega a cubrir el
-     hueco: el max() lo devuelve al cover justo. */
-  background: url("../../assets/globo-sm.webp") 50% 62% / auto max(118%, 100vw) no-repeat;
+  /* De pie se ensena la esfera entera y centrada, que es como se lee que hay
+     un planeta y no una mancha azul: un 12% por encima del hueco basta para
+     que el anillo del limbo entre por los cuatro lados sin quedar pegado a
+     los cantos. En vertical el alto manda sobre el ancho, de modo que el 112%
+     del alto es el "cover" de siempre agrandado; tumbado el telefono manda el
+     ancho y ahi ya no cubre, asi que el max() lo devuelve al cover justo. */
+  background: url("../../assets/globo-sm.webp") 50% 50% / auto max(112%, 100vw) no-repeat;
 }
 
 /* En pantalla densa el recorte pequeno se queda corto: ahora el planeta es el
@@ -508,11 +507,18 @@
 @media (max-width: 759px) {
   /* La cejilla es la linea mas larga de la portada: a 13 px se comia tres
      renglones del telefono antes de llegar al nombre. */
+  /* Con el planeta visible detras, la letra se apoya en su propio tono en vez
+     de en un velo mas espeso: sube un punto y lleva una sombra corta que la
+     despega del dibujo. Medido de 320 a 430 px contra el peor punto de la
+     esfera, la entradilla no baja de 5:1 ni la cejilla de 5.1:1. */
   .hero__eyebrow {
     font-size: .6875rem;
     letter-spacing: .08em;
     margin-bottom: .875rem;
+    color: #bcd4ee;
+    text-shadow: 0 1px 10px rgb(2 8 22 / 75%);
   }
+  .hero__text { color: #d6e6f7; text-shadow: 0 1px 12px rgb(2 8 22 / 75%); }
 
   /* El nombre, al centro, y solo el nombre: de pie la portada es una sola
      columna y la marca es lo unico que no se lee renglon a renglon, asi que
