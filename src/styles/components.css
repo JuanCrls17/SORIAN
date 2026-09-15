@@ -496,6 +496,31 @@
     margin-bottom: .875rem;
   }
 
+  /* El nombre, al centro. De pie la portada es una sola columna y la marca es
+     lo unico que no se lee renglon a renglon: centrada se comporta como un
+     rotulo y no como la primera linea de un texto.
+
+     Con el nombre centrado, la cejilla y la entradilla se centran con el: una
+     marca en el eje sobre dos parrafos pegados al riel se lee como sangria,
+     no como centrado. Y la entradilla lleva su medida a cuestas -42 caracteres,
+     mas estrecha que la columna a partir de unos 520 px-, asi que ademas de
+     centrar el texto hay que centrar su caja.
+
+     No hace falta corregir el interletrado del nombre: el descuento de -.15em
+     ensancha la caja justo lo que sobra detras de la N, de modo que al centrar
+     el bloque quedan centrados los trazos y no el hueco que los sigue. */
+  .hero__content { text-align: center; }
+  .hero__text { margin-inline: auto; }
+
+  /* La lampara viaja con el nombre: estaba puesta al 40% del ancho, que es
+     donde caia con la marca pegada al riel. */
+  .hero__title::before {
+    inset: -22% -12%;
+    background: radial-gradient(56% 128% at 50% 50%,
+      rgb(108 172 240 / 38%) 0%, rgb(108 172 240 / 0%) 72%);
+  }
+
+
   /* De pie los paneles se apilan. Media banda por cabeza serian dos tiras de
      160 px en las que no cabe ni el titulo, asi que se reparte el alto en vez
      del ancho: el mapa primero, la serie debajo. */
