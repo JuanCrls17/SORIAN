@@ -107,7 +107,11 @@
 .wordmark {
   display: block;
   color: #fff;
-  font-size: clamp(3.25rem, 13vw, 6.25rem);
+  /* El tope sube de 100 a 132 px: en pantalla amplia la portada es el planeta
+     y el nombre, nada mas, y con la marca a la medida anterior quedaba medio
+     lienzo de cielo vacio entre los dos. El termino central no se toca, asi
+     que de 320 a 768 px la marca mide exactamente lo que media. */
+  font-size: clamp(3.25rem, 13vw, 8.25rem);
   font-weight: 600;
   letter-spacing: .15em;
   line-height: 1;
@@ -316,15 +320,13 @@
     radial-gradient(92% 72% at 8% 102%, rgb(11 107 184 / 10%) 0%, rgb(11 107 184 / 0%) 72%);
 }
 
-/* La costura entre la portada y la lamina es la escala de anomalias de
-   SORIAN: la misma firma de 3 px que abre la cabecera y cierra el pie. No es
-   un adorno -es la leyenda del mapa reducida a una linea-, de modo que marca
-   exactamente donde empiezan los datos y el pie los cierra por abajo con la
-   misma marca. Un difuminado solo emborronaba el corte; una linea lo afirma.
-
-   Debajo, la sombra que la linea proyecta: sin ella el mapa quedaria pegado
-   al canto y la franja se leeria como una calcomania en vez de como un plano
-   por debajo del anterior. */
+/* La costura entre la portada y la lamina: solo la sombra que un plano
+   proyecta sobre el de abajo. Aqui iba tambien la escala de anomalias en 3 px
+   -la misma firma que abre la cabecera y cierra el pie-, pero cortaba en seco
+   el cielo del planeta justo donde la portada se disuelve en la banda: dos
+   remates de color a un centimetro uno del otro. La firma se queda donde
+   enmarca la pagina entera, arriba y abajo, y la costura se limita a decir
+   que hay un plano por debajo. */
 .showcase::before {
   content: "";
   position: absolute;
@@ -332,9 +334,7 @@
   z-index: 3;
   height: 3.5rem;
   pointer-events: none;
-  background:
-    var(--scale-line) top center / 100% 3px no-repeat,
-    linear-gradient(180deg, rgb(2 8 22 / 58%) 0%, rgb(2 8 22 / 0%) 100%);
+  background: linear-gradient(180deg, rgb(2 8 22 / 58%) 0%, rgb(2 8 22 / 0%) 100%);
 }
 
 .showcase__head { min-width: 0; }
@@ -519,7 +519,6 @@
     background: radial-gradient(56% 128% at 50% 50%,
       rgb(108 172 240 / 38%) 0%, rgb(108 172 240 / 0%) 72%);
   }
-
 
   /* De pie los paneles se apilan. Media banda por cabeza serian dos tiras de
      160 px en las que no cabe ni el titulo, asi que se reparte el alto en vez
