@@ -496,21 +496,15 @@
     margin-bottom: .875rem;
   }
 
-  /* El nombre, al centro. De pie la portada es una sola columna y la marca es
-     lo unico que no se lee renglon a renglon: centrada se comporta como un
-     rotulo y no como la primera linea de un texto.
+  /* El nombre, al centro, y solo el nombre: de pie la portada es una sola
+     columna y la marca es lo unico que no se lee renglon a renglon, asi que
+     centrada se comporta como un rotulo. La cejilla y la entradilla siguen
+     arrancando del riel, como el resto de la pagina.
 
-     Con el nombre centrado, la cejilla y la entradilla se centran con el: una
-     marca en el eje sobre dos parrafos pegados al riel se lee como sangria,
-     no como centrado. Y la entradilla lleva su medida a cuestas -42 caracteres,
-     mas estrecha que la columna a partir de unos 520 px-, asi que ademas de
-     centrar el texto hay que centrar su caja.
-
-     No hace falta corregir el interletrado del nombre: el descuento de -.15em
-     ensancha la caja justo lo que sobra detras de la N, de modo que al centrar
-     el bloque quedan centrados los trazos y no el hueco que los sigue. */
-  .hero__content { text-align: center; }
-  .hero__text { margin-inline: auto; }
+     No hace falta corregir el interletrado: el descuento de -.15em ensancha
+     la caja justo lo que sobra detras de la N, de modo que al centrar el
+     bloque quedan centrados los trazos y no el hueco que los sigue. */
+  .hero__title { text-align: center; }
 
   /* La lampara viaja con el nombre: estaba puesta al 40% del ancho, que es
      donde caia con la marca pegada al riel. */
