@@ -3,6 +3,10 @@ visor_*.html
 BOXPLOT.html
 PERCENTILES.html
 
+# Laminas de origen de la marca (se recortan con tools/build_brand.py)
+SORIAN*.png
+Firefly_*.png
+
 # Python
 __pycache__/
 *.py[cod]

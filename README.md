@@ -49,7 +49,7 @@ data/
   enso/                 series de los gráficos ENSO
   geo/borders.json      límites políticos compartidos
   content/              textos editables sin tocar el código
-tools/                  extractores de datos (Python 3)
+tools/                  extractores de datos y recorte de la marca (Python 3)
 assets/                 logos, iconos y librerías locales
 ```
 
@@ -163,6 +163,23 @@ python tools/extract_borders.py /ruta/a/visores/visor_ecmwf_tpara.html data/geo/
 
 `extract_grids.py` espera archivos con el patrón `visor_<modelo>_<variable>.html`.
 Los límites políticos solo se regeneran si cambia el dominio del mapa.
+
+## Rehacer la marca
+
+El sitio no usa la lámina institucional tal cual: escribe el nombre con
+tipografía viva y deja detrás solo el planeta. `build_brand.py` localiza la
+esfera en la lámina —ajusta una circunferencia por mínimos cuadrados sobre el
+anillo del limbo, así que no hay coordenadas escritas a mano—, la recorta con
+su halo desvaneciéndose hacia el canto y de ese mismo recorte deriva el fondo
+de la portada, los iconos, el favicon y la tarjeta social.
+
+```bash
+python tools/build_brand.py SORIAN_OFFICIAL.png
+```
+
+Reescribe `assets/globo*.webp`, `assets/icon-*.png`, `assets/apple-touch-icon.png`,
+`assets/favicon.svg`, `assets/hero-sudamerica.webp` y `favicon.ico`. La lámina de
+origen no forma parte del repositorio.
 
 ## Licencia y uso
 

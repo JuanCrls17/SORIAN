@@ -52,8 +52,11 @@
   position: absolute;
   inset: 0;
   z-index: -1;
+  /* La esfera nueva es casi toda navy oscuro: con el velo de antes no se
+     distinguia del fondo. Cede seis puntos en el centro, donde cae el limbo
+     encendido, y mantiene los cantos para que la letra no pierda apoyo. */
   background: linear-gradient(180deg,
-    rgb(6 16 39 / 88%) 0%, rgb(6 16 39 / 80%) 50%, rgb(6 16 39 / 93%) 100%);
+    rgb(6 16 39 / 87%) 0%, rgb(6 16 39 / 74%) 50%, rgb(6 16 39 / 92%) 100%);
 }
 
 @media (min-width: 760px) {
@@ -162,7 +165,10 @@
        justo para leerse como fondo y no como una figura pegada, pero sin
        comerse un tercio de la esfera */
     background-position: 74% center;
-    background-size: auto 116%;
+    /* La esfera lleva su halo dentro del recorte, asi que ocupa algo menos
+       que el lado del archivo: el alto compensa esa holgura para que asome
+       por arriba y por abajo como antes. */
+    background-size: auto 124%;
   }
 }
 
